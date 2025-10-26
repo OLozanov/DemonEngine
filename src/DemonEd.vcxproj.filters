@@ -1,0 +1,573 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{533b1b49-aa90-4c54-9b94-8acd46e1732d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Editor">
+      <UniqueIdentifier>{b444514f-b02e-40aa-985a-9a639fbc3e74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{112ccddc-8f6c-4bb4-bdfa-e23d3e1b28a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render\D3D">
+      <UniqueIdentifier>{b159cce6-6c47-4b8a-9b4b-5c8c72e7e1ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\math">
+      <UniqueIdentifier>{4ecb978f-34e5-4195-8cf4-182c43eecd34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render\Shaders">
+      <UniqueIdentifier>{a49a1232-4265-4b9d-9c21-0e83bae6810f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Editor\Geometry">
+      <UniqueIdentifier>{5f9b1253-a91c-4c95-b3fa-85f7c4442cc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utils">
+      <UniqueIdentifier>{e5c09117-5b38-4e1a-a09f-c51fe820a6a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources">
+      <UniqueIdentifier>{da9f2315-eaf5-4dc8-a796-52666f17058a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Editor\Objects">
+      <UniqueIdentifier>{e286fa28-a3b9-4b85-9e79-26cd62d6f6dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Editor\Surfaces">
+      <UniqueIdentifier>{88e1122b-af39-4900-9ddc-a99c6b954aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources\Formats">
+      <UniqueIdentifier>{925c00b5-d06e-4314-82e3-d2012b063d18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Collision">
+      <UniqueIdentifier>{e526db92-6a0e-4c42-93f5-4c37e967098a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Editor\View">
+      <UniqueIdentifier>{a086d1fb-196b-47fd-af8d-da5fa7e0b024}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Editor\EditorApp.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\D3DInstance.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\SwapChain.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Editor.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\RenderingPipeline.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="math\BBox.cpp">
+      <Filter>Source\math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Matrix.cpp">
+      <Filter>Source\math</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\CommandList.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\VertexBuffer.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\IndexBuffer.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Block.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Geometry\Geometry.cpp">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Model.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Resources.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Lexer.cpp">
+      <Filter>Source\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Geometry\Csg.cpp">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Forms.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MainFrame.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PolyDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PreferencesDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Geometry\Map.cpp">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditConsole.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\Object.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\Light.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ObjectDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\StaticObject.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorMap.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\BoxDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PlaneDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\CylinderDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ConeDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SphereDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\Entity.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\ObjectFactory.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MapInfoDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\AnimatedMap.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\SurfaceMesh.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\EditSurface.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SurfaceDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\ControlMesh.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\BezierSurface.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\BezierPatch.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\Surface.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SurfaceCpDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SurfaceEditDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\SurfaceFactory.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Formats\dds.cpp">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Formats\wav.cpp">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\BSplineSurface.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\SurfaceGraph.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Formats\bmp.cpp">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Formats\tga.cpp">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\Image.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\Sound.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\PlayerStart.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Clipping.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collision.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\Ladder.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\Trigger.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ResourceDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Decal.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\BlockDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EntityList.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\BezierTriangleSurface.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Surfaces\TriangularMesh.cpp">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\DetailDlg.cpp">
+      <Filter>Source\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\MapFinish.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\CubemapBuffer.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Frustum.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\D3D\Bitmap.cpp">
+      <Filter>Source\Render\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Objects\FogVolume.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\View\OrthoView.cpp">
+      <Filter>Source\Editor\View</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\View\PerspectiveView.cpp">
+      <Filter>Source\Editor\View</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\View\ViewCamera.cpp">
+      <Filter>Source\Editor\View</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Editor\EditorApp.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\D3DInstance.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\FrameBuffer.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\MemoryBarrier.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\SwapChain.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Editor.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\RenderingPipeline.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="math\BBox.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\mat3.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\mat4.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math3d.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vec2.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vec3.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vec4.h">
+      <Filter>Source\math</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\CommandList.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\VertexBuffer.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Block.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\IndexBuffer.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Geometry\Geometry.h">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\LinkedList.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\EditList.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\EventHandler.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\PushBuffer.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditPoint.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\HashMap.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Image.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Material.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Model.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Resource.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Resources.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Lexer.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Geometry\Csg.h">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\DisplayData.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Forms.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\IConsole.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MainFrame.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PolyDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PreferencesDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Geometry\Map.h">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditConsole.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\Light.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\Object.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\TypeInfo.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ObjectDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\StaticObject.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\DCM.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\BoxDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\CylinderDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PlaneDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ConeDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SphereDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\Entity.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\ObjectFactory.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MapInfoDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\AnimatedMap.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\SurfaceMesh.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\EditSurface.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\Surface.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SurfaceDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\ControlMesh.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\BezierSurface.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\BezierPatch.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SurfaceCpDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SurfaceEditDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\SurfaceFactory.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Formats\dds.h">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\BSplineSurface.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\SurfaceGraph.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Formats\bmp.h">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Formats\Formats.h">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Formats\tga.h">
+      <Filter>Source\Resources\Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\BlockDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\Sound.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\RenderContext.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\PlayerStart.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Clipping.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\Collision.h">
+      <Filter>Source\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\SceneConstantBuffer.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\Ladder.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\Trigger.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ResourceDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorResources.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Decal.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\BezierTriangleSurface.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Surfaces\TriangularMesh.h">
+      <Filter>Source\Editor\Surfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\DetailDlg.h">
+      <Filter>Source\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\MapFinish.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\CubemapBuffer.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Image.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Frustum.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\D3D\Bitmap.h">
+      <Filter>Source\Render\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\FogVolume.h">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\View\OrthoView.h">
+      <Filter>Source\Editor\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\View\PerspectiveView.h">
+      <Filter>Source\Editor\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\View\View.h">
+      <Filter>Source\Editor\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\View\ViewCamera.h">
+      <Filter>Source\Editor\View</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Render\Shaders\GI.hlsl">
+      <Filter>Source\Render\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Render\Shaders\Denoise_spatial.hlsl">
+      <Filter>Source\Render\Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

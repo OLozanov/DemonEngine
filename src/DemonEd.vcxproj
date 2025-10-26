@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Collision\Collision.cpp" />
+    <ClCompile Include="Editor\Block.cpp" />
+    <ClCompile Include="Editor\BlockDlg.cpp" />
+    <ClCompile Include="Editor\BoxDlg.cpp" />
+    <ClCompile Include="Editor\ConeDlg.cpp" />
+    <ClCompile Include="Editor\CylinderDlg.cpp" />
+    <ClCompile Include="Editor\Decal.cpp" />
+    <ClCompile Include="Editor\DetailDlg.cpp" />
+    <ClCompile Include="Editor\EditConsole.cpp" />
+    <ClCompile Include="Editor\Editor.cpp" />
+    <ClCompile Include="Editor\EditorApp.cpp" />
+    <ClCompile Include="Editor\EditorMap.cpp" />
+    <ClCompile Include="Editor\EntityList.cpp" />
+    <ClCompile Include="Editor\Forms.cpp" />
+    <ClCompile Include="Editor\Geometry\Csg.cpp" />
+    <ClCompile Include="Editor\Geometry\Geometry.cpp" />
+    <ClCompile Include="Editor\Geometry\Map.cpp" />
+    <ClCompile Include="Editor\MainFrame.cpp" />
+    <ClCompile Include="Editor\MapInfoDlg.cpp" />
+    <ClCompile Include="Editor\ObjectDlg.cpp" />
+    <ClCompile Include="Editor\Objects\Entity.cpp" />
+    <ClCompile Include="Editor\Objects\FogVolume.cpp" />
+    <ClCompile Include="Editor\Objects\Ladder.cpp" />
+    <ClCompile Include="Editor\Objects\Light.cpp" />
+    <ClCompile Include="Editor\Objects\MapFinish.cpp" />
+    <ClCompile Include="Editor\Objects\Object.cpp" />
+    <ClCompile Include="Editor\Objects\ObjectFactory.cpp" />
+    <ClCompile Include="Editor\Objects\PlayerStart.cpp" />
+    <ClCompile Include="Editor\Objects\Sound.cpp" />
+    <ClCompile Include="Editor\Objects\StaticObject.cpp" />
+    <ClCompile Include="Editor\Objects\Trigger.cpp" />
+    <ClCompile Include="Editor\PlaneDlg.cpp" />
+    <ClCompile Include="Editor\PolyDlg.cpp" />
+    <ClCompile Include="Editor\PreferencesDlg.cpp" />
+    <ClCompile Include="Editor\ResourceDlg.cpp" />
+    <ClCompile Include="Editor\SphereDlg.cpp" />
+    <ClCompile Include="Editor\SurfaceCpDlg.cpp" />
+    <ClCompile Include="Editor\SurfaceDlg.cpp" />
+    <ClCompile Include="Editor\SurfaceEditDlg.cpp" />
+    <ClCompile Include="Editor\Surfaces\BezierPatch.cpp" />
+    <ClCompile Include="Editor\Surfaces\BezierSurface.cpp" />
+    <ClCompile Include="Editor\Surfaces\BezierTriangleSurface.cpp" />
+    <ClCompile Include="Editor\Surfaces\BSplineSurface.cpp" />
+    <ClCompile Include="Editor\Surfaces\ControlMesh.cpp" />
+    <ClCompile Include="Editor\Surfaces\EditSurface.cpp" />
+    <ClCompile Include="Editor\Surfaces\Surface.cpp" />
+    <ClCompile Include="Editor\Surfaces\SurfaceFactory.cpp" />
+    <ClCompile Include="Editor\Surfaces\SurfaceGraph.cpp" />
+    <ClCompile Include="Editor\Surfaces\SurfaceMesh.cpp" />
+    <ClCompile Include="Editor\Surfaces\TriangularMesh.cpp" />
+    <ClCompile Include="Editor\View\OrthoView.cpp" />
+    <ClCompile Include="Editor\View\PerspectiveView.cpp" />
+    <ClCompile Include="Editor\View\ViewCamera.cpp" />
+    <ClCompile Include="math\BBox.cpp" />
+    <ClCompile Include="math\Matrix.cpp" />
+    <ClCompile Include="Render\Clipping.cpp" />
+    <ClCompile Include="Render\D3D\Bitmap.cpp" />
+    <ClCompile Include="Render\D3D\CommandList.cpp" />
+    <ClCompile Include="Render\D3D\CubemapBuffer.cpp" />
+    <ClCompile Include="Render\D3D\D3DInstance.cpp" />
+    <ClCompile Include="Render\D3D\IndexBuffer.cpp" />
+    <ClCompile Include="Render\D3D\RenderingPipeline.cpp" />
+    <ClCompile Include="Render\D3D\SwapChain.cpp" />
+    <ClCompile Include="Render\D3D\VertexBuffer.cpp" />
+    <ClCompile Include="Render\Frustum.cpp" />
+    <ClCompile Include="Resources\AnimatedMap.cpp" />
+    <ClCompile Include="Resources\Formats\bmp.cpp" />
+    <ClCompile Include="Resources\Formats\dds.cpp" />
+    <ClCompile Include="Resources\Formats\tga.cpp" />
+    <ClCompile Include="Resources\Formats\wav.cpp" />
+    <ClCompile Include="Resources\Image.cpp" />
+    <ClCompile Include="Resources\Model.cpp" />
+    <ClCompile Include="Resources\Resources.cpp" />
+    <ClCompile Include="Utils\Lexer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Collision\Collision.h" />
+    <ClInclude Include="Editor\Block.h" />
+    <ClInclude Include="Editor\BlockDlg.h" />
+    <ClInclude Include="Editor\BoxDlg.h" />
+    <ClInclude Include="Editor\ConeDlg.h" />
+    <ClInclude Include="Editor\CylinderDlg.h" />
+    <ClInclude Include="Editor\DCM.h" />
+    <ClInclude Include="Editor\Decal.h" />
+    <ClInclude Include="Editor\DetailDlg.h" />
+    <ClInclude Include="Editor\EditConsole.h" />
+    <ClInclude Include="Editor\Editor.h" />
+    <ClInclude Include="Editor\EditorApp.h" />
+    <ClInclude Include="Editor\EditorResources.h" />
+    <ClInclude Include="Editor\EditPoint.h" />
+    <ClInclude Include="Editor\Forms.h" />
+    <ClInclude Include="Editor\Geometry\Map.h" />
+    <ClInclude Include="Editor\Geometry\Csg.h" />
+    <ClInclude Include="Editor\Geometry\Geometry.h" />
+    <ClInclude Include="Editor\IConsole.h" />
+    <ClInclude Include="Editor\MainFrame.h" />
+    <ClInclude Include="Editor\MapInfoDlg.h" />
+    <ClInclude Include="Editor\ObjectDlg.h" />
+    <ClInclude Include="Editor\Objects\Entity.h" />
+    <ClInclude Include="Editor\Objects\FogVolume.h" />
+    <ClInclude Include="Editor\Objects\Ladder.h" />
+    <ClInclude Include="Editor\Objects\Light.h" />
+    <ClInclude Include="Editor\Objects\MapFinish.h" />
+    <ClInclude Include="Editor\Objects\Object.h" />
+    <ClInclude Include="Editor\Objects\ObjectFactory.h" />
+    <ClInclude Include="Editor\Objects\PlayerStart.h" />
+    <ClInclude Include="Editor\Objects\Sound.h" />
+    <ClInclude Include="Editor\Objects\StaticObject.h" />
+    <ClInclude Include="Editor\Objects\Trigger.h" />
+    <ClInclude Include="Editor\Objects\TypeInfo.h" />
+    <ClInclude Include="Editor\PlaneDlg.h" />
+    <ClInclude Include="Editor\PolyDlg.h" />
+    <ClInclude Include="Editor\PreferencesDlg.h" />
+    <ClInclude Include="Editor\RenderContext.h" />
+    <ClInclude Include="Editor\ResourceDlg.h" />
+    <ClInclude Include="Editor\SphereDlg.h" />
+    <ClInclude Include="Editor\SurfaceCpDlg.h" />
+    <ClInclude Include="Editor\SurfaceDlg.h" />
+    <ClInclude Include="Editor\SurfaceEditDlg.h" />
+    <ClInclude Include="Editor\Surfaces\BezierPatch.h" />
+    <ClInclude Include="Editor\Surfaces\BezierSurface.h" />
+    <ClInclude Include="Editor\Surfaces\BezierTriangleSurface.h" />
+    <ClInclude Include="Editor\Surfaces\BSplineSurface.h" />
+    <ClInclude Include="Editor\Surfaces\ControlMesh.h" />
+    <ClInclude Include="Editor\Surfaces\EditSurface.h" />
+    <ClInclude Include="Editor\Surfaces\TriangularMesh.h" />
+    <ClInclude Include="Editor\Surfaces\Surface.h" />
+    <ClInclude Include="Editor\Surfaces\SurfaceFactory.h" />
+    <ClInclude Include="Editor\Surfaces\SurfaceGraph.h" />
+    <ClInclude Include="Editor\Surfaces\SurfaceMesh.h" />
+    <ClInclude Include="Editor\View\OrthoView.h" />
+    <ClInclude Include="Editor\View\PerspectiveView.h" />
+    <ClInclude Include="Editor\View\View.h" />
+    <ClInclude Include="Editor\View\ViewCamera.h" />
+    <ClInclude Include="math\BBox.h" />
+    <ClInclude Include="math\mat3.h" />
+    <ClInclude Include="math\mat4.h" />
+    <ClInclude Include="math\math3d.h" />
+    <ClInclude Include="math\vec2.h" />
+    <ClInclude Include="math\vec3.h" />
+    <ClInclude Include="math\vec4.h" />
+    <ClInclude Include="Render\Clipping.h" />
+    <ClInclude Include="Render\D3D\Bitmap.h" />
+    <ClInclude Include="Render\D3D\CommandList.h" />
+    <ClInclude Include="Render\D3D\CubemapBuffer.h" />
+    <ClInclude Include="Render\D3D\D3DInstance.h" />
+    <ClInclude Include="Render\D3D\FrameBuffer.h" />
+    <ClInclude Include="Render\D3D\IndexBuffer.h" />
+    <ClInclude Include="Render\D3D\MemoryBarrier.h" />
+    <ClInclude Include="Render\D3D\PushBuffer.h" />
+    <ClInclude Include="Render\D3D\RenderingPipeline.h" />
+    <ClInclude Include="Render\D3D\SwapChain.h" />
+    <ClInclude Include="Render\D3D\VertexBuffer.h" />
+    <ClInclude Include="Render\DisplayData.h" />
+    <ClInclude Include="Render\Frustum.h" />
+    <ClInclude Include="Render\Image.h" />
+    <ClInclude Include="Render\SceneConstantBuffer.h" />
+    <ClInclude Include="Resources\AnimatedMap.h" />
+    <ClInclude Include="Resources\Formats\bmp.h" />
+    <ClInclude Include="Resources\Formats\dds.h" />
+    <ClInclude Include="Resources\Formats\Formats.h" />
+    <ClInclude Include="Resources\Formats\tga.h" />
+    <ClInclude Include="Resources\HashMap.h" />
+    <ClInclude Include="Resources\Image.h" />
+    <ClInclude Include="Resources\Material.h" />
+    <ClInclude Include="Resources\Model.h" />
+    <ClInclude Include="Resources\Resource.h" />
+    <ClInclude Include="Resources\Resources.h" />
+    <ClInclude Include="Utils\EditList.h" />
+    <ClInclude Include="Utils\EventHandler.h" />
+    <ClInclude Include="Utils\Lexer.h" />
+    <ClInclude Include="Utils\LinkedList.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Render\Shaders\Denoise_spatial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">g_p%(Filename)Shader</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">g_p%(Filename)Shader</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">g_p%(Filename)Shader</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">g_p%(Filename)Shader</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Render\Shaders\GI.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.3</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">6.3</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.3</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.3</ShaderModel>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">g_p%(Filename)Shader</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">g_p%(Filename)Shader</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">g_p%(Filename)Shader</VariableName>
+      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">g_p%(Filename)Shader</VariableName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)CompiledShaders\%(Filename).hlsl.h</HeaderFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename).cso</ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+    </FxCompile>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{131412ea-cb8a-40d8-9451-6bf4510555f7}</ProjectGuid>
+    <RootNamespace>DemonEd</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="C:\wx\3.1.6\Develop\wxwidgets.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="C:\wx\3.1.6\Develop\wxwidgets.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="C:\wx\3.1.6\Develop\wxwidgets.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="C:\wx\3.1.6\Develop\wxwidgets.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\wx\3.1.6\include\msvc;C:\wx\3.1.6\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\Editor\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\wx\3.1.6\include\msvc;C:\wx\3.1.6\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\Editor\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\wx\3.1.6\include\msvc;C:\wx\3.1.6\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\Editor\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\wx\3.1.6\include\msvc;C:\wx\3.1.6\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\Editor\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RENDER_D3D; EDITOR; WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RENDER_D3D; EDITOR; WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RENDER_D3D; EDITOR; _DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>./Editor;$(ProjectDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RENDER_D3D; EDITOR; NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>./Editor;$(ProjectDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
