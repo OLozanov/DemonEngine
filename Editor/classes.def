@@ -1,0 +1,92 @@
+// Items
+class Medkit 100
+{
+    category = 'items'
+    mesh = 'Items/medkit.msh'
+}
+
+// Characters
+class Trooper 500
+{
+    category = 'enemies'
+    mesh = 'Enemies/trooper.msh'
+}
+
+enum Item
+{
+    None,
+    Medkit,
+    Ammo
+}
+
+// 
+class Crate 0
+{
+    category = 'interactive objects'
+    mesh = 'Containers/crate.msh'
+    
+    'item' : Item = None
+}
+
+class Barrel 1
+{
+    category = 'interactive objects'
+    mesh = 'Tech/barrel.msh'
+}
+
+// Switches
+class TechSwitch 50
+{
+    category = 'activators'
+    mesh = 'Tech/switch01.msh'
+    
+    'object' : string = ''
+    'on' : bool = false
+    'use once' : bool = false
+}
+
+// Active
+class SlideDoor 10
+{
+    category = 'active objects'
+    mesh = 'Tech/door1.msh'
+    
+    'id' : string = ''
+    'closed' : bool = false
+    'gi' : bool = false
+}
+
+class Mover 11
+{
+    category = 'active objects'
+    
+    'id' : string = ''
+    'model' : model = 'Tech/door1.msh'
+    'played sound' : sound = ''
+    'direction' : vector = {0, 1, 0}
+    'move distance' : float = 2
+    'move speed' : float = 0.2
+}
+
+class Animated 20
+{
+    category = 'active objects'
+    
+    'id' : string = ''
+    'model' : model = 'Tech/fan01.msh'
+    'play': bool = true
+}
+
+class TestVehicle 200
+{
+    category = 'vehicles'
+    mesh = 'Vehicles/test_vehicle.msh'
+}
+
+class SteamEmitter 30
+{
+    category = 'effects'
+    mesh = 'Editor/steam_emitter.msh'
+    
+    'id' : string = ''
+}
