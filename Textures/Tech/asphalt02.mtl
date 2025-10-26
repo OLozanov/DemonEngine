@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech\asphalt02.dds'
+	normal = 'Tech\asphalt02_n.dds'
+    
+    roughness = 0.7
+}

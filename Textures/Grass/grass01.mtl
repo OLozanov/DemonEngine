@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Grass/grass01.dds'
+	normal = 'Grass/grass01_n.dds'
+    
+    roughness = 1.0
+}

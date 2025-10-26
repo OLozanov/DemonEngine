@@ -1,0 +1,7 @@
+material
+{
+	normal = 'Tech\concrete04_n.dds'
+	diffuse = 'Tech\concrete04.dds'
+	
+	roughness = 0.5
+}

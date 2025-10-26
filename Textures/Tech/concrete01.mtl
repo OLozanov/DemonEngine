@@ -1,0 +1,7 @@
+material
+{
+	normal = 'concrete01_n.dds'
+	diffuse = 'concrete01.dds'
+	
+	roughness = 0.5
+}

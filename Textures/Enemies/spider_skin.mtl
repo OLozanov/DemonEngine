@@ -1,0 +1,5 @@
+material
+{
+	normal = 'enemies\spider_skin_n.dds'
+	diffuse = 'enemies\spider_skin.dds'
+}

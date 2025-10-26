@@ -1,0 +1,6 @@
+material
+{
+	diffuse = 'Misc\dark_stuff.dds'
+    
+    roughness = 1.0
+}

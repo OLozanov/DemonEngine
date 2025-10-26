@@ -1,0 +1,8 @@
+material
+{
+	diffuse = 'Tech/metal_floor01.dds'
+	normal = 'Tech/metal_floor01_n.dds'
+    
+    metalness = 1.0;
+    roughness = 0.3
+}

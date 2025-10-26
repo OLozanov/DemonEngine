@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech/indicators.dds'
+    
+    roughness = 1.0
+    luminosity = 1.0
+}

@@ -1,0 +1,7 @@
+material
+{
+    type: emissive
+    diffuse = 'effects\fire\fire$.dds'
+	
+    alpha = 2.0
+}

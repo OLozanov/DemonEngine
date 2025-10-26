@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech\rust.dds'
+	normal = 'Tech\rust_n.dds'
+    
+    roughness = 0.95
+}

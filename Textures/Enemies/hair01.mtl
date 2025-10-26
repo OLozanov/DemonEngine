@@ -1,0 +1,5 @@
+material
+{
+	normal = 'enemies/hair01_n.dds'
+	diffuse = 'enemies/hair01.dds'
+}

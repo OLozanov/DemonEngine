@@ -1,0 +1,5 @@
+material
+{
+	normal = 'Terrain\rock02_n.dds'
+	diffuse = 'Terrain\rock03.dds'
+}

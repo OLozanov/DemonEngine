@@ -1,0 +1,8 @@
+material
+{
+	normal = 'Tech/door1_n.dds'
+	diffuse = 'Tech/door1.dds'
+    metalness_map = 'Tech/door1_h.dds'
+    
+    roughness = 0.3
+}

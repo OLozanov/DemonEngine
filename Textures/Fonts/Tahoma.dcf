@@ -1,0 +1,2054 @@
+font
+{
+	size = 16
+	image = 'Tahoma.dds'
+
+	glyph 0
+	{
+		width = 14
+		x = 0
+		y = 4
+		oy = -11
+	}
+
+	glyph 1
+	{
+		width = 13
+		x = 17
+		y = 4
+		oy = 6
+	}
+
+	glyph 2
+	{
+		width = 8
+		x = 33
+		y = 4
+		oy = 10
+	}
+
+	glyph 3
+	{
+		width = 8
+		x = 44
+		y = 4
+		oy = 3
+	}
+
+	glyph 4
+	{
+		width = 8
+		x = 55
+		y = 4
+		oy = 3
+	}
+
+	glyph 5
+	{
+		width = 4
+		x = 66
+		y = 4
+		oy = 3
+	}
+
+	glyph 6
+	{
+		width = 11
+		x = 73
+		y = 4
+		oy = 10
+	}
+
+	glyph 7
+	{
+		width = 9
+		x = 87
+		y = 4
+		oy = 8
+	}
+
+	glyph 8
+	{
+		width = 11
+		x = 99
+		y = 4
+		oy = 5
+	}
+
+	glyph 9
+	{
+		width = 13
+		x = 113
+		y = 4
+		oy = 6
+	}
+
+	glyph 10
+	{
+		width = 14
+		x = 0
+		y = 4
+		oy = -11
+	}
+
+	glyph 11
+	{
+		width = 0
+		x = 0
+		y = 0
+		oy = 0
+	}
+
+	glyph 12
+	{
+		width = 12
+		x = 129
+		y = 4
+		oy = 4
+	}
+
+	glyph 13
+	{
+		width = 14
+		x = 0
+		y = 4
+		oy = -11
+	}
+
+	glyph 14
+	{
+		width = 0
+		x = 0
+		y = 0
+		oy = 0
+	}
+
+	glyph 15
+	{
+		width = 11
+		x = 144
+		y = 4
+		oy = 3
+	}
+
+	glyph 16
+	{
+		width = 12
+		x = 158
+		y = 4
+		oy = 3
+	}
+
+	glyph 17
+	{
+		width = 10
+		x = 173
+		y = 4
+		oy = 4
+	}
+
+	glyph 18
+	{
+		width = 8
+		x = 186
+		y = 4
+		oy = 3
+	}
+
+	glyph 19
+	{
+		width = 6
+		x = 197
+		y = 4
+		oy = 4
+	}
+
+	glyph 20
+	{
+		width = 10
+		x = 206
+		y = 4
+		oy = 4
+	}
+
+	glyph 21
+	{
+		width = 12
+		x = 219
+		y = 4
+		oy = 3
+	}
+
+	glyph 22
+	{
+		width = 12
+		x = 234
+		y = 4
+		oy = 10
+	}
+
+	glyph 23
+	{
+		width = 8
+		x = 249
+		y = 4
+		oy = 3
+	}
+
+	glyph 24
+	{
+		width = 8
+		x = 260
+		y = 4
+		oy = 3
+	}
+
+	glyph 25
+	{
+		width = 8
+		x = 271
+		y = 4
+		oy = 3
+	}
+
+	glyph 26
+	{
+		width = 11
+		x = 282
+		y = 4
+		oy = 8
+	}
+
+	glyph 27
+	{
+		width = 11
+		x = 296
+		y = 4
+		oy = 8
+	}
+
+	glyph 28
+	{
+		width = 11
+		x = 310
+		y = 4
+		oy = 7
+	}
+
+	glyph 29
+	{
+		width = 11
+		x = 324
+		y = 4
+		oy = 8
+	}
+
+	glyph 30
+	{
+		width = 11
+		x = 338
+		y = 4
+		oy = 6
+	}
+
+	glyph 31
+	{
+		width = 11
+		x = 352
+		y = 4
+		oy = 6
+	}
+
+	glyph 32
+	{
+		width = 14
+		x = 0
+		y = 4
+		oy = -11
+	}
+
+	glyph 33
+	{
+		width = 0
+		x = 0
+		y = 0
+		oy = 0
+	}
+
+	glyph 34
+	{
+		width = 6
+		x = 366
+		y = 4
+		oy = 6
+	}
+
+	glyph 35
+	{
+		width = 10
+		x = 375
+		y = 4
+		oy = 7
+	}
+
+	glyph 36
+	{
+		width = 9
+		x = 388
+		y = 4
+		oy = 6
+	}
+
+	glyph 37
+	{
+		width = 13
+		x = 400
+		y = 4
+		oy = 7
+	}
+
+	glyph 38
+	{
+		width = 12
+		x = 416
+		y = 4
+		oy = 7
+	}
+
+	glyph 39
+	{
+		width = 4
+		x = 431
+		y = 4
+		oy = 6
+	}
+
+	glyph 40
+	{
+		width = 7
+		x = 438
+		y = 4
+		oy = 6
+	}
+
+	glyph 41
+	{
+		width = 7
+		x = 448
+		y = 4
+		oy = 6
+	}
+
+	glyph 42
+	{
+		width = 8
+		x = 458
+		y = 4
+		oy = 6
+	}
+
+	glyph 43
+	{
+		width = 10
+		x = 469
+		y = 4
+		oy = 8
+	}
+
+	glyph 44
+	{
+		width = 6
+		x = 482
+		y = 4
+		oy = 14
+	}
+
+	glyph 45
+	{
+		width = 7
+		x = 491
+		y = 4
+		oy = 11
+	}
+
+	glyph 46
+	{
+		width = 4
+		x = 501
+		y = 4
+		oy = 14
+	}
+
+	glyph 47
+	{
+		width = 8
+		x = 0
+		y = 23
+		oy = 6
+	}
+
+	glyph 48
+	{
+		width = 9
+		x = 11
+		y = 23
+		oy = 7
+	}
+
+	glyph 49
+	{
+		width = 8
+		x = 23
+		y = 23
+		oy = 7
+	}
+
+	glyph 50
+	{
+		width = 9
+		x = 34
+		y = 23
+		oy = 7
+	}
+
+	glyph 51
+	{
+		width = 9
+		x = 46
+		y = 23
+		oy = 7
+	}
+
+	glyph 52
+	{
+		width = 9
+		x = 58
+		y = 23
+		oy = 7
+	}
+
+	glyph 53
+	{
+		width = 9
+		x = 70
+		y = 23
+		oy = 7
+	}
+
+	glyph 54
+	{
+		width = 9
+		x = 82
+		y = 23
+		oy = 7
+	}
+
+	glyph 55
+	{
+		width = 9
+		x = 94
+		y = 23
+		oy = 7
+	}
+
+	glyph 56
+	{
+		width = 9
+		x = 106
+		y = 23
+		oy = 7
+	}
+
+	glyph 57
+	{
+		width = 9
+		x = 118
+		y = 23
+		oy = 7
+	}
+
+	glyph 58
+	{
+		width = 4
+		x = 130
+		y = 23
+		oy = 9
+	}
+
+	glyph 59
+	{
+		width = 6
+		x = 137
+		y = 23
+		oy = 9
+	}
+
+	glyph 60
+	{
+		width = 10
+		x = 146
+		y = 23
+		oy = 8
+	}
+
+	glyph 61
+	{
+		width = 10
+		x = 159
+		y = 23
+		oy = 10
+	}
+
+	glyph 62
+	{
+		width = 10
+		x = 172
+		y = 23
+		oy = 8
+	}
+
+	glyph 63
+	{
+		width = 8
+		x = 185
+		y = 23
+		oy = 7
+	}
+
+	glyph 64
+	{
+		width = 14
+		x = 196
+		y = 23
+		oy = 7
+	}
+
+	glyph 65
+	{
+		width = 12
+		x = 213
+		y = 23
+		oy = 7
+	}
+
+	glyph 66
+	{
+		width = 9
+		x = 228
+		y = 23
+		oy = 7
+	}
+
+	glyph 67
+	{
+		width = 10
+		x = 240
+		y = 23
+		oy = 7
+	}
+
+	glyph 68
+	{
+		width = 10
+		x = 253
+		y = 23
+		oy = 7
+	}
+
+	glyph 69
+	{
+		width = 9
+		x = 266
+		y = 23
+		oy = 7
+	}
+
+	glyph 70
+	{
+		width = 9
+		x = 278
+		y = 23
+		oy = 7
+	}
+
+	glyph 71
+	{
+		width = 10
+		x = 290
+		y = 23
+		oy = 7
+	}
+
+	glyph 72
+	{
+		width = 10
+		x = 303
+		y = 23
+		oy = 7
+	}
+
+	glyph 73
+	{
+		width = 6
+		x = 316
+		y = 23
+		oy = 7
+	}
+
+	glyph 74
+	{
+		width = 7
+		x = 325
+		y = 23
+		oy = 7
+	}
+
+	glyph 75
+	{
+		width = 9
+		x = 335
+		y = 23
+		oy = 7
+	}
+
+	glyph 76
+	{
+		width = 8
+		x = 347
+		y = 23
+		oy = 7
+	}
+
+	glyph 77
+	{
+		width = 12
+		x = 358
+		y = 23
+		oy = 7
+	}
+
+	glyph 78
+	{
+		width = 10
+		x = 373
+		y = 23
+		oy = 7
+	}
+
+	glyph 79
+	{
+		width = 11
+		x = 386
+		y = 23
+		oy = 7
+	}
+
+	glyph 80
+	{
+		width = 9
+		x = 400
+		y = 23
+		oy = 7
+	}
+
+	glyph 81
+	{
+		width = 11
+		x = 412
+		y = 23
+		oy = 7
+	}
+
+	glyph 82
+	{
+		width = 10
+		x = 426
+		y = 23
+		oy = 7
+	}
+
+	glyph 83
+	{
+		width = 10
+		x = 439
+		y = 23
+		oy = 7
+	}
+
+	glyph 84
+	{
+		width = 10
+		x = 452
+		y = 23
+		oy = 7
+	}
+
+	glyph 85
+	{
+		width = 10
+		x = 465
+		y = 23
+		oy = 7
+	}
+
+	glyph 86
+	{
+		width = 12
+		x = 478
+		y = 23
+		oy = 7
+	}
+
+	glyph 87
+	{
+		width = 16
+		x = 0
+		y = 42
+		oy = 7
+	}
+
+	glyph 88
+	{
+		width = 10
+		x = 19
+		y = 42
+		oy = 7
+	}
+
+	glyph 89
+	{
+		width = 10
+		x = 32
+		y = 42
+		oy = 7
+	}
+
+	glyph 90
+	{
+		width = 9
+		x = 45
+		y = 42
+		oy = 7
+	}
+
+	glyph 91
+	{
+		width = 6
+		x = 57
+		y = 42
+		oy = 6
+	}
+
+	glyph 92
+	{
+		width = 9
+		x = 66
+		y = 42
+		oy = 6
+	}
+
+	glyph 93
+	{
+		width = 6
+		x = 78
+		y = 42
+		oy = 6
+	}
+
+	glyph 94
+	{
+		width = 11
+		x = 87
+		y = 42
+		oy = 7
+	}
+
+	glyph 95
+	{
+		width = 10
+		x = 101
+		y = 42
+		oy = 17
+	}
+
+	glyph 96
+	{
+		width = 6
+		x = 114
+		y = 42
+		oy = 6
+	}
+
+	glyph 97
+	{
+		width = 9
+		x = 123
+		y = 42
+		oy = 9
+	}
+
+	glyph 98
+	{
+		width = 9
+		x = 135
+		y = 42
+		oy = 6
+	}
+
+	glyph 99
+	{
+		width = 8
+		x = 147
+		y = 42
+		oy = 9
+	}
+
+	glyph 100
+	{
+		width = 9
+		x = 158
+		y = 42
+		oy = 6
+	}
+
+	glyph 101
+	{
+		width = 9
+		x = 170
+		y = 42
+		oy = 9
+	}
+
+	glyph 102
+	{
+		width = 8
+		x = 182
+		y = 42
+		oy = 6
+	}
+
+	glyph 103
+	{
+		width = 9
+		x = 193
+		y = 42
+		oy = 9
+	}
+
+	glyph 104
+	{
+		width = 9
+		x = 205
+		y = 42
+		oy = 6
+	}
+
+	glyph 105
+	{
+		width = 4
+		x = 217
+		y = 42
+		oy = 7
+	}
+
+	glyph 106
+	{
+		width = 6
+		x = 224
+		y = 42
+		oy = 7
+	}
+
+	glyph 107
+	{
+		width = 9
+		x = 233
+		y = 42
+		oy = 6
+	}
+
+	glyph 108
+	{
+		width = 4
+		x = 245
+		y = 42
+		oy = 6
+	}
+
+	glyph 109
+	{
+		width = 12
+		x = 252
+		y = 42
+		oy = 9
+	}
+
+	glyph 110
+	{
+		width = 9
+		x = 267
+		y = 42
+		oy = 9
+	}
+
+	glyph 111
+	{
+		width = 9
+		x = 279
+		y = 42
+		oy = 9
+	}
+
+	glyph 112
+	{
+		width = 9
+		x = 291
+		y = 42
+		oy = 9
+	}
+
+	glyph 113
+	{
+		width = 9
+		x = 303
+		y = 42
+		oy = 9
+	}
+
+	glyph 114
+	{
+		width = 7
+		x = 315
+		y = 42
+		oy = 9
+	}
+
+	glyph 115
+	{
+		width = 8
+		x = 325
+		y = 42
+		oy = 9
+	}
+
+	glyph 116
+	{
+		width = 7
+		x = 336
+		y = 42
+		oy = 7
+	}
+
+	glyph 117
+	{
+		width = 9
+		x = 346
+		y = 42
+		oy = 9
+	}
+
+	glyph 118
+	{
+		width = 8
+		x = 358
+		y = 42
+		oy = 9
+	}
+
+	glyph 119
+	{
+		width = 12
+		x = 369
+		y = 42
+		oy = 9
+	}
+
+	glyph 120
+	{
+		width = 8
+		x = 384
+		y = 42
+		oy = 9
+	}
+
+	glyph 121
+	{
+		width = 8
+		x = 395
+		y = 42
+		oy = 9
+	}
+
+	glyph 122
+	{
+		width = 8
+		x = 406
+		y = 42
+		oy = 9
+	}
+
+	glyph 123
+	{
+		width = 8
+		x = 417
+		y = 42
+		oy = 6
+	}
+
+	glyph 124
+	{
+		width = 4
+		x = 428
+		y = 42
+		oy = 6
+	}
+
+	glyph 125
+	{
+		width = 8
+		x = 435
+		y = 42
+		oy = 6
+	}
+
+	glyph 126
+	{
+		width = 10
+		x = 446
+		y = 42
+		oy = 10
+	}
+
+	glyph 127
+	{
+		width = 9
+		x = 459
+		y = 42
+		oy = 5
+	}
+
+	glyph 128
+	{
+		width = 11
+		x = 471
+		y = 42
+		oy = 7
+	}
+
+	glyph 129
+	{
+		width = 9
+		x = 485
+		y = 42
+		oy = 4
+	}
+
+	glyph 130
+	{
+		width = 6
+		x = 497
+		y = 42
+		oy = 14
+	}
+
+	glyph 131
+	{
+		width = 7
+		x = 0
+		y = 61
+		oy = 6
+	}
+
+	glyph 132
+	{
+		width = 9
+		x = 10
+		y = 61
+		oy = 14
+	}
+
+	glyph 133
+	{
+		width = 12
+		x = 22
+		y = 61
+		oy = 14
+	}
+
+	glyph 134
+	{
+		width = 8
+		x = 37
+		y = 61
+		oy = 6
+	}
+
+	glyph 135
+	{
+		width = 8
+		x = 48
+		y = 61
+		oy = 6
+	}
+
+	glyph 136
+	{
+		width = 10
+		x = 59
+		y = 61
+		oy = 7
+	}
+
+	glyph 137
+	{
+		width = 18
+		x = 72
+		y = 61
+		oy = 7
+	}
+
+	glyph 138
+	{
+		width = 15
+		x = 93
+		y = 61
+		oy = 7
+	}
+
+	glyph 139
+	{
+		width = 6
+		x = 111
+		y = 61
+		oy = 9
+	}
+
+	glyph 140
+	{
+		width = 15
+		x = 120
+		y = 61
+		oy = 7
+	}
+
+	glyph 141
+	{
+		width = 9
+		x = 138
+		y = 61
+		oy = 4
+	}
+
+	glyph 142
+	{
+		width = 11
+		x = 150
+		y = 61
+		oy = 7
+	}
+
+	glyph 143
+	{
+		width = 11
+		x = 164
+		y = 61
+		oy = 7
+	}
+
+	glyph 144
+	{
+		width = 10
+		x = 178
+		y = 61
+		oy = 6
+	}
+
+	glyph 145
+	{
+		width = 6
+		x = 191
+		y = 61
+		oy = 6
+	}
+
+	glyph 146
+	{
+		width = 6
+		x = 200
+		y = 61
+		oy = 6
+	}
+
+	glyph 147
+	{
+		width = 9
+		x = 209
+		y = 61
+		oy = 6
+	}
+
+	glyph 148
+	{
+		width = 9
+		x = 221
+		y = 61
+		oy = 6
+	}
+
+	glyph 149
+	{
+		width = 7
+		x = 233
+		y = 61
+		oy = 10
+	}
+
+	glyph 150
+	{
+		width = 10
+		x = 243
+		y = 61
+		oy = 11
+	}
+
+	glyph 151
+	{
+		width = 15
+		x = 256
+		y = 61
+		oy = 11
+	}
+
+	glyph 152
+	{
+		width = 8
+		x = 274
+		y = 61
+		oy = 4
+	}
+
+	glyph 153
+	{
+		width = 12
+		x = 285
+		y = 61
+		oy = 7
+	}
+
+	glyph 154
+	{
+		width = 13
+		x = 300
+		y = 61
+		oy = 9
+	}
+
+	glyph 155
+	{
+		width = 6
+		x = 316
+		y = 61
+		oy = 9
+	}
+
+	glyph 156
+	{
+		width = 13
+		x = 325
+		y = 61
+		oy = 9
+	}
+
+	glyph 157
+	{
+		width = 9
+		x = 341
+		y = 61
+		oy = 6
+	}
+
+	glyph 158
+	{
+		width = 10
+		x = 353
+		y = 61
+		oy = 6
+	}
+
+	glyph 159
+	{
+		width = 9
+		x = 366
+		y = 61
+		oy = 9
+	}
+
+	glyph 160
+	{
+		width = 14
+		x = 0
+		y = 4
+		oy = -11
+	}
+
+	glyph 161
+	{
+		width = 0
+		x = 0
+		y = 0
+		oy = 0
+	}
+
+	glyph 162
+	{
+		width = 8
+		x = 378
+		y = 61
+		oy = 6
+	}
+
+	glyph 163
+	{
+		width = 7
+		x = 389
+		y = 61
+		oy = 7
+	}
+
+	glyph 164
+	{
+		width = 9
+		x = 399
+		y = 61
+		oy = 9
+	}
+
+	glyph 165
+	{
+		width = 9
+		x = 411
+		y = 61
+		oy = 4
+	}
+
+	glyph 166
+	{
+		width = 4
+		x = 423
+		y = 61
+		oy = 6
+	}
+
+	glyph 167
+	{
+		width = 9
+		x = 430
+		y = 61
+		oy = 7
+	}
+
+	glyph 168
+	{
+		width = 9
+		x = 442
+		y = 61
+		oy = 5
+	}
+
+	glyph 169
+	{
+		width = 14
+		x = 454
+		y = 61
+		oy = 7
+	}
+
+	glyph 170
+	{
+		width = 10
+		x = 471
+		y = 61
+		oy = 7
+	}
+
+	glyph 171
+	{
+		width = 9
+		x = 484
+		y = 61
+		oy = 9
+	}
+
+	glyph 172
+	{
+		width = 10
+		x = 496
+		y = 61
+		oy = 11
+	}
+
+	glyph 173
+	{
+		width = 7
+		x = 0
+		y = 80
+		oy = 11
+	}
+
+	glyph 174
+	{
+		width = 14
+		x = 10
+		y = 80
+		oy = 7
+	}
+
+	glyph 175
+	{
+		width = 6
+		x = 27
+		y = 80
+		oy = 5
+	}
+
+	glyph 176
+	{
+		width = 8
+		x = 36
+		y = 80
+		oy = 7
+	}
+
+	glyph 177
+	{
+		width = 10
+		x = 47
+		y = 80
+		oy = 7
+	}
+
+	glyph 178
+	{
+		width = 6
+		x = 60
+		y = 80
+		oy = 7
+	}
+
+	glyph 179
+	{
+		width = 4
+		x = 69
+		y = 80
+		oy = 7
+	}
+
+	glyph 180
+	{
+		width = 7
+		x = 76
+		y = 80
+		oy = 7
+	}
+
+	glyph 181
+	{
+		width = 9
+		x = 86
+		y = 80
+		oy = 9
+	}
+
+	glyph 182
+	{
+		width = 9
+		x = 98
+		y = 80
+		oy = 7
+	}
+
+	glyph 183
+	{
+		width = 4
+		x = 110
+		y = 80
+		oy = 9
+	}
+
+	glyph 184
+	{
+		width = 9
+		x = 117
+		y = 80
+		oy = 7
+	}
+
+	glyph 185
+	{
+		width = 17
+		x = 129
+		y = 80
+		oy = 7
+	}
+
+	glyph 186
+	{
+		width = 8
+		x = 149
+		y = 80
+		oy = 9
+	}
+
+	glyph 187
+	{
+		width = 9
+		x = 160
+		y = 80
+		oy = 9
+	}
+
+	glyph 188
+	{
+		width = 6
+		x = 172
+		y = 80
+		oy = 7
+	}
+
+	glyph 189
+	{
+		width = 10
+		x = 181
+		y = 80
+		oy = 7
+	}
+
+	glyph 190
+	{
+		width = 8
+		x = 194
+		y = 80
+		oy = 9
+	}
+
+	glyph 191
+	{
+		width = 6
+		x = 205
+		y = 80
+		oy = 7
+	}
+
+	glyph 192
+	{
+		width = 12
+		x = 214
+		y = 80
+		oy = 7
+	}
+
+	glyph 193
+	{
+		width = 10
+		x = 229
+		y = 80
+		oy = 7
+	}
+
+	glyph 194
+	{
+		width = 9
+		x = 242
+		y = 80
+		oy = 7
+	}
+
+	glyph 195
+	{
+		width = 9
+		x = 254
+		y = 80
+		oy = 7
+	}
+
+	glyph 196
+	{
+		width = 11
+		x = 266
+		y = 80
+		oy = 7
+	}
+
+	glyph 197
+	{
+		width = 9
+		x = 280
+		y = 80
+		oy = 7
+	}
+
+	glyph 198
+	{
+		width = 14
+		x = 292
+		y = 80
+		oy = 7
+	}
+
+	glyph 199
+	{
+		width = 9
+		x = 309
+		y = 80
+		oy = 7
+	}
+
+	glyph 200
+	{
+		width = 10
+		x = 321
+		y = 80
+		oy = 7
+	}
+
+	glyph 201
+	{
+		width = 10
+		x = 334
+		y = 80
+		oy = 4
+	}
+
+	glyph 202
+	{
+		width = 9
+		x = 347
+		y = 80
+		oy = 7
+	}
+
+	glyph 203
+	{
+		width = 11
+		x = 359
+		y = 80
+		oy = 7
+	}
+
+	glyph 204
+	{
+		width = 12
+		x = 373
+		y = 80
+		oy = 7
+	}
+
+	glyph 205
+	{
+		width = 10
+		x = 388
+		y = 80
+		oy = 7
+	}
+
+	glyph 206
+	{
+		width = 11
+		x = 401
+		y = 80
+		oy = 7
+	}
+
+	glyph 207
+	{
+		width = 10
+		x = 415
+		y = 80
+		oy = 7
+	}
+
+	glyph 208
+	{
+		width = 9
+		x = 428
+		y = 80
+		oy = 7
+	}
+
+	glyph 209
+	{
+		width = 10
+		x = 440
+		y = 80
+		oy = 7
+	}
+
+	glyph 210
+	{
+		width = 10
+		x = 453
+		y = 80
+		oy = 7
+	}
+
+	glyph 211
+	{
+		width = 11
+		x = 466
+		y = 80
+		oy = 7
+	}
+
+	glyph 212
+	{
+		width = 12
+		x = 480
+		y = 80
+		oy = 7
+	}
+
+	glyph 213
+	{
+		width = 10
+		x = 495
+		y = 80
+		oy = 7
+	}
+
+	glyph 214
+	{
+		width = 11
+		x = 0
+		y = 99
+		oy = 7
+	}
+
+	glyph 215
+	{
+		width = 10
+		x = 14
+		y = 99
+		oy = 7
+	}
+
+	glyph 216
+	{
+		width = 14
+		x = 27
+		y = 99
+		oy = 7
+	}
+
+	glyph 217
+	{
+		width = 15
+		x = 44
+		y = 99
+		oy = 7
+	}
+
+	glyph 218
+	{
+		width = 11
+		x = 62
+		y = 99
+		oy = 7
+	}
+
+	glyph 219
+	{
+		width = 12
+		x = 76
+		y = 99
+		oy = 7
+	}
+
+	glyph 220
+	{
+		width = 10
+		x = 91
+		y = 99
+		oy = 7
+	}
+
+	glyph 221
+	{
+		width = 10
+		x = 104
+		y = 99
+		oy = 7
+	}
+
+	glyph 222
+	{
+		width = 14
+		x = 117
+		y = 99
+		oy = 7
+	}
+
+	glyph 223
+	{
+		width = 10
+		x = 134
+		y = 99
+		oy = 7
+	}
+
+	glyph 224
+	{
+		width = 9
+		x = 147
+		y = 99
+		oy = 9
+	}
+
+	glyph 225
+	{
+		width = 9
+		x = 159
+		y = 99
+		oy = 6
+	}
+
+	glyph 226
+	{
+		width = 9
+		x = 171
+		y = 99
+		oy = 9
+	}
+
+	glyph 227
+	{
+		width = 7
+		x = 183
+		y = 99
+		oy = 9
+	}
+
+	glyph 228
+	{
+		width = 9
+		x = 193
+		y = 99
+		oy = 9
+	}
+
+	glyph 229
+	{
+		width = 9
+		x = 205
+		y = 99
+		oy = 9
+	}
+
+	glyph 230
+	{
+		width = 12
+		x = 217
+		y = 99
+		oy = 9
+	}
+
+	glyph 231
+	{
+		width = 8
+		x = 232
+		y = 99
+		oy = 9
+	}
+
+	glyph 232
+	{
+		width = 9
+		x = 243
+		y = 99
+		oy = 9
+	}
+
+	glyph 233
+	{
+		width = 9
+		x = 255
+		y = 99
+		oy = 6
+	}
+
+	glyph 234
+	{
+		width = 9
+		x = 267
+		y = 99
+		oy = 9
+	}
+
+	glyph 235
+	{
+		width = 9
+		x = 279
+		y = 99
+		oy = 9
+	}
+
+	glyph 236
+	{
+		width = 10
+		x = 291
+		y = 99
+		oy = 9
+	}
+
+	glyph 237
+	{
+		width = 9
+		x = 304
+		y = 99
+		oy = 9
+	}
+
+	glyph 238
+	{
+		width = 9
+		x = 316
+		y = 99
+		oy = 9
+	}
+
+	glyph 239
+	{
+		width = 9
+		x = 328
+		y = 99
+		oy = 9
+	}
+
+	glyph 240
+	{
+		width = 9
+		x = 340
+		y = 99
+		oy = 9
+	}
+
+	glyph 241
+	{
+		width = 8
+		x = 352
+		y = 99
+		oy = 9
+	}
+
+	glyph 242
+	{
+		width = 8
+		x = 363
+		y = 99
+		oy = 9
+	}
+
+	glyph 243
+	{
+		width = 8
+		x = 374
+		y = 99
+		oy = 9
+	}
+
+	glyph 244
+	{
+		width = 12
+		x = 385
+		y = 99
+		oy = 6
+	}
+
+	glyph 245
+	{
+		width = 8
+		x = 400
+		y = 99
+		oy = 9
+	}
+
+	glyph 246
+	{
+		width = 9
+		x = 411
+		y = 99
+		oy = 9
+	}
+
+	glyph 247
+	{
+		width = 8
+		x = 423
+		y = 99
+		oy = 9
+	}
+
+	glyph 248
+	{
+		width = 12
+		x = 434
+		y = 99
+		oy = 9
+	}
+
+	glyph 249
+	{
+		width = 13
+		x = 449
+		y = 99
+		oy = 9
+	}
+
+	glyph 250
+	{
+		width = 9
+		x = 465
+		y = 99
+		oy = 9
+	}
+
+	glyph 251
+	{
+		width = 11
+		x = 477
+		y = 99
+		oy = 9
+	}
+
+	glyph 252
+	{
+		width = 9
+		x = 491
+		y = 99
+		oy = 9
+	}
+
+	glyph 253
+	{
+		width = 8
+		x = 0
+		y = 118
+		oy = 9
+	}
+
+	glyph 254
+	{
+		width = 12
+		x = 11
+		y = 118
+		oy = 9
+	}
+
+	glyph 255
+	{
+		width = 9
+		x = 26
+		y = 118
+		oy = 9
+	}
+
+}

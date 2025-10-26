@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech/indicators.dds'
+    
+    color = (0.3, 0.3, 0.3)
+    roughness = 0.1
+}

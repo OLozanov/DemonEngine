@@ -1,0 +1,5 @@
+material
+{
+    color = (1.0, 1.0, 1.0)
+	roughness = 0.6
+}

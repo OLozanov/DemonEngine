@@ -1,0 +1,85 @@
+font
+{
+	size = 70
+	image = 'digits_large.dds'
+
+	glyph '0'
+	{
+		width = 54
+		x = 9
+		y = 9
+		oy = 0
+	}
+    
+    glyph '1'
+	{
+		width = 37
+		x = 77
+		y = 9
+		oy = 0
+	}
+    
+    glyph '2'
+	{
+		width = 51
+		x = 136
+		y = 9
+		oy = 0
+	}
+    
+    glyph '3'
+	{
+		width = 51
+		x = 198
+		y = 9
+		oy = 0
+	}
+    
+    glyph '4'
+	{
+		width = 54
+		x = 9
+		y = 92
+		oy = 0
+	}
+    
+    glyph '5'
+	{
+		width = 51
+		x = 72
+		y = 92
+		oy = 0
+	}
+    
+    glyph '6'
+	{
+		width = 51
+		x = 136
+		y = 92
+		oy = 0
+	}
+    
+    glyph '7'
+	{
+		width = 51
+		x = 198
+		y = 92
+		oy = 0
+	}
+     
+    glyph '8'
+	{
+		width = 50
+		x = 10
+		y = 174
+		oy = 0
+	}
+    
+    glyph '9'
+	{
+		width = 51
+		x = 72
+		y = 174
+		oy = 0
+	}
+}

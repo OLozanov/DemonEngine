@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech\barrel01.dds'
+	normal = 'Tech\barrel01_n.dds'
+    
+    roughness = 0.3
+}

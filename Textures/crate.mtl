@@ -1,0 +1,7 @@
+material
+{
+	normal = 'crate_n.dds'
+	diffuse = 'crate.dds'
+	
+	roughness = 0.5
+}

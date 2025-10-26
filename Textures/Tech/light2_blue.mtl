@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech/light2_blue.dds'
+    
+    roughness = 1.0
+    luminosity = 1.0
+}

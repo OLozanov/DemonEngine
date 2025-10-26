@@ -1,0 +1,8 @@
+material
+{
+	diffuse = 'Tech\ductwork01.dds'
+	normal = 'Tech\ductwork01_n.dds'
+    
+    metalness = 1.0;
+    roughness = 0.3
+}

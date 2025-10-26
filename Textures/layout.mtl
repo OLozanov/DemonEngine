@@ -1,0 +1,5 @@
+material
+{
+	diffuse = 'layout.bmp'
+    roughness = 1.0
+}

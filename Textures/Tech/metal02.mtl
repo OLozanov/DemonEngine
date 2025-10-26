@@ -1,0 +1,8 @@
+material
+{
+	diffuse = 'Tech\metal02.dds'
+	normal = 'Tech\metal02_n.dds'
+    
+    metalness = 1.0;
+    roughness = 0.3
+}

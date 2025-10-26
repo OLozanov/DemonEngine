@@ -1,0 +1,5 @@
+material
+{
+    diffuse = 'Editor/steam_emitter.bmp'
+    alpha = 1.0
+}

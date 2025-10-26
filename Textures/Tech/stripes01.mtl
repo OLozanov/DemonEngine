@@ -1,0 +1,7 @@
+material
+{
+	normal = 'Tech/stripes01_n.dds'
+	diffuse = 'Tech/stripes01.dds'
+	
+	roughness = 0.5
+}

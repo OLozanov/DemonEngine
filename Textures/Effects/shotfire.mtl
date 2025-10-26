@@ -1,0 +1,7 @@
+material
+{
+    type: emissive
+    diffuse = 'effects\shotfire.dds'
+	
+    alpha = 1.0
+}

@@ -1,0 +1,8 @@
+material
+{
+	diffuse = 'Weapon\metal01.dds'
+	normal = 'Weapon\metal_n.dds'
+    
+    metalness = 1.0;
+    roughness = 0.3
+}

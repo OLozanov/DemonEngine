@@ -1,0 +1,7 @@
+material
+{
+	normal = 'blocks01_n.dds'
+	diffuse = 'blocks01.dds'
+    
+    roughness = 0.7
+}
