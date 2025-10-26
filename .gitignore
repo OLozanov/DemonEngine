@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+*.cso
 
 # Precompiled Headers
 *.gch
@@ -39,3 +40,16 @@
 
 # debug information files
 *.dwo
+
+# Particular files and folders
+settings.cfg
+
+# Visual Studio
+src/.vs/
+src/x64/
+
+*.vcxproj.user
+*.opendb
+
+# 
+*Thumbs.db
