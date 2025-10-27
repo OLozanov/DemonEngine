@@ -7,8 +7,8 @@ Decal::Decal(Material* material)
 : m_material(material)
 , m_selected(false)
 {
-    m_size.x = material->img[0]->width * 0.01f;
-    m_size.y = material->img[0]->height * 0.01f;
+    m_size.x = material->img[0]->width * 0.001f;
+    m_size.y = material->img[0]->height * 0.001f;
     m_size.z = 0.05f;
 
     InitBBoxGeometry();

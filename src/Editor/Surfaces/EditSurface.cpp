@@ -1,7 +1,7 @@
 #include "EditSurface.h"
 #include "Surface.h"
 
-#include "Block.h"
+#include "Geometry/Block.h"
 
 #include <algorithm>
 

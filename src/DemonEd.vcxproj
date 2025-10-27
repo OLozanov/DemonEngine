@@ -20,12 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Collision\Collision.cpp" />
-    <ClCompile Include="Editor\Block.cpp" />
     <ClCompile Include="Editor\BlockDlg.cpp" />
     <ClCompile Include="Editor\BoxDlg.cpp" />
     <ClCompile Include="Editor\ConeDlg.cpp" />
     <ClCompile Include="Editor\CylinderDlg.cpp" />
-    <ClCompile Include="Editor\Decal.cpp" />
     <ClCompile Include="Editor\DetailDlg.cpp" />
     <ClCompile Include="Editor\EditConsole.cpp" />
     <ClCompile Include="Editor\Editor.cpp" />
@@ -33,7 +31,9 @@
     <ClCompile Include="Editor\EditorMap.cpp" />
     <ClCompile Include="Editor\EntityList.cpp" />
     <ClCompile Include="Editor\Forms.cpp" />
+    <ClCompile Include="Editor\Geometry\Block.cpp" />
     <ClCompile Include="Editor\Geometry\Csg.cpp" />
+    <ClCompile Include="Editor\Geometry\Decal.cpp" />
     <ClCompile Include="Editor\Geometry\Geometry.cpp" />
     <ClCompile Include="Editor\Geometry\Map.cpp" />
     <ClCompile Include="Editor\MainFrame.cpp" />
@@ -96,13 +96,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Collision.h" />
-    <ClInclude Include="Editor\Block.h" />
     <ClInclude Include="Editor\BlockDlg.h" />
     <ClInclude Include="Editor\BoxDlg.h" />
     <ClInclude Include="Editor\ConeDlg.h" />
     <ClInclude Include="Editor\CylinderDlg.h" />
     <ClInclude Include="Editor\DCM.h" />
-    <ClInclude Include="Editor\Decal.h" />
     <ClInclude Include="Editor\DetailDlg.h" />
     <ClInclude Include="Editor\EditConsole.h" />
     <ClInclude Include="Editor\Editor.h" />
@@ -110,6 +108,8 @@
     <ClInclude Include="Editor\EditorResources.h" />
     <ClInclude Include="Editor\EditPoint.h" />
     <ClInclude Include="Editor\Forms.h" />
+    <ClInclude Include="Editor\Geometry\Block.h" />
+    <ClInclude Include="Editor\Geometry\Decal.h" />
     <ClInclude Include="Editor\Geometry\Map.h" />
     <ClInclude Include="Editor\Geometry\Csg.h" />
     <ClInclude Include="Editor\Geometry\Geometry.h" />

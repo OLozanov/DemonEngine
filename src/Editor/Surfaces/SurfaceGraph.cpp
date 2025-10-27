@@ -1,6 +1,6 @@
 #include "SurfaceGraph.h"
 #include "Surfaces/EditSurface.h"
-#include "Block.h"
+#include "Geometry/Block.h"
 
 SurfaceGraph::SurfaceGraph(size_t id, const std::vector<EditSurface*>& surfaces)
 : m_id(id)

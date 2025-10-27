@@ -1,5 +1,5 @@
 #include "BezierTriangleSurface.h"
-#include "Block.h"
+#include "Geometry/Block.h"
 #include "Geometry/Geometry.h"
 
 template<class T>

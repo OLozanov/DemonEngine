@@ -8,10 +8,10 @@
 #include "RenderContext.h"
 
 #include "EditPoint.h"
-#include "Block.h"
+#include "Geometry/Block.h"
 #include "Objects/Object.h"
 #include "Surfaces/Surface.h"
-#include "Decal.h"
+#include "Geometry/Decal.h"
 
 #include "Geometry/Map.h"
 

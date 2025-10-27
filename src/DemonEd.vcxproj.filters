@@ -79,9 +79,6 @@
     <ClCompile Include="Render\D3D\IndexBuffer.cpp">
       <Filter>Source\Render\D3D</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\Block.cpp">
-      <Filter>Source\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="Editor\Geometry\Geometry.cpp">
       <Filter>Source\Editor\Geometry</Filter>
     </ClCompile>
@@ -229,9 +226,6 @@
     <ClCompile Include="Editor\ResourceDlg.cpp">
       <Filter>Source\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\Decal.cpp">
-      <Filter>Source\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="Editor\BlockDlg.cpp">
       <Filter>Source\Editor</Filter>
     </ClCompile>
@@ -270,6 +264,12 @@
     </ClCompile>
     <ClCompile Include="Editor\View\ViewCamera.cpp">
       <Filter>Source\Editor\View</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Geometry\Block.cpp">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Geometry\Decal.cpp">
+      <Filter>Source\Editor\Geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -320,9 +320,6 @@
     </ClInclude>
     <ClInclude Include="Render\D3D\VertexBuffer.h">
       <Filter>Source\Render\D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\Block.h">
-      <Filter>Source\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Render\D3D\IndexBuffer.h">
       <Filter>Source\Render\D3D</Filter>
@@ -516,9 +513,6 @@
     <ClInclude Include="Editor\EditorResources.h">
       <Filter>Source\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\Decal.h">
-      <Filter>Source\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\Surfaces\BezierTriangleSurface.h">
       <Filter>Source\Editor\Surfaces</Filter>
     </ClInclude>
@@ -557,6 +551,12 @@
     </ClInclude>
     <ClInclude Include="Editor\View\ViewCamera.h">
       <Filter>Source\Editor\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Geometry\Block.h">
+      <Filter>Source\Editor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Geometry\Decal.h">
+      <Filter>Source\Editor\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

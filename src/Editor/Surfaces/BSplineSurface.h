@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Block.h"
+#include "Geometry/Block.h"
 #include "Surface.h"
 #include "ControlMesh.h"
 #include "BezierPatch.h"
