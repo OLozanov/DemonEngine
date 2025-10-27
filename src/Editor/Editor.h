@@ -7,8 +7,6 @@
 
 #include "RenderContext.h"
 
-#include "IConsole.h"
-
 #include "EditPoint.h"
 #include "Block.h"
 #include "Objects/Object.h"
@@ -116,7 +114,7 @@ struct ColorRangeParam
 class Editor
 {
 public:
-    Editor(IConsole& console);
+    Editor();
 
     void cleanup();
     void buildMap();
@@ -168,8 +166,8 @@ public:
     void setEditType(EditType type);
     EditType getEditType() { return m_editType; }
 
-    void setCurrentMaterial(Material* mat) { m_curmat = mat; }
-    Material* getCurrentMaterial() { return m_curmat; }
+    void setCurrentMaterial(const std::string name) { m_curmat = name; }
+    Material* getCurrentMaterial() { return loadMaterial(m_curmat); }
 
     void setPolygonFlag(PolygonFlag flag, bool set);
     uint8_t getPolygonFlags();
@@ -363,8 +361,6 @@ private:
     void readSurfaces(FILE* file);
 
 private:
-    IConsole& m_console;
-
     //render::CommandList m_commandList;
     RenderContext m_renderContext;
 
@@ -380,7 +376,7 @@ private:
 
     Map m_map;
 
-    Material* m_curmat;
+    std::string m_curmat;
 
     Block m_editBlock;
 

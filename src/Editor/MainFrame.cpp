@@ -24,7 +24,7 @@ MainFrameImpl::MainFrameImpl(wxWindow* parent)
 , m_sphereDlg(new SphereDlgImpl(this, m_editor))
 , m_saveDlg(new wxFileDialog(this, _("Save map"), _(".\\Maps"), wxEmptyString, _("DC map (*.dcm)|*.dcm"), wxFD_SAVE, wxDefaultPosition, wxDefaultSize, _T("wxFileDialog")))
 , m_openDlg(new wxFileDialog(this, _("Select file"), _(".\\Maps"), wxEmptyString, wxFileSelectorDefaultWildcardStr, wxFD_OPEN, wxDefaultPosition, wxDefaultSize, _T("wxFileDialog")))
-, m_editor(*m_console)
+, m_editor()
 {
     Connect(wxEVT_SIZE, (wxObjectEventFunction)&MainFrameImpl::onResize);
     Connect(wxEVT_KEY_UP, (wxObjectEventFunction)&MainFrameImpl::onKeyUp);
@@ -54,9 +54,9 @@ MainFrameImpl::MainFrameImpl(wxWindow* parent)
     m_sideView->onEditFinish.bind(this, &MainFrameImpl::refreshViews);
     m_frontView->onEditFinish.bind(this, &MainFrameImpl::refreshViews);
 
-    m_editor.loadMaterial("blocks01");
-    m_editor.loadMaterial("tile");
-    m_editor.loadMaterial("grass01");
+    //m_editor.loadMaterial("blocks01");
+    //m_editor.loadMaterial("tile");
+    //m_editor.loadMaterial("grass01");
 }
 
 void MainFrameImpl::onMenuNew(wxCommandEvent& event)

@@ -113,7 +113,6 @@
     <ClInclude Include="Editor\Geometry\Map.h" />
     <ClInclude Include="Editor\Geometry\Csg.h" />
     <ClInclude Include="Editor\Geometry\Geometry.h" />
-    <ClInclude Include="Editor\IConsole.h" />
     <ClInclude Include="Editor\MainFrame.h" />
     <ClInclude Include="Editor\MapInfoDlg.h" />
     <ClInclude Include="Editor\ObjectDlg.h" />

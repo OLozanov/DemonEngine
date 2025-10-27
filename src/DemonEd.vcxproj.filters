@@ -375,9 +375,6 @@
     <ClInclude Include="Editor\Forms.h">
       <Filter>Source\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\IConsole.h">
-      <Filter>Source\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\MainFrame.h">
       <Filter>Source\Editor</Filter>
     </ClInclude>

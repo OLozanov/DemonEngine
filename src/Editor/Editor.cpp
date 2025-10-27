@@ -8,12 +8,11 @@
 #include <utility>
 #include <set>
 
-Editor::Editor(IConsole& console)
-: m_console(console)
-, m_editMode(EditMode::Move)
+Editor::Editor()
+: m_editMode(EditMode::Move)
 , m_editType(EditType::Blocks)
 , m_displaceMode(DisplaceMode::Up)
-, m_curmat(nullptr)
+, m_curmat("blocks01")
 , m_pickedBlock(nullptr)
 , m_discreteMove(true)
 , m_discreteRotate(true)
@@ -29,8 +28,6 @@ Editor::Editor(IConsole& console)
 {
     initGridGeometry();
     Block::Box(2, 2, 2, m_editBlock);
-
-    m_curmat = loadMaterial("blocks01");
 
     m_blocks.append(&m_editBlock);
 }
@@ -196,7 +193,7 @@ void Editor::addBlock(BlockType type)
 
     Block* newBlock = new Block(m_editBlock, type);
     
-    newBlock->setMaterial(m_curmat);
+    newBlock->setMaterial(loadMaterial(m_curmat));
     newBlock->generatePolygons();
 
     clipBlock(newBlock);
@@ -551,12 +548,12 @@ void Editor::applyMaterialToPolygons()
 {
     for (PolygonSelection* poly : m_selectedPolys)
     {
-        poly->origin->material = m_curmat;
-        poly->owner->setMaterial(m_curmat, poly->origin->displayList);
+        poly->origin->material = loadMaterial(m_curmat);
+        poly->owner->setMaterial(loadMaterial(m_curmat), poly->origin->displayList);
 
-        if (poly->origin->surface) poly->origin->surface->setMaterial(m_curmat);
+        if (poly->origin->surface) poly->origin->surface->setMaterial(loadMaterial(m_curmat));
 
-        for (EditPolygon* editPoly : poly->origin->editPolygons) editPoly->material = m_curmat;
+        for (EditPolygon* editPoly : poly->origin->editPolygons) editPoly->material = loadMaterial(m_curmat);
     }
 
     onUpdate();
@@ -662,7 +659,7 @@ void Editor::rotatePolyUV(float ang)
 
 void Editor::applyMaterialToSurfaces()
 {
-    for (Surface* surface : m_selectedSurfaces) surface->setMaterial(m_curmat);
+    for (Surface* surface : m_selectedSurfaces) surface->setMaterial(loadMaterial(m_curmat));
 
     onUpdate();
 }
@@ -1722,7 +1719,7 @@ void Editor::addDecal(const vec3& origin, const vec3& ray)
 
         //if ((norm ^ s) * t < 0) t = -t;
 
-        Decal* decal = new Decal(m_curmat);
+        Decal* decal = new Decal(loadMaterial(m_curmat));
 
         decal->setPos(pos);
         decal->setOrientation({ s, t, norm });
@@ -2956,7 +2953,7 @@ Material* Editor::loadMaterial(const std::string& name)
     if (mat && !exist)
     {
         mat->name = name;
-        m_console.addMaterial(name, mat);
+        //m_console.addMaterial(name, mat);
     }
 
     return mat;

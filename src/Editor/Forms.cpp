@@ -710,8 +710,8 @@ Console::Console( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxS
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_matAddBtn = new wxButton( m_materialPanel, wxID_ANY, wxT("Add"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer4->Add( m_matAddBtn, 0, wxALL, 5 );
+	m_matRefreshBtn = new wxButton( m_materialPanel, wxID_ANY, wxT("Refresh"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_matRefreshBtn, 0, wxALL, 5 );
 
 
 	bSizer4->Add( 0, 0, 1, wxEXPAND, 5 );
@@ -1030,7 +1030,7 @@ Console::Console( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxS
 
 	// Connect Events
 	m_materialTree->Connect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( Console::onMatTreeSelected ), NULL, this );
-	m_matAddBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onAddMaterial ), NULL, this );
+	m_matRefreshBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onRefreshMaterials ), NULL, this );
 	m_matApplyBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onApplyMaterial ), NULL, this );
 	m_meshTree->Connect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( Console::onMeshTreeSelected ), NULL, this );
 	m_meshRefreshBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onRefreshMesh ), NULL, this );
@@ -1059,7 +1059,7 @@ Console::~Console()
 {
 	// Disconnect Events
 	m_materialTree->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( Console::onMatTreeSelected ), NULL, this );
-	m_matAddBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onAddMaterial ), NULL, this );
+	m_matRefreshBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onRefreshMaterials ), NULL, this );
 	m_matApplyBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onApplyMaterial ), NULL, this );
 	m_meshTree->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( Console::onMeshTreeSelected ), NULL, this );
 	m_meshRefreshBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Console::onRefreshMesh ), NULL, this );

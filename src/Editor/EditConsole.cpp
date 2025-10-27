@@ -12,6 +12,8 @@
 #include "Objects/Ladder.h"
 #include "Objects/FogVolume.h"
 
+#include "Resources/Resources.h"
+
 ///TODO: If its required to define entity manually
 /*static const EntityType MoverType = { "Mover", {},
                                      {{"id", TypeInfoMember::Type::String, nullptr, ""},
@@ -31,9 +33,7 @@ ConsoleImpl::ConsoleImpl(wxWindow* parent, Editor& editor, const ViewCamera& cam
 , m_camera(camera)
 , m_swapChain(Render::GpuInstance::GetInstance().createSwapChain(m_previewPanel->GetHandle()))
 {
-    m_matId = m_materialTree->AddRoot("Materials", -1, -1);
-    m_meshTree->Expand(m_matId);
-
+    initMaterialList();
     initMeshList();
     initEntityList();
 }
@@ -43,7 +43,7 @@ void ConsoleImpl::initMaterialList()
     wxTreeItemId root = m_materialTree->AddRoot("Materials", -1, -1);
     addMaterialDirectory(root, "./Textures/");
 
-    m_materialTree->Expand(m_matId);
+    m_materialTree->Expand(root);
 }
 
 void ConsoleImpl::addMaterialDirectory(wxTreeItemId root, const std::filesystem::path& path)
@@ -75,7 +75,7 @@ void ConsoleImpl::addMaterialDirectory(wxTreeItemId root, const std::filesystem:
         auto fname = path.filename().replace_extension();
 
         TextureInfo* matinfo = new TextureInfo;
-        matinfo->name = path.lexically_relative("./Textures/").string();
+        matinfo->name = path.lexically_relative("./Textures/").replace_extension().string();
         matinfo->mat = nullptr;
 
         m_materialTree->AppendItem(root, fname.c_str(), -1, -1, matinfo);
@@ -162,12 +162,10 @@ vec3 ConsoleImpl::calcNewPos(float dist)
     return m_camera.pos() + m_camera.basis()[2] * dist;
 }
 
-void ConsoleImpl::addMaterial(const std::string& name, Material* mat)
+void ConsoleImpl::addMaterialDetails(const wxTreeItemId& id)
 {
-    TextureInfo* matinfo = new TextureInfo;
-    matinfo->mat = mat;
-
-    wxTreeItemId root = m_materialTree->AppendItem(m_matId, name, -1, -1, matinfo);
+    TextureInfo* tinfo = (TextureInfo*)m_materialTree->GetItemData(id);
+    Material* mat = ResourceManager::GetMaterial(tinfo->name);
 
     for (int i = 0; i < 2; i++)
     {
@@ -188,7 +186,7 @@ void ConsoleImpl::addMaterial(const std::string& name, Material* mat)
         texinfo->mat = mat;
         texinfo->img = img;
 
-        m_materialTree->AppendItem(root, name, -1, -1, texinfo);
+        m_materialTree->AppendItem(id, name, -1, -1, texinfo);
     }
 }
 
@@ -201,15 +199,11 @@ void ConsoleImpl::onResize()
 
 void ConsoleImpl::onMatTreeSelected(wxTreeEvent& event)
 {
-    wxTreeItemId id = event.GetItem();
+    m_meshId = event.GetItem();
 
-    TextureInfo* tinfo = (TextureInfo*)m_materialTree->GetItemData(id);
+    TextureInfo* tinfo = (TextureInfo*)m_materialTree->GetItemData(m_meshId);
 
-    if (tinfo)
-    {
-        Material* mat = tinfo->mat;
-        m_editor.setCurrentMaterial(mat);
-    }
+    if (tinfo) m_editor.setCurrentMaterial(tinfo->name);
 }
 
 void ConsoleImpl::onApplyMaterial(wxCommandEvent& event)
@@ -225,28 +219,10 @@ void ConsoleImpl::onApplyMaterial(wxCommandEvent& event)
     }
 }
 
-void ConsoleImpl::onAddMaterial(wxCommandEvent& event)
+void ConsoleImpl::onRefreshMaterials(wxCommandEvent& event)
 {
-    m_loadDlg.SetDirectory(".\\Textures");
-    m_loadDlg.SetWildcard("*.mtl");
-
-    if (m_loadDlg.ShowModal() != wxID_CANCEL)
-    {
-        wxString path = m_loadDlg.GetPath();
-
-        int left = path.Find("Textures\\");
-        if (left == wxNOT_FOUND) return;
-
-        left += 9;
-
-        int right = path.Find(".mtl");
-        if (right == wxNOT_FOUND) return;
-
-        wxString matname = path.SubString(left, right - 1);
-        std::string name = matname.ToStdString();
-
-        m_editor.loadMaterial(name);
-    }
+    m_materialTree->DeleteAllItems();
+    initMaterialList();
 }
 
 void ConsoleImpl::onMeshTreeSelected(wxTreeEvent& event)

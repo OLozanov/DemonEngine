@@ -4,7 +4,6 @@
 #include <wx/filedlg.h>
 
 #include "Forms.h"
-#include "IConsole.h"
 #include "DetailDlg.h"
 
 #include "Objects/Entity.h"
@@ -14,7 +13,7 @@
 class ViewCamera;
 class Editor;
 
-class ConsoleImpl : public Console, public IConsole
+class ConsoleImpl : public Console
 {
     struct TextureInfo : public wxTreeItemData
     {
@@ -57,11 +56,11 @@ private:
 
     vec3 calcNewPos(float dist);
 
-    void addMaterial(const std::string& name, Material* mat) override;
+    void addMaterialDetails(const wxTreeItemId& id);
 
     void onMatTreeSelected(wxTreeEvent& event) override;
     void onApplyMaterial(wxCommandEvent& event) override;
-    void onAddMaterial(wxCommandEvent& event) override;
+    void onRefreshMaterials(wxCommandEvent& event) override;
 
     void onMeshTreeSelected(wxTreeEvent& event) override;
     void onCreateMesh(wxCommandEvent& event) override;

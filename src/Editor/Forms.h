@@ -295,7 +295,7 @@ class Console : public wxPanel
 		wxNotebook* m_tabPanel;
 		wxPanel* m_materialPanel;
 		wxTreeCtrl* m_materialTree;
-		wxButton* m_matAddBtn;
+		wxButton* m_matRefreshBtn;
 		wxButton* m_matApplyBtn;
 		wxPanel* m_meshPanel;
 		wxTreeCtrl* m_meshTree;
@@ -338,7 +338,7 @@ class Console : public wxPanel
 
 		// Virtual event handlers, override them in your derived class
 		virtual void onMatTreeSelected( wxTreeEvent& event ) { event.Skip(); }
-		virtual void onAddMaterial( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onRefreshMaterials( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onApplyMaterial( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onMeshTreeSelected( wxTreeEvent& event ) { event.Skip(); }
 		virtual void onRefreshMesh( wxCommandEvent& event ) { event.Skip(); }
