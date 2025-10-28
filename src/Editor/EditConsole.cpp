@@ -49,7 +49,7 @@ void ConsoleImpl::initMaterialList()
 void ConsoleImpl::addMaterialDirectory(wxTreeItemId root, const std::filesystem::path& path)
 {
     std::vector<std::filesystem::path> folders;
-    std::vector<std::filesystem::path> meshes;
+    std::vector<std::filesystem::path> materials;
 
     for (const auto& entry : std::filesystem::directory_iterator(path))
     {
@@ -60,7 +60,7 @@ void ConsoleImpl::addMaterialDirectory(wxTreeItemId root, const std::filesystem:
         else
         {
             std::string ext = entry.path().extension().string();
-            if (ext == ".mtl") meshes.push_back(entry.path());
+            if (ext == ".mtl") materials.push_back(entry.path());
         }
     }
 
@@ -68,9 +68,11 @@ void ConsoleImpl::addMaterialDirectory(wxTreeItemId root, const std::filesystem:
     {
         wxTreeItemId dir = m_materialTree->AppendItem(root, path.filename().c_str(), -1, -1, 0);
         addMaterialDirectory(dir, path);
+   
+        if (!m_materialTree->ItemHasChildren(dir)) m_materialTree->Delete(dir);
     }
 
-    for (const std::filesystem::path& path : meshes)
+    for (const std::filesystem::path& path : materials)
     {
         auto fname = path.filename().replace_extension();
 
@@ -112,6 +114,8 @@ void ConsoleImpl::addMeshDirectory(wxTreeItemId root, const std::filesystem::pat
     {
         wxTreeItemId dir = m_meshTree->AppendItem(root, path.filename().c_str(), -1, -1, 0);
         addMeshDirectory(dir, path);
+    
+        if (!m_meshTree->ItemHasChildren(dir)) m_meshTree->Delete(dir);
     }
 
     for (const std::filesystem::path& path : meshes)
