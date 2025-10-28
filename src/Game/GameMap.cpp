@@ -283,7 +283,7 @@ void Game::loadLeafs(FILE* file, std::vector<Render::Leaf>& leafs)
         static const vec3 GlobalPosition = {};
 
         Collision::PolygonalCollisionShape* collisionShape = new Collision::PolygonalCollisionShape(GlobalOrientation, GlobalPosition, collisionPolygons.size(), collisionPolygons.data());
-        Physics::StationaryBody* staticBody = new Physics::StationaryBody(collisionShape, leafs[l].bbox, collision_solid | collision_actor | collision_hitable);
+        Physics::StationaryBody* staticBody = new Physics::StationaryBody(collisionShape, leafs[l].bbox, collision_map);
 
         Physics::PhysicsManager::GetInstance().addStationaryBody(staticBody);
     }

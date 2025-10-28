@@ -728,9 +728,27 @@ void Game::activateObject(const std::string& id)
     }
 }
 
+void Game::createDebris(uint32_t type, const vec3& pos, const mat3& rot, float lifetime, const vec3& velocity)
+{
+    Debris* debris = new Debris(pos, rot, lifetime, type);
+
+    debris->setVelocity(velocity * 6);
+
+    m_objects.append(debris);
+
+    debris->OnLifetimeExpires.bind_async(m_asyncQueue, [this](Debris* obj)
+    {
+        m_physicsManager.removeRigidBody(obj);
+        m_sceneManager.removeObject(obj);
+        m_objects.remove(obj);
+
+        delete obj;
+    });
+}
+
 void Game::destroyContainer(Container* container)
 {
-    vec3 pos = container->location();
+    const vec3& pos = container->location();
 
     m_physicsManager.removeRigidBody(container);
     m_sceneManager.removeObject(container);
@@ -738,8 +756,8 @@ void Game::destroyContainer(Container* container)
 
     Item* item = nullptr;
 
-    std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
-    vec3 rot = vec3(distribution(m_randomGenerator), distribution(m_randomGenerator), distribution(m_randomGenerator)) * math::pi * 2.0f;
+    std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+    vec3 rot = vec3(distribution(m_randomGenerator), distribution(m_randomGenerator), distribution(m_randomGenerator)) * math::pi2;
 
     switch (container->item())
     {
@@ -748,13 +766,32 @@ void Game::destroyContainer(Container* container)
 
         item->OnPickup.bind([this, item]() {
             pickMedkit(item);
-        });
+            });
     }
 
     if (item)
     {
         item->setVelocity({ 0, -0.1, 0 });
         m_objects.append(item);
+    }
+
+    // Create debris
+    const mat3& orientation = container->orientation();
+
+    for (int i = 0; i < 8; i++)
+    {
+        vec3 offset = { distribution(m_randomGenerator), distribution(m_randomGenerator), distribution(m_randomGenerator) };
+        vec3 rot = vec3(distribution(m_randomGenerator), distribution(m_randomGenerator), distribution(m_randomGenerator)) * math::pi2;
+        mat3 orientation = mat3::Rotate(rot.x, rot.y, rot.z);
+
+        vec3 velocity = offset;
+        velocity.normalize();
+
+        uint32_t type = i <= 5 ? 2 : 1;
+
+        float lifetime = 10.0f + distribution(m_randomGenerator) * 5.0f;
+
+        createDebris(type, pos + offset * 0.4f, orientation, lifetime, velocity * 0.3f);
     }
 
     delete container;

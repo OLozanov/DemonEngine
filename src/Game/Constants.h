@@ -1,14 +1,16 @@
 #pragma once
 
-enum CollisionLayer 
+enum CollisionLayer
 {
-    collision_solid = 1,
-    collision_hitable = 2,
-    collision_pickable = 4,
-    collision_actor = 8,
-    collision_entity = 16,
-    collision_debris = 32,
-    collision_character = 64
+	collision_solid = 1,
+	collision_hitable = 2,
+	collision_pickable = 4,
+	collision_actor = 8,
+	collision_entity = 16,
+	collision_debris = 32,
+	collision_character = 64,
+
+	collision_map = collision_solid | collision_actor | collision_hitable | collision_debris
 };
 
 enum GameMaterial

@@ -71,7 +71,7 @@ SurfaceObject::SurfaceObject(const vec3& pos,
 
     Collision::PolygonalCollisionShape * collisionShape = new Collision::PolygonalCollisionShape(m_orientation, m_pos, pnum, m_collisionMesh.data());
 
-    m_body = new Physics::StationaryBody(collisionShape, bbox, collision_solid | collision_actor | collision_hitable);
+    m_body = new Physics::StationaryBody(collisionShape, bbox, collision_map);
     Physics::PhysicsManager::GetInstance().addStationaryBody(m_body);
 }
 

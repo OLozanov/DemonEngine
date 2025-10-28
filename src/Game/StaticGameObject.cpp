@@ -49,7 +49,7 @@ void StaticGameObject::addCollisionModel()
         bbox = RecalcBBox({ -colbbox, colbbox }, m_orientation);
     }
 
-    m_body = new Physics::StationaryBody(collisionShape, bbox, collision_solid | collision_actor | collision_hitable);
+    m_body = new Physics::StationaryBody(collisionShape, bbox, collision_map);
 
     Physics::PhysicsManager::GetInstance().addStationaryBody(m_body);
 }

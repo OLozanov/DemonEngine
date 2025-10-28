@@ -7,17 +7,18 @@
 namespace GameLogic
 {
 
-static const std::string DebrisModel[] = {"Tech/scrap_metal.msh",
-                                          "debris/wood2.msh",
-                                          "debris/wood3.msh"};
+static const std::string DebrisModel[] = { "Tech/scrap_metal.msh",
+                                           "Containers/crate_debris_01.msh",
+                                           "Containers/crate_debris_02.msh" };
 
 Debris::Debris(const vec3& pos, const mat3& rot, float lifetime, uint32_t type)
-: PhysicsObject(pos, rot, 5, collision_solid, ResourceManager::GetModel(DebrisModel[type]))
+: PhysicsObject(pos, rot, 5, collision_debris, ResourceManager::GetModel(DebrisModel[type]))
 , m_type(type)
 , m_lifetime(lifetime)
 {
-    m_bumpSnd = ResourceManager::GetSound("wood_debris.wav");
-    m_bumpImpulse = 10;
+    if (type > 0) m_bumpSnd = ResourceManager::GetSound("Wood/wood_debris.wav");
+    
+    m_bumpImpulse = 5;
 }
 
 Debris::~Debris()

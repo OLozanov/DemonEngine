@@ -100,6 +100,8 @@ private:
 
     void activateObject(const std::string& id);
 
+    void createDebris(uint32_t type, const vec3& pos, const mat3& rot, float lifetime, const vec3& velocity);
+
     void destroyContainer(Container* container);
     void destroyBarrel(Breakable* barrel);
 
