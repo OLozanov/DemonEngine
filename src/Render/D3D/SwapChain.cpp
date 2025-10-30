@@ -53,14 +53,6 @@ void SwapChain::resize(int width, int height)
     createRenderTargetViews();
 }
 
-bool SwapChain::isFullscreen()
-{
-    BOOL fullscreen;
-    ThrowIfFailed(m_swapChain->GetFullscreenState(&fullscreen, nullptr));
-
-    return static_cast<bool>(fullscreen);
-}
-
 SwapChain& SwapChain::operator=(IDXGISwapChain3* swapChain)
 {
     m_swapChain = swapChain;

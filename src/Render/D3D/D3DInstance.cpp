@@ -176,13 +176,6 @@ IDXGISwapChain3* D3DInstance::createSwapChain(HWND hwnd, bool maximizable)
     UINT width = clientRect.right - clientRect.left;
     UINT height = clientRect.bottom - clientRect.top;
 
-    DXGI_SWAP_CHAIN_FULLSCREEN_DESC fullscreenDesc = {};
-    fullscreenDesc.RefreshRate = { 60000, 1000 };
-    fullscreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-    fullscreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-    fullscreenDesc.Windowed = true;
-
-    // Describe and create the swap chain.
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
     swapChainDesc.BufferCount = FrameCount;
     swapChainDesc.Width = width;
@@ -195,10 +188,10 @@ IDXGISwapChain3* D3DInstance::createSwapChain(HWND hwnd, bool maximizable)
 
     IDXGISwapChain1* swapChain;
     ThrowIfFailed(m_dxgiFactory->CreateSwapChainForHwnd(
-            m_commandQueue.Get(),        // Swap chain needs the queue so that it can force a flush on it.
+            m_commandQueue.Get(),
             hwnd,
             &swapChainDesc,
-            &fullscreenDesc,
+            nullptr,
             nullptr,
             &swapChain
     ));

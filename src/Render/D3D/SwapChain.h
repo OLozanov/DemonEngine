@@ -17,8 +17,6 @@ public:
     void present();
     void resize(int width, int height);
 
-    bool isFullscreen();
-
     SwapChain& operator=(IDXGISwapChain3* swapChain);
 
 private:
