@@ -12,21 +12,25 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
 : UI::Widget(parent, x, y, width, height, 0)
 , m_settings(settings)
 , m_resLabel(this, 100, 30, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
-, m_giLabel(this, 100, 60, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
+, m_windowedLabel(this, 100, 60, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
+, m_giLabel(this, 100, 90, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
 , m_resolutionCombo(this, 112, 30, 100, UI::Widget::Alignment::Left)
-, m_giChbox(this, 120, 60)
+, m_windowedChbox(this, 120, 60)
+, m_giChbox(this, 120, 90)
 {
     Render::GpuInstance& renderApi = Render::GpuInstance::GetInstance();
 
     m_resLabel.setText("Resolution:");
+    m_windowedLabel.setText("Windowed:");
     m_giLabel.setText("GI:");
 
     m_resLabel.setColor(1.0f, 1.0f, 1.0f);
+    m_windowedLabel.setColor(1.0f, 1.0f, 1.0f);
     m_giLabel.setColor(1.0f, 1.0f, 1.0f);
 
     std::stringstream sstream;
 
-    for (const auto& mode : renderApi.displayModes())
+    for (const auto& mode : App::DisplayModeList())
     {
         sstream << mode.first << "x" << mode.second;
         m_resolutionCombo.addItem(sstream.str());
@@ -35,6 +39,7 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
     }
 
     m_resolutionCombo.selectItem(7);
+    m_windowedChbox.setValue(true);
 
     if (!renderApi.rtxSupport())
     {
@@ -45,12 +50,13 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
         m_giChbox.setValue(true);
 
     m_resolutionCombo.OnChange.bind([this](size_t index) {
-        Render::GpuInstance& renderApi = Render::GpuInstance::GetInstance();
 
-        auto resolution = renderApi.displayModes()[index];
-        Win32App::Resize(resolution.first, resolution.second);
-
+        App::Resize(index);
         m_settings.resolution = index;
+    });
+
+    m_windowedChbox.OnChange.bind([this](bool enable) {
+        App::ToggleFullscreen();
     });
 
     m_giChbox.OnChange.bind([this](bool enable) {
@@ -63,8 +69,15 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
 void VideoPanel::update()
 {
     m_resolutionCombo.selectItem(m_settings.resolution);
+    m_windowedChbox.setValue(!m_settings.fullscreen);
     m_giChbox.setValue(m_settings.gi);
 
+    refresh();
+}
+
+void VideoPanel::updateFullscreenStatus()
+{
+    m_windowedChbox.setValue(!m_settings.fullscreen);
     refresh();
 }
 
@@ -152,6 +165,12 @@ void SettingsPanel::setSettings(const Settings& settings)
 
     m_videoPanel.update();
     m_audioPanel.update();
+}
+
+void SettingsPanel::setFullscreenStatus(bool fullscreen)
+{
+    m_settings.fullscreen = fullscreen;
+    m_videoPanel.updateFullscreenStatus();
 }
 
 void SettingsPanel::display()

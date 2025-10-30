@@ -117,6 +117,7 @@ void Game::saveSettings()
     const Settings& settings = m_menu.settings();
 
     out << "resolution " << settings.resolution << std::endl;
+    out << "fullscreen " << App::IsFullscreen() << std::endl;  // We can bypass menu data here
     out << "gi " << settings.gi << std::endl;
     out << "volume " << settings.volume << std::endl;
 }
@@ -136,6 +137,7 @@ void Game::readSettings(Settings& settings)
         in >> param;
 
         if (param == "resolution") in >> settings.resolution;
+        else if (param == "fullscreen") in >> settings.fullscreen;
         else if (param == "gi") in >> settings.gi;
         else if (param == "volume") in >> settings.volume;
         else in >> param;
@@ -148,14 +150,14 @@ void Game::loadSettings()
 {
     // Settings
     Settings settings;
+
     readSettings(settings);
 
     AudioManager::GetInstance().setVolume(settings.volume);
     m_sceneManager.enableGI(settings.gi);
 
-    Render::GpuInstance& renderApi = Render::GpuInstance::GetInstance();
-    auto resolution = renderApi.displayModes()[settings.resolution];
-    Win32App::Resize(resolution.first, resolution.second);
+    App::Resize(settings.resolution);
+    if (settings.fullscreen) App::ToggleFullscreen();
 }
 
 void Game::processCommandLine(const std::string& cmd)
@@ -213,6 +215,11 @@ void Game::onScreenResize(int width, int height)
     m_msg.move(width / 2, height / 2);
 
     m_menu.move(width / 2 - m_menu.width() / 2, height / 2 - m_menu.height() / 2);
+}
+
+void Game::onSwichFullscreen(bool fullscreen)
+{
+    m_menu.setFullscreenStatus(fullscreen);
 }
 
 void Game::onKeyPress(int key, bool keyDown)
@@ -732,7 +739,7 @@ void Game::createDebris(uint32_t type, const vec3& pos, const mat3& rot, float l
 {
     Debris* debris = new Debris(pos, rot, lifetime, type);
 
-    debris->setVelocity(velocity * 6);
+    debris->setVelocity(velocity);
 
     m_objects.append(debris);
 
@@ -791,7 +798,7 @@ void Game::destroyContainer(Container* container)
 
         float lifetime = 10.0f + distribution(m_randomGenerator) * 5.0f;
 
-        createDebris(type, pos + offset * 0.4f, orientation, lifetime, velocity * 0.3f);
+        createDebris(type, pos + offset * 0.4f, orientation, lifetime, velocity * 2.0f);
     }
 
     delete container;

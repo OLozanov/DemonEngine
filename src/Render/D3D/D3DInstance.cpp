@@ -89,26 +89,6 @@ void D3DInstance::SelectAdapter(IDXGIFactory1* pFactory,
     *ppAdapter = adapter.Detach();
 }
 
-void D3DInstance::getDisplayModes(IDXGIAdapter1* adapter)
-{
-    ComPtr<IDXGIOutput> output;
-
-    adapter->EnumOutputs(0, &output);
-
-    UINT modesNum = 0;
-    output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 0, &modesNum, nullptr);
-
-    std::vector<DXGI_MODE_DESC> modeDesc(modesNum);
-
-    output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 0, &modesNum, modeDesc.data());
-
-    std::set<DisplayMode> modes;
-
-    for (const auto& desc : modeDesc) modes.insert({ desc.Width, desc.Height });
-
-    for (const auto& mode : modes) m_displayModes.emplace_back(mode);
-}
-
 void D3DInstance::checkFeatureSupport()
 {
     D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureData = {};
@@ -140,8 +120,6 @@ void D3DInstance::init()
 
     ComPtr<IDXGIAdapter1> hardwareAdapter;
     SelectAdapter(m_dxgiFactory.Get(), &hardwareAdapter);
-
-    getDisplayModes(hardwareAdapter.Get());
 
     ThrowIfFailed(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));
 
@@ -213,7 +191,7 @@ IDXGISwapChain3* D3DInstance::createSwapChain(HWND hwnd, bool maximizable)
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    swapChainDesc.Flags = 0;
 
     IDXGISwapChain1* swapChain;
     ThrowIfFailed(m_dxgiFactory->CreateSwapChainForHwnd(
@@ -225,7 +203,7 @@ IDXGISwapChain3* D3DInstance::createSwapChain(HWND hwnd, bool maximizable)
             &swapChain
     ));
 
-    if(!maximizable) m_dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+    m_dxgiFactory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
 
     IDXGISwapChain3* result = nullptr;
     swapChain->QueryInterface(&result);

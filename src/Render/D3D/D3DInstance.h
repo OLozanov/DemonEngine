@@ -17,9 +17,6 @@ using Microsoft::WRL::ComPtr;
 class D3DInstance
 {
 public:
-    using DisplayMode = std::pair<UINT, UINT>;
-
-public:
 
     D3DInstance();
     ~D3DInstance();
@@ -37,8 +34,6 @@ public:
     inline ID3D12Device* device() { return m_device.Get(); }
     inline ID3D12DescriptorHeap* descriptorHeap() { return m_srvHeap.Get(); }
 
-    const std::vector<DisplayMode>& displayModes() { return m_displayModes; }
-
     void execute(ID3D12CommandList* commandList);
 
     inline D3D12_CPU_DESCRIPTOR_HANDLE CpuDescriptor(UINT handle) { return { m_srvHeapCpuPtr + handle * (ULONG_PTR)m_cbvSrvDescriptorSize }; }
@@ -55,7 +50,6 @@ public:
 private:
     static void SelectAdapter(IDXGIFactory1* pFactory, IDXGIAdapter1** ppAdapter);
 
-    void getDisplayModes(IDXGIAdapter1* adapter);
     void checkFeatureSupport();
 
     void createSyncObjects();
@@ -69,12 +63,10 @@ private:
     static constexpr UINT DsvCount = 40;
     static constexpr UINT RtvCount = 13;
 
+    // Feature support
     bool m_rtxSupport = false;
 
-    bool m_fullscreen = false;
-
     // Pipeline objects.
-    std::vector<DisplayMode> m_displayModes;
     ComPtr<ID3D12Device> m_device;
     ComPtr<IDXGIFactory4> m_dxgiFactory;
     ComPtr<ID3D12CommandQueue> m_commandQueue;

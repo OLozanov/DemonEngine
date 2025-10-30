@@ -117,7 +117,7 @@ public:
     void move(int16_t x, int16_t y);
     void resize(uint16_t width, uint16_t height);
 
-    void refresh() { m_redraw = true; }
+    void refresh();
 
     virtual void onResize() {}
 

@@ -17,6 +17,8 @@ namespace GameLogic
 struct Settings
 {
     size_t resolution = 7;
+    bool fullscreen = false;
+
     bool gi = true;
 
     float volume = 0.5f;
@@ -28,14 +30,18 @@ public:
     VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 
     void update();
+    void updateFullscreenStatus();
 
 private:
     Settings& m_settings;
 
     Widgets::Label m_resLabel;
+    Widgets::Label m_windowedLabel;
     Widgets::Label m_giLabel;
 
     Widgets::ComboBox m_resolutionCombo;
+    Widgets::CheckBox m_windowedChbox;
+    
     Widgets::CheckBox m_giChbox;
 
     //void display() { m_canvas.rectangle(m_left, m_top, m_right, m_bottom); }
@@ -62,6 +68,7 @@ public:
 
     const Settings& settings() const { return m_settings; }
     void setSettings(const Settings& settings);
+    void setFullscreenStatus(bool fullscreen);
 
     void display() override;
 
@@ -92,6 +99,7 @@ public:
 
     const Settings& settings() const { return m_settingsPanel.settings(); }
     void setSettings(const Settings& settings) { m_settingsPanel.setSettings(settings); }
+    void setFullscreenStatus(bool fullscreen) { m_settingsPanel.setFullscreenStatus(fullscreen); }
 
 private:
     void showButtons();

@@ -32,8 +32,8 @@ PhysicsObject::PhysicsObject(const vec3& pos, const mat3& mat, float mass, unsig
 
     m_layers = layers;
 
-    vec3 inertiaTensor = Physics::BoxInertiaTensor(StaticObject::m_bbox.max - StaticObject::m_bbox.min, m_mass);
-    setInertia(inertiaTensor);
+    vec3 inertia = Physics::BoxInertiaTensor(StaticObject::m_bbox.max - StaticObject::m_bbox.min, m_mass);
+    setInertia(inertia);
 
     m_object = static_cast<Hitable*>(this);
 

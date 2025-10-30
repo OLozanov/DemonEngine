@@ -10,6 +10,8 @@
 
 #include "System/Timer.h"
 
+#include <set>
+
 wchar_t szClassName[] = L"GameWnd";
 
 bool Win32App::m_run = true;
@@ -19,8 +21,11 @@ Render::SwapChain Win32App::m_swapChain;
 
 int Win32App::m_xcenter;
 int Win32App::m_ycenter;
-bool Win32App::m_fullscreen;
-bool Win32App::m_focus = false;
+bool Win32App::m_fullscreen = false;
+bool Win32App::m_active = false;
+
+std::vector<Win32App::DisplayMode> Win32App::m_displayModeList;
+UINT Win32App::m_displayMode = 7;
 
 DWORD Win32App::m_time = 0;
 
@@ -65,6 +70,8 @@ int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
     );
 
     ShowWindow(m_hwnd, nCmdShow);
+
+    EnumDisplayModes();
 
 #ifdef _DEBUG
     if (AttachConsole(ATTACH_PARENT_PROCESS))
@@ -129,23 +136,23 @@ int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
             DispatchMessage(&message);
         }
 
-        if (m_focus)
+        if (m_active)
         {
             POINT cursorPos;
 
             GetCursorPos(&cursorPos);
             game.onMouseMove(cursorPos.x - m_xcenter, cursorPos.y - m_ycenter);
             SetCursorPos(m_xcenter, m_ycenter);
+
+            game.update(dt);
+            uiLayer.update(dt);
+            ResourceManager::AnimateMaps(dt);
+            Timer::UpdateTimers(dt);
+
+            sceneManager.display();
+            uiLayer.display();
+            m_swapChain.present();
         }
-
-        game.update(dt);
-        uiLayer.update(dt);
-        ResourceManager::AnimateMaps(dt);
-        Timer::UpdateTimers(dt);
-
-        sceneManager.display();
-        uiLayer.display();
-        m_swapChain.present();
     }
 
     game.saveSettings();
@@ -164,23 +171,74 @@ void Win32App::ShowMessage(const char* msg, const char * title)
     MessageBoxA(m_hwnd, msg, title, MB_OK);
 }
 
-void Win32App::Resize(int width, int height)
+void Win32App::EnumDisplayModes()
 {
-    RECT rect = { 0, 0 , width, height };
+    // TODO: For better support of multi-monitor configurations it probably worth to track current monitor
+    /*HMONITOR monitor = MonitorFromWindow(m_hwnd, MONITOR_DEFAULTTONEAREST);
 
-    if (!m_swapChain.isFullscreen()) AdjustWindowRect(&rect, WindowStyle, FALSE);
+    std::wstring mname;
+
+    if (monitor != NULL)
+    {
+        MONITORINFOEX monitorInfo;
+        monitorInfo.cbSize = sizeof(MONITORINFOEX);
+
+        if (GetMonitorInfo(monitor, &monitorInfo))
+            mname = monitorInfo.szDevice;
+    }*/
+
+    std::set<DisplayMode> modes;
+    m_displayModeList.clear();
+    
+    DEVMODE devMode = {};
+    devMode.dmSize = sizeof(devMode);
+    
+    size_t modeNum = 0;
+  
+    while (EnumDisplaySettingsEx(NULL, modeNum++, &devMode, 0))
+    {
+        modes.insert({ devMode.dmPelsWidth, devMode.dmPelsHeight });
+        
+        ZeroMemory(&devMode, sizeof(devMode));
+        devMode.dmSize = sizeof(devMode);
+    }
+
+    for (const auto& mode : modes) m_displayModeList.emplace_back(mode);
+}
+
+void Win32App::SetDisplayMode(UINT m)
+{
+    const auto& mode = m_displayModeList[m];
+
+    DEVMODE devmode;
+
+    devmode.dmSize = sizeof(DEVMODE);
+    devmode.dmPelsWidth = mode.first;
+    devmode.dmPelsHeight = mode.second;
+    devmode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+
+    ChangeDisplaySettings(&devmode, CDS_FULLSCREEN);
+}
+
+void Win32App::Resize(UINT m)
+{
+    m_displayMode = m;
+
+    const auto& mode = m_displayModeList[m];
+
+    RECT rect = { 0, 0 , mode.first, mode.second };
+
+    if (!m_fullscreen) AdjustWindowRect(&rect, WindowStyle, FALSE);
     
     int w = rect.right - rect.left;
     int h = rect.bottom - rect.top;
 
-    MoveWindow(m_hwnd, 0, 0, w, h, FALSE);
+    if (m_fullscreen) SetDisplayMode(m);
 
-    /*Render::SceneManager& sceneManager = Render::SceneManager::GetInstance();
-    UI::UiLayer& uiLayer = UI::UiLayer::GetInstance();
+    int x = m_fullscreen ? 0 : (GetSystemMetrics(SM_CXSCREEN) - w) / 2;
+    int y = m_fullscreen ? 0 : (GetSystemMetrics(SM_CYSCREEN) - h) / 2;
 
-    m_swapChain.resize(width, height);
-    sceneManager.resize(width, height);
-    uiLayer.resize(width, height);*/
+    SetWindowPos(m_hwnd, HWND_TOP, x, y, w, h, 0);
 }
 
 void Win32App::ToggleFullscreen()
@@ -189,17 +247,21 @@ void Win32App::ToggleFullscreen()
 
     if (m_fullscreen)
     {
-        SetWindowLong(m_hwnd, GWL_STYLE, WindowStyle & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME));
-        ShowWindow(m_hwnd, SW_MAXIMIZE);
+        SetWindowLong(m_hwnd, GWL_STYLE, WS_OVERLAPPED);
+        ShowWindow(m_hwnd, SW_NORMAL);
     }
     else
     {
         SetWindowLong(m_hwnd, GWL_STYLE, WindowStyle);
         ShowWindow(m_hwnd, SW_NORMAL);
+
+        ChangeDisplaySettings(NULL, 0);
     }
 
-    Render::SceneManager& sm = Render::SceneManager::GetInstance();
-    //sm.setFullscreen(m_fullscreen);
+    Resize(m_displayMode);
+
+    GameLogic::Game* game = reinterpret_cast<GameLogic::Game*>(GetWindowLongPtr(m_hwnd, GWLP_USERDATA));
+    game->onSwichFullscreen(m_fullscreen);
 }
 
 void Win32App::SyncTime()
@@ -219,12 +281,6 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
                 game->onKeyPress(wParam, true);
                 UI::UiLayer::GetInstance().onKeyPress(wParam, true);
             }
-
-            /*if (wParam == VK_ESCAPE)
-            {
-                PostQuitMessage(0);
-                SetWindowLongPtr(m_hwnd, GWLP_USERDATA, NULL);
-            }*/
         break;
 
         case WM_KEYUP:
@@ -268,9 +324,6 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
                 WORD keys = GET_KEYSTATE_WPARAM(wParam);
                 short delta = GET_WHEEL_DELTA_WPARAM(wParam);
 
-                //short x = GET_X_LPARAM(lParam);
-                //short y = GET_Y_LPARAM(lParam);
-
                 game->onMouseWheel(delta);
             }
         break;
@@ -282,11 +335,11 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
         case WM_SYSKEYDOWN:
         
         // Alt+Enter
-        /*if ((wParam == VK_RETURN) && (lParam & (1 << 29)))
+        if ((wParam == VK_RETURN) && (lParam & (1 << 29)))
         {
             ToggleFullscreen();
             return 0;
-        }*/
+        }
         break;
 
         case WM_SIZE:
@@ -296,12 +349,7 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
 
             m_xcenter = windowRect.left + int(LOWORD(lParam) / 2);
             m_ycenter = windowRect.top + int(HIWORD(lParam) / 2);
-        }
-        //break;
 
-        // Detect fullscreen switch
-        case WM_WINDOWPOSCHANGED:
-        {
             RECT clientRect = {};
             GetClientRect(hwnd, &clientRect);
             if (wParam != SIZE_MINIMIZED && game)
@@ -316,21 +364,36 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
                 game->onScreenResize(width, height);
             }
 
-            RECT windowRect = {};
-            GetWindowRect(hwnd, &windowRect);
-
             m_xcenter = windowRect.left + (windowRect.right - windowRect.left) / 2;
             m_ycenter = windowRect.top + (windowRect.bottom - windowRect.top) / 2;
             SetCursorPos(m_xcenter, m_ycenter);
         }
         break;
 
-        case WM_SETFOCUS:
-            Win32App::m_focus = true;
-        break;
+        case WM_ACTIVATE:
+        {
+            m_active = LOWORD(wParam) == WA_INACTIVE ? false : true;
 
-        case WM_KILLFOCUS:
-            Win32App::m_focus = false;
+            if (m_fullscreen)
+            {
+                if (m_active)
+                {
+                    SetWindowLong(m_hwnd, GWL_STYLE, WS_OVERLAPPED);
+                    ShowWindow(m_hwnd, SW_NORMAL);
+
+                    SetDisplayMode(m_displayMode);
+                }
+                else
+                {
+                    //SetWindowLong(m_hwnd, GWL_STYLE, WindowStyle);
+                    ShowWindow(m_hwnd, SW_MINIMIZE);
+
+                    ChangeDisplaySettings(NULL, 0);
+                }
+            }
+
+            if (m_active) SyncTime();
+        }
         break;
 
         case WM_DESTROY:

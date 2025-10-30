@@ -246,6 +246,13 @@ void Widget::resize(uint16_t width, uint16_t height)
     onResize();
 }
 
+void Widget::refresh() 
+{ 
+    m_redraw = true; 
+
+    for (Widget* child : m_children) child->refresh();
+}
+
 void Widget::display()
 {
 
