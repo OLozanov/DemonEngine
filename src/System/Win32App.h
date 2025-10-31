@@ -34,12 +34,11 @@ public:
 
 private:
     static void EnumDisplayModes();
+    static void GameTick();
 
     static LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
-    static bool m_run;
-
     static HWND m_hwnd;
     static Render::SwapChain m_swapChain;
 
@@ -52,6 +51,9 @@ private:
     static bool m_active;
 
     static DWORD m_time;
+    static float m_dt;
+
+    static GameLogic::Game* m_game;
     
     static constexpr UINT WindowStyle = WS_OVERLAPPEDWINDOW;
 };

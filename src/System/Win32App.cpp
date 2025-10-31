@@ -14,8 +14,6 @@
 
 wchar_t szClassName[] = L"GameWnd";
 
-bool Win32App::m_run = true;
-
 HWND Win32App::m_hwnd;
 Render::SwapChain Win32App::m_swapChain;
 
@@ -28,6 +26,9 @@ std::vector<Win32App::DisplayMode> Win32App::m_displayModeList;
 UINT Win32App::m_displayMode = 7;
 
 DWORD Win32App::m_time = 0;
+float Win32App::m_dt = 1.0f / 60.0f;
+
+GameLogic::Game* Win32App::m_game = nullptr;
 
 int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
 {
@@ -97,73 +98,75 @@ int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
     sceneManager.init(width, height);
     uiLayer.init(width, height);
 
-    GameLogic::Game game;
-    game.onScreenResize(width, height);
+    m_game = new GameLogic::Game();
+    m_game->onScreenResize(width, height);
 
-    SetWindowLongPtr(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&game));
+    SetWindowLongPtr(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(m_game));
 
     ShowCursor(false);
 
-    game.loadSettings();
-    game.processCommandLine(lpszArgument);
+    m_game->loadSettings();
+    m_game->processCommandLine(lpszArgument);
 
     //Main loop
-    MSG message;
+    MSG message = {};
 
     m_time = timeGetTime();
 
-    float dt = 1.0 / 60.0;
-
-    while(m_run)
+    while (message.message != WM_QUIT)
     {
-        DWORD curtime = timeGetTime();
-
-        if (curtime > m_time)
+        if (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
         {
-            static constexpr float w = 1.0f / 30.0f;
-
-            float delta = (curtime - m_time) / 1000.0f;
-            dt = delta * w + dt * (1.0f - w);
-
-            m_time = curtime;
-        }
-
-        while(PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
-        {
-            if (message.message == WM_QUIT) return message.wParam;
-
             TranslateMessage(&message);
             DispatchMessage(&message);
         }
-
-        if (m_active)
-        {
-            POINT cursorPos;
-
-            GetCursorPos(&cursorPos);
-            game.onMouseMove(cursorPos.x - m_xcenter, cursorPos.y - m_ycenter);
-            SetCursorPos(m_xcenter, m_ycenter);
-
-            game.update(dt);
-            uiLayer.update(dt);
-            ResourceManager::AnimateMaps(dt);
-            Timer::UpdateTimers(dt);
-
-            sceneManager.display();
-            uiLayer.display();
-            m_swapChain.present();
-        }
     }
 
-    game.saveSettings();
+    m_game->saveSettings();
 
     return message.wParam;
+}
+
+void Win32App::GameTick()
+{
+    if (!m_active) return;
+    if (!m_game) return;
+
+    Render::SceneManager& sceneManager = Render::SceneManager::GetInstance();
+    UI::UiLayer& uiLayer = UI::UiLayer::GetInstance();
+
+    DWORD curtime = timeGetTime();
+
+    if (curtime > m_time)
+    {
+        static constexpr float w = 1.0f / 30.0f;
+
+        float delta = (curtime - m_time) / 1000.0f;
+        m_dt = delta * w + m_dt * (1.0f - w);
+
+        m_time = curtime;
+    }
+
+    POINT cursorPos;
+
+    GetCursorPos(&cursorPos);
+    m_game->onMouseMove(cursorPos.x - m_xcenter, cursorPos.y - m_ycenter);
+    SetCursorPos(m_xcenter, m_ycenter);
+
+    m_game->update(m_dt);
+    uiLayer.update(m_dt);
+    ResourceManager::AnimateMaps(m_dt);
+    Timer::UpdateTimers(m_dt);
+
+    sceneManager.display();
+    uiLayer.display();
+    m_swapChain.present();
 }
 
 void Win32App::Shutdown()
 {
     SetWindowLongPtr(m_hwnd, GWLP_USERDATA, 0);
-    m_run = false;
+    PostQuitMessage(0);
 }
 
 void Win32App::ShowMessage(const char* msg, const char * title)
@@ -260,8 +263,7 @@ void Win32App::ToggleFullscreen()
 
     Resize(m_displayMode);
 
-    GameLogic::Game* game = reinterpret_cast<GameLogic::Game*>(GetWindowLongPtr(m_hwnd, GWLP_USERDATA));
-    game->onSwichFullscreen(m_fullscreen);
+    m_game->onSwichFullscreen(m_fullscreen);
 }
 
 void Win32App::SyncTime()
@@ -394,6 +396,10 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
 
             if (m_active) SyncTime();
         }
+        break;
+
+        case WM_PAINT:
+            GameTick();
         break;
 
         case WM_DESTROY:
