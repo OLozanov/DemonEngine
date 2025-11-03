@@ -613,6 +613,8 @@ void Map::generateDisplayData()
         {
             EditPolygon& poly = leaf.polygons[p];
 
+            if (poly.flags & PolyInvisible) continue;
+
             if (poly.flags & PolySky)
             {
                 leaf.flags = 1;

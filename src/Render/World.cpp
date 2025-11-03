@@ -63,12 +63,12 @@ void World::traceObject(DisplayObject* object, Node& node, const vec3& pos, cons
     float r = fabs(axis[0] * node.plane.xyz) * bbox.x + fabs(axis[1] * node.plane.xyz) * bbox.y + fabs(axis[2] * node.plane.xyz) * bbox.z;
     float dist = pos * node.plane.xyz + node.plane.w;
 
-    if ((dist + r) >= 0)
+    if ((dist + r) > -math::eps)
     {
         if (node.right != InvalidIndex) traceObject(object, m_nodes[node.right], pos, bbox, axis);
     }
 
-    if ((dist - r) < 0)
+    if ((dist - r) < math::eps)
     {
         if (node.left != InvalidIndex) traceObject(object, m_nodes[node.left], pos, bbox, axis);
     }
@@ -86,12 +86,12 @@ void World::traceLight(Light* light, Node& node, const vec3& pos, const vec3& bb
     float r = fabs(node.plane.x) * bbox.x + fabs(node.plane.y) * bbox.y + fabs(node.plane.z) * bbox.z;
     float dist = pos * node.plane.xyz + node.plane.w;
 
-    if ((dist + r) >= 0)
+    if ((dist + r) > -math::eps)
     {
         if (node.right != InvalidIndex) traceLight(light, m_nodes[node.right], pos, bbox);
     }
 
-    if ((dist - r) < 0)
+    if ((dist - r) < math::eps)
     {
         if (node.left != InvalidIndex) traceLight(light, m_nodes[node.left], pos, bbox);
     }
@@ -112,12 +112,12 @@ void World::traceFogVolume(FogVolume* volume, Node& node, const vec3& pos, const
     float r = fabs(node.plane.x) * bbox.x + fabs(node.plane.y) * bbox.y + fabs(node.plane.z) * bbox.z;
     float dist = pos * node.plane.xyz + node.plane.w;
 
-    if ((dist + r) >= 0)
+    if ((dist + r) > -math::eps)
     {
         if (node.right != InvalidIndex) traceFogVolume(volume, m_nodes[node.right], pos, bbox);
     }
 
-    if ((dist - r) < 0)
+    if ((dist - r) < math::eps)
     {
         if (node.left != InvalidIndex) traceFogVolume(volume, m_nodes[node.left], pos, bbox);
     }

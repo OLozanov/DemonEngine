@@ -1,5 +1,5 @@
 #include "BezierSurface.h"
-#include "Block.h"
+#include "Geometry/Block.h"
 #include "Geometry/Geometry.h"
 
 BezierSurface::BezierSurface(Block* block, BlockPolygon* polygon, uint32_t xpower, uint32_t ypower, size_t xsize, size_t ysize, TextureMapping mapping)

@@ -201,8 +201,8 @@ vec3 BezierPatch::ytangent(int u, int v) const
 
 void BezierPatch::buildCollisionMesh(std::vector<vec3>& cverts, uint16_t& cresX, uint16_t& cresY) const
 {
-    cresX = m_xsize <= 5 ? 3 : m_xsize / 4;
-    cresY = m_ysize <= 5 ? 3 : m_ysize / 4;
+    cresX = m_xsize <= 5 ? m_xsize : m_xsize / 2;
+    cresY = m_ysize <= 5 ? m_ysize : m_ysize / 2;
 
     cverts.resize(cresX * cresY);
 
