@@ -129,6 +129,7 @@ private:
     LinkedList<StaticGameObject> m_staticObjects;
     LinkedList<GameObject> m_objects;
     std::vector<Trigger> m_triggers;
+    std::vector<Trigger> m_vehicleTriggers;
     std::map<std::string, GameObject*> m_activeObjects;
     std::vector<ClimbArea> m_climbAreas;
 

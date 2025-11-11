@@ -468,9 +468,11 @@ void Game::loadObjects(FILE* file)
         {
             vec3 pos;
             vec3 size;
+            bool vehicle;
 
             fread(&pos, sizeof(vec3), 1, file);
             fread(&size, sizeof(vec3), 1, file);
+            fread(&vehicle, sizeof(bool), 1, file);
 
             std::string id = {};
 
@@ -483,7 +485,8 @@ void Game::loadObjects(FILE* file)
                 fread(id.data(), sizeof(char), len, file);
             }
 
-            Trigger& trigger = m_triggers.emplace_back(size, pos);
+            Trigger& trigger = vehicle ? m_vehicleTriggers.emplace_back(size, pos) :
+                                         m_triggers.emplace_back(size, pos);
 
             trigger.OnTrigger.bind([this, id]() {
                 activateObject(id);

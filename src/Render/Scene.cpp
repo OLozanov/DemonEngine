@@ -46,6 +46,7 @@ void Scene::markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustu
                     switch (block.type)
                     {
                     case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
+                    case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
                     case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
                     case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
                     case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
@@ -324,6 +325,7 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
                         switch (block.type)
                         {
                         case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
+                        case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
                         case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
                         case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
                         }

@@ -131,8 +131,8 @@ void Vehicle::input(int key, bool keyDown)
 
     if (m_moveForward)
     {
-        m_suspension[0]->setMotor(20.0f);
-        m_suspension[1]->setMotor(20.0f);
+        m_suspension[0]->setMotor(30.0f);
+        m_suspension[1]->setMotor(30.0f);
     }
     else if (m_moveBack)
     {

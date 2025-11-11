@@ -448,6 +448,21 @@ bool PhysicsManager::traceRay(const vec3 & origin,
                               float maxdist)
 {
     bool intersect = false;
+    bool testBBox = false;
+
+    vec3 bbox = {};
+    vec3 bpos = {};
+
+    if (maxdist < std::numeric_limits<float>::infinity())
+    {
+        testBBox = true;
+
+        bbox.x = fabs(ray.x) * maxdist * 0.5f;
+        bbox.y = fabs(ray.y) * maxdist * 0.5f;
+        bbox.z = fabs(ray.z) * maxdist * 0.5f;
+
+        bpos = origin + ray * maxdist * 0.5f;
+    }
 
     traceInfo.dist = std::numeric_limits<float>::infinity();
     traceInfo.object = nullptr;
@@ -455,6 +470,16 @@ bool PhysicsManager::traceRay(const vec3 & origin,
     for(StationaryBody * body : m_stationaryBodies)
     {
         if(!(body->m_layers & mask)) continue;
+
+        if (testBBox)
+        {
+            vec3 staticPos = (body->m_bbox.min + body->m_bbox.max) * 0.5;
+            vec3 staticBBox = body->m_bbox.max - staticPos;
+
+            staticPos += body->m_collisionShape->pos();
+
+            if (!AABBTest(bpos, bbox, staticPos, staticBBox)) continue;
+        }
 
         Collision::TraceRayInfo tinfo;
 

@@ -1017,8 +1017,11 @@ EditPolygon* Block::pickPolygon(const vec3& origin, const vec3& ray, float& dist
 
     for (EditPolygon& poly : m_editPolygons)
     {
-        if (m_type != BlockType::Subtruct && poly.status == VolumeStatus::Inside) continue;
-        if (m_type == BlockType::Subtruct && poly.status == VolumeStatus::Outside) continue;
+        if (!poly.origin->surface)
+        {
+            if (m_type != BlockType::Subtruct && poly.status == VolumeStatus::Inside) continue;
+            if (m_type == BlockType::Subtruct && poly.status == VolumeStatus::Outside) continue;
+        }
     
         float pdist;
 

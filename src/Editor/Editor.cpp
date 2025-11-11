@@ -2330,6 +2330,9 @@ void Editor::rotateSurfacesX(const vec3& newpt)
     float Cos = cos(rot);
     float Sin = -sin(rot);
 
+    if (fabs(Cos) < math::eps) Cos = 0.0f;
+    if (fabs(Sin) < math::eps) Sin = 0.0f;
+
     const vec3& center = m_pickedSurface->pos();
 
     for (Surface* surface : m_selectedSurfaces)
@@ -2355,6 +2358,9 @@ void Editor::rotateSurfacesY(const vec3& newpt)
     float Cos = cos(rot);
     float Sin = -sin(rot);
 
+    if (fabs(Cos) < math::eps) Cos = 0.0f;
+    if (fabs(Sin) < math::eps) Sin = 0.0f;
+
     const vec3& center = m_pickedSurface->pos();
 
     for (Surface* surface : m_selectedSurfaces)
@@ -2379,6 +2385,9 @@ void Editor::rotateSurfacesZ(const vec3& newpt)
 
     float Cos = cos(rot);
     float Sin = -sin(rot);
+
+    if (fabs(Cos) < math::eps) Cos = 0.0f;
+    if (fabs(Sin) < math::eps) Sin = 0.0f;
 
     const vec3& center = m_pickedSurface->pos();
 

@@ -155,11 +155,14 @@ Object* ObjectFactory::CreateTrigger(FILE* file)
 {
     vec3 pos;
     vec3 size;
+    bool vehicle;
+
     uint16_t len;
     std::string id;
 
     fread(&pos, sizeof(vec3), 1, file);
     fread(&size, sizeof(vec3), 1, file);
+    fread(&vehicle, sizeof(bool), 1, file);
 
     fread(&len, sizeof(uint16_t), 1, file);
 
@@ -169,7 +172,7 @@ Object* ObjectFactory::CreateTrigger(FILE* file)
         fread(id.data(), sizeof(char), len, file);
     }
 
-    Trigger* trigger = new Trigger(pos, size, id);
+    Trigger* trigger = new Trigger(pos, size, vehicle, id);
 
     return trigger;
 }

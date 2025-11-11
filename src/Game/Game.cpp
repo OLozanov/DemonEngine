@@ -329,6 +329,7 @@ void Game::resetMap()
     m_staticObjects.destroy();
     m_objects.destroy();
     m_triggers.clear();
+    m_vehicleTriggers.clear();
     m_activeObjects.clear();
     m_climbAreas.clear();
 
@@ -461,7 +462,12 @@ void Game::update(float dt)
         m_physicsManager.run(dt);
 
         for (GameObject* object : m_objects) object->update(dt);
-        for (Trigger& trigger : m_triggers) trigger.test(m_player.pos(), m_player.bbox());
+
+        if (m_vehicle)
+            for (Trigger& trigger : m_vehicleTriggers) trigger.test(m_vehicle->location(), m_vehicle->boundingBox());
+        else
+            for (Trigger& trigger : m_triggers) trigger.test(m_player.pos(), m_player.bbox());
+
         Pickable::TestObjects(m_player.pos(), m_player.bbox());
 
         if (!m_player.isClimbing() && m_player.isWalking())
