@@ -473,7 +473,145 @@ bool BoxCollisionShape::traceBBox(TraceInfo& tinfo, const vec3& bbox, const vec3
 
 bool BoxCollisionShape::testHeight(const vec3& pos, const vec3& bbox, float& height, float& tilt) const
 {
-    return false;
+    height = -std::numeric_limits<float>::infinity();
+
+    // Test bbox faces
+    for (size_t i = 0; i < 3; i++)
+    {
+        float dist = fabs(pos[i] - m_pos[i]);
+
+        float r = bbox[i] + m_dimensions[0] * fabs(m_orientation[0][i]) +
+                            m_dimensions[1] * fabs(m_orientation[1][i]) +
+                            m_dimensions[2] * fabs(m_orientation[2][i]);
+
+        if (dist > r + 0.01f) return false;
+    }
+
+    vec3 boxpos[4] = { {pos.x - bbox.x, 0.0f, pos.z - bbox.z},
+                       {pos.x + bbox.x, 0.0f, pos.z - bbox.z},
+                       {pos.x - bbox.x, 0.0f, pos.z + bbox.z},
+                       {pos.x + bbox.x, 0.0f, pos.z + bbox.z} };
+
+    size_t face = 3;
+
+    // Find upward face
+    for (size_t i = 0; i < 3; i++)
+    {
+        if (fabs(m_orientation[i].y) < 0.5f) continue;
+
+        face = i;
+    }
+
+    if (face > 2) return false;
+
+    size_t l, m;
+
+    switch (face)
+    {
+    case 0: l = 1; m = 2; break;
+    case 1: l = 0; m = 2; break;
+    case 2: l = 0; m = 1; break;
+    }
+
+    // Test bbox against collision shape
+    vec3 norm = m_orientation[face].y > 0.0f ? m_orientation[face] : -m_orientation[face];
+    float d = -(norm * m_pos + m_dimensions[face]);
+
+    // Test collision shape edges
+    vec3 fverts[4] = { {m_pos - m_orientation[l] * m_dimensions[l] + m_orientation[m] * m_dimensions[m] + norm * m_dimensions[face]},
+                       {m_pos + m_orientation[l] * m_dimensions[l] + m_orientation[m] * m_dimensions[m] + norm * m_dimensions[face]},
+                       {m_pos + m_orientation[l] * m_dimensions[l] - m_orientation[m] * m_dimensions[m] + norm * m_dimensions[face]},
+                       {m_pos - m_orientation[l] * m_dimensions[l] - m_orientation[m] * m_dimensions[m] + norm * m_dimensions[face]} };
+
+    bool binside[4] = { true, true, true, true };
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        if ((fabs(fverts[i].x - pos.x) < bbox.x) &&
+             fabs(fverts[i].z - pos.z) < bbox.z)
+        {
+            if (fverts[i].y > height) height = fverts[i].y;
+        }
+
+        size_t k = (i == 3) ? k = 0 : k = i + 1;
+
+        vec3 edge = fverts[k] - fverts[i];
+        float elength = edge.normalize();
+
+        static constexpr vec3 updir = { 0.0f, 1.0f, 0.0f };
+
+        vec3 sdir = edge ^ updir;
+        float d = -fverts[i] * sdir;
+
+        float r = bbox.x * fabs(sdir.x) + bbox.y * fabs(sdir.y) + bbox.z * fabs(sdir.z);
+        float dist = sdir * pos + d;
+
+        for (int l = 0; l < 4; l++)
+        {
+            float dist = sdir * boxpos[l] + d;
+            if (dist > 0) binside[l] = false;
+        }
+
+        if (dist > r) return false;
+        if (dist < -r) continue;
+
+        if (fabs(edge.x) > math::eps)
+        {
+            float x1 = pos.x + bbox.x - fverts[i].x;
+            float x2 = pos.x - bbox.x - fverts[i].x;
+
+            float y1 = fverts[i].x < fverts[k].x ? fverts[i].y : fverts[k].y;
+            float y2 = fverts[i].x < fverts[k].x ? fverts[k].y : fverts[i].y;
+
+            float x = y1 < y2 ? x1 : x2;
+
+            float len = x / edge.x;
+            float z = fverts[i].z + len * edge.z;
+
+            if ((len > 0 && len < elength) &&
+                (z >= pos.z - bbox.z && z <= pos.z + bbox.z))
+            {
+                float hdist = fverts[i].y + len * edge.y;
+                if (hdist > height) height = hdist;
+            }
+        }
+
+        if (fabs(edge.z) > math::eps)
+        {
+            float z1 = pos.z + bbox.z - fverts[i].z;
+            float z2 = pos.z - bbox.z - fverts[i].z;
+
+            float y1 = fverts[i].z < fverts[k].z ? fverts[i].y : fverts[k].y;
+            float y2 = fverts[i].z < fverts[k].z ? fverts[k].y : fverts[i].y;
+
+            float z = y1 < y2 ? z1 : z2;
+
+            float len = z / edge.z;
+            float x = fverts[i].x + len * edge.x;
+
+            if ((len > 0 && len < elength) &&
+                (x >= pos.x - bbox.x && x <= pos.x + bbox.x))
+            {
+                float hdist = fverts[i].y + len * edge.y;
+                if (hdist > height) height = hdist;
+            }
+        }
+    }
+
+    // Test bbox corners
+    for (size_t i = 0; i < 4; i++)
+    {
+        if (!binside[i]) continue;
+
+        float dist = norm * boxpos[i] + d;
+        float hdist = -dist / norm.y;
+
+        if (hdist > height) height = hdist;
+    }
+
+    tilt = fabs(m_orientation[face].y);
+
+    return true;
 }
 
 } //namespace Collision

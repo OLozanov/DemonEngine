@@ -323,8 +323,8 @@ bool PolygonalCollisionShape::testPolygon(ContactInfo & cinfo,
 {
     //Test polygon plane
     float r = bbox.x*fabs(polygon.plane.xyz*axis[0]) +
-            bbox.y*fabs(polygon.plane.xyz*axis[1]) +
-            bbox.z*fabs(polygon.plane.xyz*axis[2]);
+              bbox.y*fabs(polygon.plane.xyz*axis[1]) +
+              bbox.z*fabs(polygon.plane.xyz*axis[2]);
 
     float dist = polygon.plane.xyz*pos + polygon.plane.w;
 
@@ -979,7 +979,7 @@ bool PolygonalCollisionShape::testPolyHeight(const CollisionPolygon& poly,
 
     const std::vector<vec3>& verts = poly.verts;
 
-    // heighst vert
+    // heighest vert
     int vmax = 0;
 
     for (int i = 1; i < verts.size(); i++)
@@ -1020,14 +1020,6 @@ bool PolygonalCollisionShape::testPolyHeight(const CollisionPolygon& poly,
         if (dist > r) return false;
 
         if (dist < -r) continue;
-
-        bool etouch = false;
-
-        const vec3& pnorm = poly.plane.xyz;
-
-        vec3 tang = sdir - pnorm * (sdir * pnorm);
-        vec3 xtang = vec3(1.0f, 0.0f, 0.0f) - pnorm * pnorm.x;
-        vec3 ztang = vec3(0.0f, 0.0f, 1.0f) - pnorm * pnorm.z;
 
         if (fabs(edge.x) > math::eps)
         {
