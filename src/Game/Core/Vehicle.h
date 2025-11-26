@@ -10,6 +10,22 @@
 namespace GameLogic
 {
 
+struct VehicleParams
+{
+    vec3 viewPoint;
+    float motorPower;
+    float rearMotorPower;
+    float mass;
+    float wheelRadius;
+    float wheelFriction;
+    float rollResistance;
+    float suspensionLength;
+    float suspensionStiffness;
+    float suspensionDamping;
+    size_t numWheels;
+    const vec3* wheelPos;
+};
+
 class DragForceGenerator : public Physics::ForceGenerator
 {
 public:
@@ -36,12 +52,15 @@ public:
     using OnMountEvent = Event<void(Vehicle*)>;
 
 public:
-    Vehicle(const vec3& pos, const mat3& orientation, float mass, Model* model, Model* wheelModel);
+    Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel);
     ~Vehicle();
+
+    const vec3& viewPoint() { return m_viewPoint; }
 
     void onCollide(const vec3& normal, float impulse) override;
 
     void use() override;
+    void dismount();
 
     void input(int key, bool keyDown);
     void update(float dt) override;
@@ -49,9 +68,17 @@ public:
     OnMountEvent OnMount;
 
 protected:
-    void setupWheels(Model* wheelModel);
+    void setupWheels(const VehicleParams& params, Model* wheelModel);
 
 private:
+    vec3 m_viewPoint;
+
+    float m_motor;
+    float m_rearMotor;
+
+    vec3 m_bboxDiff;
+    vec3 m_bboxCenter;  // Collision shape center;
+
     DragForceGenerator m_dragForce;
 
     float m_wheelRadius;

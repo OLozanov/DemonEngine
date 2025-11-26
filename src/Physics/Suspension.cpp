@@ -18,6 +18,7 @@ Suspension::Suspension(RigidBody* body, const vec3& point, unsigned long layers,
 , m_damping(damping)
 , m_motor(0.0f)
 , m_steering(0.0f)
+, m_handbrake(true)
 {
     for (size_t i = 0; i < m_jacobian.size(); i++)
     {
@@ -84,7 +85,9 @@ void Suspension::evaluate()
 
         m_wheelSpeed = (m_bodyA->velocity() * fwdvec) / m_wheelRadius;
 
-        m_friction[1] = m_wheelFriction * m_bodyA->mass() * 0.25f * 9.8f; //m_wheelFriction * fabs(impulse)
+        float friction = m_wheelFriction * m_bodyA->mass() * 0.25f * 9.8f; //m_wheelFriction * fabs(impulse)
+
+        m_friction[1] = friction;
         m_jacobian[1] = { sidevec, contactPoint ^ sidevec, {}, {} };
 
         if (fabs(m_motor) > math::eps)
@@ -95,10 +98,18 @@ void Suspension::evaluate()
             m_lowerBound[2] = -fabs(m_motor * 0.1f);
             m_upperBound[2] = fabs(m_motor * 0.1f);
         }
+        else if (m_handbrake)
+        {
+            m_error[2] = 0.0f;
+            m_friction[2] = friction;
+
+            m_lowerBound[2] = -std::numeric_limits<float>::infinity();
+            m_upperBound[2] = std::numeric_limits<float>::infinity();
+        }
         else
         {
             m_error[2] = 0.0f;
-            m_friction[2] = m_rollResistance;// *m_bodyA->mass() * 0.25f;
+            m_friction[2] = m_rollResistance;
         
             m_lowerBound[2] = -std::numeric_limits<float>::infinity();
             m_upperBound[2] = std::numeric_limits<float>::infinity();

@@ -77,10 +77,10 @@ class Animated 20
     'play': bool = true
 }
 
-class TestVehicle 200
+class Jeep 200
 {
     category = 'vehicles'
-    mesh = 'Vehicles/test_vehicle.msh'
+    mesh = 'Vehicles/jeep.msh'
 }
 
 class SteamEmitter 30

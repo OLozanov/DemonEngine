@@ -13,6 +13,8 @@ public:
                float wheelRadius, float wheelFriction = 0.8f, float rollResistance = 0.1f,
                float length = 0.08f, float stiffness = 50.0f, float damping = 15.0f);
 
+    void setHandbrake(bool brake) { m_handbrake = brake; }
+
     void setSteering(float ang) { m_steering = ang; }
     void setMotor(float motor) { m_motor = motor; }
 
@@ -38,6 +40,8 @@ private:
 
     float m_motor;
     float m_steering;
+
+    bool m_handbrake;
 
     float m_wheelSpeed;
     float m_dist;

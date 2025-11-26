@@ -596,7 +596,7 @@ void Game::setVehicleCamera()
     if (m_cameraMode == CameraMode::FirstPerson)
     {
         m_firstPersonCamera.setObject(m_vehicle);
-        m_firstPersonCamera.setViewOffset({ -0.3f, 0.3f, 0.3f });
+        m_firstPersonCamera.setViewOffset(m_vehicle->viewPoint());
         m_cameraController = &m_firstPersonCamera;
     }
     else
@@ -621,6 +621,7 @@ void Game::dismountVehicle()
 
     m_player.moveTo(m_vehicle->location() + m_vehicle->orientation() * vec3(-1.2f, 0.3f, 0.3f));
 
+    m_vehicle->dismount();
     m_vehicle = nullptr;
 
     m_objects.append(&m_player);

@@ -30,6 +30,24 @@
 namespace GameLogic
 {
 
+const vec3 JeepWheels[] = { vec3{-0.68f, -0.05f, -0.938f},
+                            vec3{0.68f, -0.05f, -0.938f},
+                            vec3{0.68f, -0.05f, 0.938f},
+                            vec3{-0.68f, -0.05f, 0.938f} };
+
+const VehicleParams JeepParams = { {-0.35f, 0.7f, 0.0f},      // viewPoint
+                                   50.0f,                     // motorPower
+                                   30.0f,                     // rearMotorPower
+                                   500.0f,                    // mass
+                                   0.33f,                     // wheelRadius
+                                   0.8f,                      // wheelFriction
+                                   0.1f,                      // rollResistance
+                                   0.08f,                     // suspensionLength
+                                   50.0f,                     // suspensionStiffness
+                                   15.0f,                     // suspensionDamping
+                                   _countof(JeepWheels),      // numWheels
+                                   JeepWheels };              // wheelPos
+
 void readString(std::string& str, FILE* file)
 {
     uint16_t len;
@@ -721,7 +739,9 @@ void Game::loadEntities(FILE* file)
 
         if (eclass == EntityClass::Vehicle)
         {
-            Vehicle* vehicle = new Vehicle(pos, mat, 500, ResourceManager::GetModel("Vehicles/test_vehicle.msh"), ResourceManager::GetModel("Vehicles/test_wheel.msh"));
+            Vehicle* vehicle = new Vehicle(pos, mat, JeepParams, 
+                                           ResourceManager::GetModel("Vehicles/jeep.msh"), 
+                                           ResourceManager::GetModel("Vehicles/wheel01.msh"));
 
             vehicle->OnMount.bind(this, &Game::mountVehicle);
 

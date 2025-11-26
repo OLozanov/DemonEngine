@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Vehicles/tire01.dds'
+	normal = 'Vehicles/tire01_n.dds'
+	
+	roughness = 0.5
+}

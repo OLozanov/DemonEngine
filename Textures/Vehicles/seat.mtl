@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Vehicles/seat.dds'
+	normal = 'Vehicles/seat_n.dds'
+	
+	roughness = 0.5
+}

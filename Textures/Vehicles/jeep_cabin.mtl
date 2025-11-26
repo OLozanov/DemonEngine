@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Vehicles/jeep_cabin.dds'
+	normal = 'Vehicles/jeep_cabin_n.dds'
+	
+	roughness = 0.5
+}

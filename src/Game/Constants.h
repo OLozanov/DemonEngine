@@ -9,8 +9,9 @@ enum CollisionLayer
 	collision_entity = 16,
 	collision_debris = 32,
 	collision_character = 64,
+	collision_raycast = 128,
 
-	collision_map = collision_solid | collision_actor | collision_hitable | collision_debris
+	collision_map = collision_solid | collision_actor | collision_hitable | collision_debris | collision_raycast
 };
 
 enum GameMaterial
