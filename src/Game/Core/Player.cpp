@@ -262,6 +262,15 @@ void Player::input(int key, bool keyDown)
     //updateForce();
 }
 
+void Player::resetInput()
+{
+    m_moveForward = false;
+    m_moveBack = false;
+    m_moveLeft = false;
+    m_moveRight = false;
+    m_crouch = false;
+}
+
 void Player::update(float dt)
 {
     if (isDead()) return;

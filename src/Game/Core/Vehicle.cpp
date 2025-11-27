@@ -19,6 +19,8 @@ DragForceGenerator::DragForceGenerator(float dragFactor)
 
 void DragForceGenerator::update(Physics::RigidBody& body, float dt)
 {
+    if (body.isAtRest()) return;
+
     const vec3& velocity = body.velocity();
     float drag = velocity * velocity * m_dragFactor;
 
@@ -46,14 +48,16 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
     const auto& collisionData = m_model->collisionData();
 
     vec3 bbox = (StaticObject::m_bbox.max - StaticObject::m_bbox.min) * 0.5f;
-    m_bboxDiff = (StaticObject::m_bbox.max + StaticObject::m_bbox.min) * 0.5f;
+    vec3 boxcenter = (StaticObject::m_bbox.max + StaticObject::m_bbox.min) * 0.5f;
 
-    m_bboxCenter = m_pos + m_orientation * m_bboxDiff;
+    m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, bbox, boxcenter);
+    m_layers = collision_solid | collision_pickable;
 
-    if (!collisionData.empty()) m_collisionShape = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
-    else m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_bboxCenter, bbox);
+    if (!collisionData.empty()) m_staticCollision = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
+    else m_staticCollision = new Collision::BoxCollisionShape(m_orientation, m_pos, bbox, boxcenter);
 
-    m_layers = collision_solid | collision_actor | collision_pickable;
+    m_staticBody.setCollision(m_staticCollision, { -RigidBody::m_bbox, RigidBody::m_bbox }, collision_actor | collision_hitable);
+    Physics::PhysicsManager::GetInstance().addStationaryBody(&m_staticBody);
 
     vec3 inertiaTensor = Physics::BoxInertiaTensor(StaticObject::m_bbox.max - StaticObject::m_bbox.min, m_mass);
     setInertia(inertiaTensor);
@@ -107,6 +111,8 @@ void Vehicle::setupWheels(const VehicleParams& params, Model* wheelModel)
     }
 
     m_wheelParams.resize(m_wheelPos.size());
+
+    m_fwdWheel = params.numWheels - 2;
 }
 
 void Vehicle::onCollide(const vec3& normal, float impulse)
@@ -123,6 +129,11 @@ void Vehicle::use()
 
 void Vehicle::dismount()
 {
+    m_moveForward = false;
+    m_moveBack = false;
+    m_moveLeft = false;
+    m_moveRight = false;
+
     for (const auto& suspension : m_suspension) suspension->setHandbrake(true);
 }
 
@@ -195,15 +206,11 @@ void Vehicle::update(float dt)
         }
     }
 
-    m_suspension[2]->setSteering(m_steering);
-    m_suspension[3]->setSteering(m_steering);
-
-    //if (m_rest) return;
+    m_suspension[m_fwdWheel]->setSteering(m_steering);
+    m_suspension[m_fwdWheel+1]->setSteering(m_steering);
 
     DisplayObject::m_mat = transformMat();
     Render::SceneManager::GetInstance().moveObject(static_cast<StaticObject*>(this));
-
-    m_bboxCenter = m_pos + m_orientation * m_bboxDiff;
 
     for (size_t i = 0; i < m_suspension.size(); i++)
     {
@@ -212,7 +219,7 @@ void Vehicle::update(float dt)
         m_wheelParams[i].ang += m_wheelParams[i].dang * dt;
         m_wheelParams[i].ang = std::remainderf(m_wheelParams[i].ang, math::pi2);
 
-        if (fabs(m_wheelParams[i].dang) < math::eps) m_wheelParams[i].dang = 0.0f;
+        if (fabs(m_wheelParams[i].dang) < 0.1f) m_wheelParams[i].dang = 0.0f;
 
         const mat3& orientation = m_suspension[i]->orientation();
         mat3 wheelRot = orientation * mat3::RotateX(m_wheelParams[i].ang);

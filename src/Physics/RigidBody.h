@@ -18,7 +18,7 @@ class RigidBody : public ListNode<RigidBody>
 protected:
     static constexpr float ReferenceFrameTime = 0.025;
 
-    static constexpr float LinearSpeedEps = 0.018f;
+    static constexpr float LinearSpeedEps = 0.035f; //0.018f;
     static constexpr float AngularSpeedEps = 0.035f;
 
     bool m_rest;

@@ -198,13 +198,13 @@ bool BBoxVsBBox(ContactInfo& cinfo,
 
 bool BoxCollisionShape::testCollision(const BoxCollisionShape * shape, ContactInfo& contactInfo) const
 {
-    return BBoxVsBBox(contactInfo, shape->m_pos, shape->m_orientation, shape->m_dimensions,
-                        m_pos, m_orientation, m_dimensions);
+    return BBoxVsBBox(contactInfo, shape->boxpos(), shape->m_orientation, shape->m_dimensions,
+                      boxpos(), m_orientation, m_dimensions);
 }
 
 bool BoxCollisionShape::testCollision(const PolygonalCollisionShape * shape, ContactInfo& contactInfo) const
 {
-    bool result = shape->testBBox(contactInfo, m_pos, m_orientation, m_dimensions);
+    bool result = shape->testBBox(contactInfo, boxpos(), m_orientation, m_dimensions);
 
     contactInfo.norm = -contactInfo.norm;
 
@@ -213,7 +213,7 @@ bool BoxCollisionShape::testCollision(const PolygonalCollisionShape * shape, Con
 
 bool BoxCollisionShape::testCollision(const CapsuleCollisionShape * shape, ContactInfo& contactInfo) const
 {
-    vec3 relpos = (shape->pos() - m_pos)*m_orientation;
+    vec3 relpos = (shape->pos() - boxpos())*m_orientation;
 
     for(int i = 0; i < 3; i++)
     {

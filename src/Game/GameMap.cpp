@@ -40,7 +40,7 @@ const VehicleParams JeepParams = { {-0.35f, 0.7f, 0.0f},      // viewPoint
                                    30.0f,                     // rearMotorPower
                                    500.0f,                    // mass
                                    0.33f,                     // wheelRadius
-                                   0.8f,                      // wheelFriction
+                                   0.9f,                      // wheelFriction
                                    0.1f,                      // rollResistance
                                    0.08f,                     // suspensionLength
                                    50.0f,                     // suspensionStiffness

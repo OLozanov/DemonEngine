@@ -8,11 +8,20 @@ namespace Collision
 class BoxCollisionShape : public CollisionShape
 {
     vec3 m_dimensions;
+    vec3 m_center;
 
 public:
     BoxCollisionShape(const mat3& orientation, const vec3& pos, const vec3& dimensions)
     : CollisionShape(orientation, pos)
     , m_dimensions(dimensions)
+    , m_center(0)
+    {
+    }
+
+    BoxCollisionShape(const mat3& orientation, const vec3& pos, const vec3& dimensions, const vec3& center)
+    : CollisionShape(orientation, pos)
+    , m_dimensions(dimensions)
+    , m_center(center)
     {
     }
 
@@ -22,6 +31,11 @@ public:
 
     void setDimensions(const vec3& dim) { m_dimensions = dim; }
     const vec3& getDimensions() const { return m_dimensions; }
+
+    void setCenter(const vec3& center) { m_center = center; }
+    const vec3& center() const { return m_center; }
+
+    vec3 boxpos() const { return m_pos + m_orientation * m_center; }
 
     bool testCollision(const BoxCollisionShape * shape, ContactInfo& contactInfo) const override;
     bool testCollision(const PolygonalCollisionShape * shape, ContactInfo& contactInfo) const override;

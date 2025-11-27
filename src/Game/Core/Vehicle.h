@@ -76,9 +76,6 @@ private:
     float m_motor;
     float m_rearMotor;
 
-    vec3 m_bboxDiff;
-    vec3 m_bboxCenter;  // Collision shape center;
-
     DragForceGenerator m_dragForce;
 
     float m_wheelRadius;
@@ -88,6 +85,8 @@ private:
     bool m_moveLeft = false;
     bool m_moveRight = false;
 
+    size_t m_fwdWheel;
+
     float m_steering;
     float m_steerVelocity;
 
@@ -95,6 +94,9 @@ private:
     std::vector<WheelParams> m_wheelParams;
     std::vector<Physics::Suspension*> m_suspension;
     std::vector<Render::StaticObject*> m_wheels;
+
+    Collision::CollisionShape* m_staticCollision;
+    Physics::StationaryBody m_staticBody;  // for player collsion
 };
 
 } // namespace GameLogic

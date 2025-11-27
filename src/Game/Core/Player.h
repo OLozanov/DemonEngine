@@ -88,6 +88,8 @@ public:
     float headDist() const { return m_headDist; }
 
     void input(int key, bool keyDown);
+    void resetInput();
+
     void update(float dt);
 };
 

@@ -47,6 +47,8 @@ private:
     float m_dist;
 
     mat3 m_orientation;
+
+    static constexpr float RestThreshold = 0.025f; // 0.012f is enough on level surface
 };
 
 } //namespace Physics

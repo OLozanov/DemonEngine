@@ -43,13 +43,23 @@ void Suspension::evaluate()
     vec3 fwdvec = xaxis * stcos + yaxis * stsin;
     vec3 sidevec = -xaxis * stsin + yaxis * stcos;
 
+    m_orientation[0] = sidevec;
+    m_orientation[1] = m_bodyA->orientation()[1];
+    m_orientation[2] = fwdvec;
+
     Collision::TraceRayInfo traceInfo;
 
-    if (physics.traceRay(point + m_bodyA->location(), dir, m_layers, traceInfo, m_wheelRadius + m_length))
-    {
-        float err = m_wheelRadius + m_length - traceInfo.dist;
-        float stiffness = 1.0f;
+    bool result = physics.traceRay(point + m_bodyA->location(), dir, m_layers, traceInfo, m_wheelRadius + m_length);
+    
+    float err = m_wheelRadius + m_length - traceInfo.dist;
 
+    if (result && m_motor == 0.0f)
+    {
+        if (m_bodyA->isAtRest() && err < 0.025f) result = false;
+    }
+    
+    if (result)
+    {
         m_dist = std::max(0.0f, traceInfo.dist - m_wheelRadius);
         vec3 contactPoint = point + dir * m_dist;
 
@@ -128,10 +138,6 @@ void Suspension::evaluate()
         m_friction[1] = 0.0f;
         m_friction[2] = 0.0f;
     }
-
-    m_orientation[0] = sidevec;
-    m_orientation[1] = m_bodyA->orientation()[1];
-    m_orientation[2] = fwdvec;
 }
 
 } //namespace Physics

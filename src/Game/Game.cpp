@@ -317,8 +317,17 @@ void Game::resetMap()
 {
     m_player.resetClimbArea();
 
-    m_objects.remove(&m_player);
-    m_physicsManager.removeRigidBody(&m_player);
+    if (m_vehicle)
+    {
+        m_vehicle = nullptr;
+        m_cameraController = &m_playerCamera;
+        equipWeapon(m_pistols);
+    }
+    else
+    {
+        m_objects.remove(&m_player);
+        m_physicsManager.removeRigidBody(&m_player);
+    }
 
     Hitable::ClearObjects();
     Pickable::ClearObjects();
@@ -608,7 +617,11 @@ void Game::setVehicleCamera()
 
 void Game::mountVehicle(Vehicle* vehicle)
 {
+    m_player.resetInput();
+
     m_objects.remove(&m_player);
+    m_physicsManager.removeRigidBody(&m_player);
+
     m_vehicle = vehicle;
 
     setVehicleCamera();
@@ -617,7 +630,7 @@ void Game::mountVehicle(Vehicle* vehicle)
 
 void Game::dismountVehicle()
 {
-    if (m_vehicle->velocity().length() > 0.2f) return;
+    if (m_vehicle->velocity().length() > 5.0f) return;
 
     m_player.moveTo(m_vehicle->location() + m_vehicle->orientation() * vec3(-1.2f, 0.3f, 0.3f));
 
@@ -625,6 +638,7 @@ void Game::dismountVehicle()
     m_vehicle = nullptr;
 
     m_objects.append(&m_player);
+    m_physicsManager.addRigidBody(&m_player);
     m_cameraController = &m_playerCamera;
 
     m_playerCamera.setAngles(m_firstPersonCamera.verticalAngle(), m_firstPersonCamera.horizontalAngle());

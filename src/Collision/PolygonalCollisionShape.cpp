@@ -321,6 +321,8 @@ bool PolygonalCollisionShape::testPolygon(ContactInfo & cinfo,
                                         const CollisionPolygon& polygon,
                                         const vec3 & pos, const mat3& axis, const vec3 & bbox)
 {
+    if (polygon.verts.empty()) return false;
+
     //Test polygon plane
     float r = bbox.x*fabs(polygon.plane.xyz*axis[0]) +
               bbox.y*fabs(polygon.plane.xyz*axis[1]) +
@@ -641,7 +643,7 @@ bool PolygonalCollisionShape::testCapsule(ContactInfo& cinfo, const CapsuleColli
 
 bool PolygonalCollisionShape::testCollision(const BoxCollisionShape * shape, ContactInfo& contactInfo) const
 {
-    return testBBox(contactInfo, shape->pos(), shape->orientation(), shape->getDimensions());
+    return testBBox(contactInfo, shape->boxpos(), shape->orientation(), shape->getDimensions());
 }
 
 bool PolygonalCollisionShape::testCollision(const PolygonalCollisionShape * shape, ContactInfo& contactInfo) const
