@@ -323,7 +323,6 @@ LayeredSurface::LayeredSurface(const vec3& pos,
     }
 }
 
-
 void Surface::calculateBBox(const std::vector<Vertex>& vertices)
 {
     m_bbox.min = vertices[0].position;

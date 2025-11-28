@@ -330,6 +330,10 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
                         case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
                         }
                     }
+
+                    if (obj->instanceData().empty()) continue;
+
+                    for (const InstanceData& data : obj->instanceData()) m_instancedList.push_back(&data);
                 }
             }
         }

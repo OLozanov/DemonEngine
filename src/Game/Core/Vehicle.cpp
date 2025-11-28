@@ -32,7 +32,7 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
 , StaticObject(pos, orientation, model, true)
 , m_viewPoint(params.viewPoint)
 , m_motor(params.motorPower)
-, m_rearMotor(-params.rearMotorPower)
+, m_reverseMotor(-params.reverseMotorPower)
 , m_dragForce(15.0f)
 , m_steering(0.0f)
 {
@@ -131,8 +131,8 @@ void Vehicle::dismount()
 {
     m_moveForward = false;
     m_moveBack = false;
-    m_moveLeft = false;
-    m_moveRight = false;
+    m_turnLeft = false;
+    m_turnRight = false;
 
     for (const auto& suspension : m_suspension) suspension->setHandbrake(true);
 }
@@ -152,11 +152,11 @@ void Vehicle::input(int key, bool keyDown)
     break;
 
     case 'A':
-        m_moveLeft = keyDown;
+        m_turnLeft = keyDown;
     break;
 
     case 'D':
-        m_moveRight = keyDown;
+        m_turnRight = keyDown;
     break;
     }
 
@@ -167,8 +167,8 @@ void Vehicle::input(int key, bool keyDown)
     }
     else if (m_moveBack)
     {
-        m_suspension[0]->setMotor(m_rearMotor);
-        m_suspension[1]->setMotor(m_rearMotor);
+        m_suspension[0]->setMotor(m_reverseMotor);
+        m_suspension[1]->setMotor(m_reverseMotor);
     }
     else
     {
@@ -182,12 +182,12 @@ void Vehicle::update(float dt)
     static constexpr float steerang = 15.0f / 180.0f * math::pi;
     static constexpr float steervel = 30.0f / 180.0f * math::pi;
 
-    if (m_moveLeft)
+    if (m_turnLeft)
     {
         m_steering -= steervel * dt;
         m_steering = std::max(m_steering, -steerang);
     }
-    else if (m_moveRight)
+    else if (m_turnRight)
     {
         m_steering += steervel * dt;
         m_steering = std::min(m_steering, steerang);

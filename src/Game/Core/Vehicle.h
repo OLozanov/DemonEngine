@@ -14,7 +14,7 @@ struct VehicleParams
 {
     vec3 viewPoint;
     float motorPower;
-    float rearMotorPower;
+    float reverseMotorPower;
     float mass;
     float wheelRadius;
     float wheelFriction;
@@ -74,7 +74,7 @@ private:
     vec3 m_viewPoint;
 
     float m_motor;
-    float m_rearMotor;
+    float m_reverseMotor;
 
     DragForceGenerator m_dragForce;
 
@@ -82,8 +82,8 @@ private:
 
     bool m_moveForward = false;
     bool m_moveBack = false;
-    bool m_moveLeft = false;
-    bool m_moveRight = false;
+    bool m_turnLeft = false;
+    bool m_turnRight = false;
 
     size_t m_fwdWheel;
 
@@ -96,7 +96,7 @@ private:
     std::vector<Render::StaticObject*> m_wheels;
 
     Collision::CollisionShape* m_staticCollision;
-    Physics::StationaryBody m_staticBody;  // for player collsion
+    Physics::StationaryBody m_staticBody;           // for player collision
 };
 
 } // namespace GameLogic

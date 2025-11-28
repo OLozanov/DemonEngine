@@ -53,6 +53,11 @@ void Suspension::evaluate()
     
     float err = m_wheelRadius + m_length - traceInfo.dist;
 
+    if (result)
+        m_dist = std::max(0.0f, traceInfo.dist - m_wheelRadius);
+    else
+        m_dist = m_length;
+
     if (result && m_motor == 0.0f)
     {
         if (m_bodyA->isAtRest() && err < 0.025f) result = false;
@@ -60,7 +65,6 @@ void Suspension::evaluate()
     
     if (result)
     {
-        m_dist = std::max(0.0f, traceInfo.dist - m_wheelRadius);
         vec3 contactPoint = point + dir * m_dist;
 
         m_jacobian[0] = { dir, contactPoint ^ dir, {}, {} };
@@ -130,7 +134,6 @@ void Suspension::evaluate()
     else
     {
         m_wheelSpeed = 0.0f;
-        m_dist = m_length;
 
         m_error[0] = 0.0f;
         m_error[2] = 0.0f;
