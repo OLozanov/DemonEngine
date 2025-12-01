@@ -19,6 +19,7 @@ Suspension::Suspension(RigidBody* body, const vec3& point, unsigned long layers,
 , m_motor(0.0f)
 , m_steering(0.0f)
 , m_handbrake(true)
+, m_contact(false)
 {
     for (size_t i = 0; i < m_jacobian.size(); i++)
     {
@@ -49,8 +50,9 @@ void Suspension::evaluate()
 
     Collision::TraceRayInfo traceInfo;
 
-    bool result = physics.traceRay(point + m_bodyA->location(), dir, m_layers, traceInfo, m_wheelRadius + m_length);
-    
+    m_contact = physics.traceRay(point + m_bodyA->location(), dir, m_layers, traceInfo, m_wheelRadius + m_length);
+    bool result = m_contact;
+
     float err = m_wheelRadius + m_length - traceInfo.dist;
 
     if (result)

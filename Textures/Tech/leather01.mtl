@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Tech\leather01.dds'
+	normal = 'Tech\leather01_n.dds'
+    
+    roughness = 0.5
+}

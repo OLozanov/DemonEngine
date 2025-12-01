@@ -36,6 +36,8 @@ const vec3 JeepWheels[] = { vec3{-0.68f, -0.05f, -0.938f},
                             vec3{-0.68f, -0.05f, 0.938f} };
 
 const VehicleParams JeepParams = { {-0.35f, 0.7f, 0.0f},      // viewPoint
+                                   { -0.35f, 0.5f, 0.35f },   // steeringWheelPos
+                                   -45.0f,                    // steeringWheelAngle
                                    50.0f,                     // motorPower
                                    30.0f,                     // reverseMotorPower
                                    500.0f,                    // mass
@@ -741,7 +743,8 @@ void Game::loadEntities(FILE* file)
         {
             Vehicle* vehicle = new Vehicle(pos, mat, JeepParams, 
                                            ResourceManager::GetModel("Vehicles/jeep.msh"), 
-                                           ResourceManager::GetModel("Vehicles/wheel01.msh"));
+                                           ResourceManager::GetModel("Vehicles/wheel01.msh"),
+                                           ResourceManager::GetModel("Vehicles/steer_wheel.msh"));
 
             vehicle->OnMount.bind(this, &Game::mountVehicle);
 

@@ -27,10 +27,12 @@ void DragForceGenerator::update(Physics::RigidBody& body, float dt)
     body.applyForce(-velocity.normalized() * drag);
 }
 
-Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel)
+Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel, Model* steerWheelModel)
 : RigidBody(pos, params.mass, 0.35f, 0.9f)
 , StaticObject(pos, orientation, model, true)
 , m_viewPoint(params.viewPoint)
+, m_steeringWheelPos(params.steeringWheelPos)
+, m_steeringWheelAngle(params.steeringWheelAngle / 180.0f * math::pi)
 , m_motor(params.motorPower)
 , m_reverseMotor(-params.reverseMotorPower)
 , m_dragForce(15.0f)
@@ -65,6 +67,9 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
     m_object = static_cast<Usable*>(this);
 
     setupWheels(params, wheelModel);
+
+    m_steeringWheel = std::make_unique<Render::StaticObject>(m_pos + m_steeringWheelPos, mat3(), steerWheelModel);
+    Render::SceneManager::GetInstance().addObject(m_steeringWheel.get());
 }
 
 Vehicle::~Vehicle()
@@ -179,29 +184,26 @@ void Vehicle::input(int key, bool keyDown)
 
 void Vehicle::update(float dt)
 {
-    static constexpr float steerang = 15.0f / 180.0f * math::pi;
-    static constexpr float steervel = 30.0f / 180.0f * math::pi;
-
     if (m_turnLeft)
     {
-        m_steering -= steervel * dt;
-        m_steering = std::max(m_steering, -steerang);
+        m_steering -= SteerVel * dt;
+        m_steering = std::max(m_steering, -SteerAng);
     }
     else if (m_turnRight)
     {
-        m_steering += steervel * dt;
-        m_steering = std::min(m_steering, steerang);
+        m_steering += SteerVel * dt;
+        m_steering = std::min(m_steering, SteerAng);
     }
     else
     {
         if (m_steering > math::eps)
         {
-            m_steering -= steervel * dt;
+            m_steering -= SteerVel * dt;
             m_steering = std::max(m_steering, 0.0f);
         }
         else if (m_steering < -math::eps)
         {
-            m_steering += steervel * dt;
+            m_steering += SteerVel * dt;
             m_steering = std::min(m_steering, 0.0f);
         }
     }
@@ -215,7 +217,7 @@ void Vehicle::update(float dt)
     for (size_t i = 0; i < m_suspension.size(); i++)
     {
         float speed = m_suspension[i]->wheelSpeed();
-        m_wheelParams[i].dang = fabs(speed) > math::eps ? speed : m_wheelParams[i].dang * pow(0.8f, dt);
+        m_wheelParams[i].dang = m_suspension[i]->surfaceContact() ? speed : m_wheelParams[i].dang * pow(0.8f, dt);
         m_wheelParams[i].ang += m_wheelParams[i].dang * dt;
         m_wheelParams[i].ang = std::remainderf(m_wheelParams[i].ang, math::pi2);
 
@@ -232,6 +234,11 @@ void Vehicle::update(float dt)
         m_wheels[i]->setMat(transform);
         Render::SceneManager::GetInstance().moveObject(m_wheels[i]);
     }
+
+    mat3 wheelRot = DisplayObject::m_mat * mat3::RotateX(m_steeringWheelAngle) * mat3::RotateY(m_steering * 2.0f);
+    mat4 transform = mat4(wheelRot, DisplayObject::m_mat * m_steeringWheelPos);
+    m_steeringWheel->setMat(transform);
+    Render::SceneManager::GetInstance().moveObject(m_steeringWheel.get());
 }
 
 }// namespace GameLogic

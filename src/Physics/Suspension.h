@@ -18,6 +18,7 @@ public:
     void setSteering(float ang) { m_steering = ang; }
     void setMotor(float motor) { m_motor = motor; }
 
+    bool surfaceContact() const { return m_contact; }
     float suspensionDist() const { return m_dist; }
     float wheelSpeed() const { return m_wheelSpeed; }
 
@@ -43,6 +44,7 @@ private:
 
     bool m_handbrake;
 
+    bool m_contact;
     float m_wheelSpeed;
     float m_dist;
 

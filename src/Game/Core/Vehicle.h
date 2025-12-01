@@ -13,6 +13,8 @@ namespace GameLogic
 struct VehicleParams
 {
     vec3 viewPoint;
+    vec3 steeringWheelPos;
+    float steeringWheelAngle;
     float motorPower;
     float reverseMotorPower;
     float mass;
@@ -52,7 +54,7 @@ public:
     using OnMountEvent = Event<void(Vehicle*)>;
 
 public:
-    Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel);
+    Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel, Model* steerWheelModel);
     ~Vehicle();
 
     const vec3& viewPoint() { return m_viewPoint; }
@@ -71,14 +73,15 @@ protected:
     void setupWheels(const VehicleParams& params, Model* wheelModel);
 
 private:
-    vec3 m_viewPoint;
+    const vec3 m_viewPoint;
 
-    float m_motor;
-    float m_reverseMotor;
+    const vec3 m_steeringWheelPos;
+    const float m_steeringWheelAngle;
+
+    const float m_motor;
+    const float m_reverseMotor;
 
     DragForceGenerator m_dragForce;
-
-    float m_wheelRadius;
 
     bool m_moveForward = false;
     bool m_moveBack = false;
@@ -95,8 +98,13 @@ private:
     std::vector<Physics::Suspension*> m_suspension;
     std::vector<Render::StaticObject*> m_wheels;
 
+    std::unique_ptr<Render::StaticObject> m_steeringWheel;
+
     Collision::CollisionShape* m_staticCollision;
     Physics::StationaryBody m_staticBody;           // for player collision
+
+    static constexpr float SteerAng = 15.0f / 180.0f * math::pi;
+    static constexpr float SteerVel = 30.0f / 180.0f * math::pi;
 };
 
 } // namespace GameLogic
