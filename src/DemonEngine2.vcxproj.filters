@@ -344,6 +344,9 @@
     <ClCompile Include="Physics\Suspension.cpp">
       <Filter>Source\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Render\CompositeObject.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Game.h">
@@ -748,6 +751,9 @@
     </ClInclude>
     <ClInclude Include="Physics\Suspension.h">
       <Filter>Source\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\CompositeObject.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

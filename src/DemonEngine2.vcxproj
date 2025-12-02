@@ -220,6 +220,7 @@
     <ClCompile Include="Physics\RigidBody.cpp" />
     <ClCompile Include="Physics\Suspension.cpp" />
     <ClCompile Include="Render\AnimatedObject.cpp" />
+    <ClCompile Include="Render\CompositeObject.cpp" />
     <ClCompile Include="Render\DirectionalLight.cpp" />
     <ClCompile Include="Render\ArticulatedObject.cpp" />
     <ClCompile Include="Render\Camera.cpp" />
@@ -327,6 +328,7 @@
     <ClInclude Include="Physics\RigidBody.h" />
     <ClInclude Include="Physics\Suspension.h" />
     <ClInclude Include="Render\AnimatedObject.h" />
+    <ClInclude Include="Render\CompositeObject.h" />
     <ClInclude Include="Render\D3D\D3DRender.h" />
     <ClInclude Include="Render\DirectionalLight.h" />
     <ClInclude Include="Render\ArticulatedObject.h" />

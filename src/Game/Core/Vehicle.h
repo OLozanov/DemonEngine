@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Game/GameObject.h"
-#include "Render/StaticObject.h"
+#include "Render/CompositeObject.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/RigidBody.h"
 #include "Physics/Suspension.h"
@@ -48,7 +48,7 @@ struct WheelParams
 class Vehicle : public GameObject
               , public Usable
               , public Physics::RigidBody
-              , public Render::StaticObject
+              , public Render::CompositeObject
 {
 public:
     using OnMountEvent = Event<void(Vehicle*)>;
@@ -96,9 +96,6 @@ private:
     std::vector<vec3> m_wheelPos;
     std::vector<WheelParams> m_wheelParams;
     std::vector<Physics::Suspension*> m_suspension;
-    std::vector<Render::StaticObject*> m_wheels;
-
-    std::unique_ptr<Render::StaticObject> m_steeringWheel;
 
     Collision::CollisionShape* m_staticCollision;
     Physics::StationaryBody m_staticBody;           // for player collision

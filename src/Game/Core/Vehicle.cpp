@@ -29,7 +29,7 @@ void DragForceGenerator::update(Physics::RigidBody& body, float dt)
 
 Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel, Model* steerWheelModel)
 : RigidBody(pos, params.mass, 0.35f, 0.9f)
-, StaticObject(pos, orientation, model, true)
+, CompositeObject(pos, orientation, model, true)
 , m_viewPoint(params.viewPoint)
 , m_steeringWheelPos(params.steeringWheelPos)
 , m_steeringWheelAngle(params.steeringWheelAngle / 180.0f * math::pi)
@@ -68,8 +68,9 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
 
     setupWheels(params, wheelModel);
 
-    m_steeringWheel = std::make_unique<Render::StaticObject>(m_pos + m_steeringWheelPos, mat3(), steerWheelModel);
-    Render::SceneManager::GetInstance().addObject(m_steeringWheel.get());
+    addNode(m_pos + m_steeringWheelPos, mat3(), steerWheelModel);
+
+    updateNodeData();
 }
 
 Vehicle::~Vehicle()
@@ -78,12 +79,6 @@ Vehicle::~Vehicle()
     {
         Physics::PhysicsManager::GetInstance().removeConstraint(m_suspension[i]);
         delete m_suspension[i];
-    }
-
-    for (StaticObject* wheel : m_wheels)
-    {
-        Render::SceneManager::GetInstance().removeObject(wheel);
-        delete wheel;
     }
 }
 
@@ -107,16 +102,9 @@ void Vehicle::setupWheels(const VehicleParams& params, Model* wheelModel)
         m_suspension.push_back(suspension);
     }
 
-    for (size_t i = 0; i < 4; i++)
-    {
-        StaticObject* wheel = new StaticObject(m_wheelPos[i], mat3(), wheelModel, true);
-        Render::SceneManager::GetInstance().addObject(wheel);
-
-        m_wheels.push_back(wheel);
-    }
+    for (size_t i = 0; i < 4; i++) addNode(m_wheelPos[i], mat3(), wheelModel);
 
     m_wheelParams.resize(m_wheelPos.size());
-
     m_fwdWheel = params.numWheels - 2;
 }
 
@@ -231,14 +219,12 @@ void Vehicle::update(float dt)
         vec3 pos = m_wheelPos[i] - orientation[1] * m_suspension[i]->suspensionDist();
 
         mat4 transform = mat4(wheelRot, DisplayObject::m_mat * pos);
-        m_wheels[i]->setMat(transform);
-        Render::SceneManager::GetInstance().moveObject(m_wheels[i]);
+        setNodeMat(i, transform);
     }
 
     mat3 wheelRot = DisplayObject::m_mat * mat3::RotateX(m_steeringWheelAngle) * mat3::RotateY(m_steering * 2.0f);
     mat4 transform = mat4(wheelRot, DisplayObject::m_mat * m_steeringWheelPos);
-    m_steeringWheel->setMat(transform);
-    Render::SceneManager::GetInstance().moveObject(m_steeringWheel.get());
+    setNodeMat(m_wheelParams.size(), transform);
 }
 
 }// namespace GameLogic

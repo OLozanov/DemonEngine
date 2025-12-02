@@ -80,4 +80,4 @@ void StaticObject::initData()
     }
 }
 
-} //namespace render
+} //namespace Render

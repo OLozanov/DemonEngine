@@ -23,4 +23,4 @@ public:
     ~StaticObject() {}
 };
 
-} //namespace render
+} //namespace Render
