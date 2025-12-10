@@ -61,6 +61,12 @@ void Actor::damage(uint32_t damage)
     }
 }
 
+void Actor::kill()
+{
+    onDeath(m_health);
+    m_health = 0;
+}
+
 bool Actor::heal(uint32_t health)
 {
     if (m_health <= 0) return false;

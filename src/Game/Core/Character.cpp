@@ -83,6 +83,11 @@ void Character::onDeath(uint32_t damage)
 	OnDie(this);
 }
 
+void Character::onCollide(const vec3& normal, float impulse)
+{
+	if (fabs(impulse) > 20.0f) kill();
+}
+
 void Character::update(float dt)
 {
     //if (m_state != State::Idle) 

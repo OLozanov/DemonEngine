@@ -30,6 +30,7 @@ public:
     void setTarget(Actor* target) { m_target = target; }
 
     void damage(uint32_t damage);
+    void kill();
     bool heal(uint32_t health);
     bool isDead() { return m_health == 0; }
     void revive() { m_health = m_maxHealth; }

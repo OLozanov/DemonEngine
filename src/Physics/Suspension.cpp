@@ -73,8 +73,8 @@ void Suspension::evaluate()
 
         vec3 velocity = m_bodyA->velocity() + (m_bodyA->angularVelocity() ^ contactPoint);
         float speed = velocity * traceInfo.norm;
-        float m = effectiveMass(m_jacobian[0], m_bodyA->inverseInertiaTensor());
-        float impulse = m * speed;
+        //float m = effectiveMass(m_jacobian[0], m_bodyA->inverseInertiaTensor());
+        //float impulse = m * speed;
 
         if (err < m_length + math::eps) // Act as a spring
         {

@@ -3,10 +3,14 @@
 #include "System/Win32App.h"
 #include "System/AudioManager.h"
 
+#include "Game/UI/Widgets/Style.h"
+
 #include <sstream>
 
 namespace GameLogic
 {
+
+const std::string Menu::Captions[] = { "Save Game", "Load Game", "Settings" };
 
 VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 : UI::Widget(parent, x, y, width, height, 0)
@@ -179,6 +183,28 @@ void SettingsPanel::display()
     //m_canvas.polygon(m_polygon);
 }
 
+SaveLoadPanel::SaveLoadPanel(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+: UI::Widget(parent, x, y, width, height, 0)
+{
+
+}
+
+void SaveLoadPanel::display()
+{
+    short top = m_top + 50;
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        m_canvas.setFillColor(0.0f, 0.48f, 0.69f, 0.9f);
+        m_canvas.rectangle(m_left, top, m_right, top + 20);
+
+        m_canvas.setFillColor(0.0f, 0.58f, 0.69f, 0.9f);
+        m_canvas.rectangle(m_left, top + 20, m_right, top + 40);
+
+        top += 40;
+    }
+}
+
 Menu::Menu()
 : UI::Widget(nullptr, 0, 0, MenuWidth, MenuHeight, flag_visible)
 , m_newButton(this, MenuWidth / 2, 140, ButtonWidth, ButtonHeight, "New Game")
@@ -186,24 +212,64 @@ Menu::Menu()
 , m_loadButton(this, MenuWidth / 2, 220, ButtonWidth, ButtonHeight, "Load Game")
 , m_settingsButton(this, MenuWidth / 2, 260, ButtonWidth, ButtonHeight, "Settings")
 , m_exitButton(this, MenuWidth / 2, 440, ButtonWidth, ButtonHeight, "Exit")
+, m_saveloadPanel(this, -MenuWidth * 0.1f, 0, MenuWidth * 1.2f, MenuHeight)
 , m_settingsPanel(this, -MenuWidth * 0.1f, 0, MenuWidth * 1.2f, MenuHeight)
+, m_cid(-1)
 {
+    int16_t left = MenuWidth / 2 - 60;
+
+    m_plaquePolygon = { { float(left), float(m_top) },
+                        { float(left) + 110, float(m_top) },
+                        { float(left) + 120, float(m_top) + 12 },
+                        { float(left) + 120, float(m_top) + 20 },
+                        { float(left) + 10, float(m_top) + 20 }, 
+                        { float(left), float(m_top) + 8 } };
+
+    m_canvas.setFont("Tahoma");
+    m_canvas.setTextColor(Widgets::Style::WidgetTextColor);
+
     m_newButton.enable();
+    m_loadButton.enable();
     m_settingsButton.enable();
     m_exitButton.enable();
+
+    m_loadButton.OnClick.bind([this]() {
+        hideButtons();
+        m_saveloadPanel.show();
+
+        m_cid = 1;
+
+        refresh();
+    });
 
     m_settingsButton.OnClick.bind([this]() {
         hideButtons();
         m_settingsPanel.show();
+
+        m_cid = 2;
+
+        refresh();
     });
 }
 
 bool Menu::escape()
 {
+    if (m_saveloadPanel.isVisible())
+    {
+        m_saveloadPanel.hide();
+        showButtons();
+
+        m_cid = -1;
+
+        return false;
+    }
+
     if (m_settingsPanel.isVisible())
     {
         m_settingsPanel.hide();
         showButtons();
+
+        m_cid = -1;
 
         return false;
     }
@@ -218,6 +284,8 @@ void Menu::showButtons()
     m_loadButton.show();
     m_settingsButton.show();
     m_exitButton.show();
+
+    refresh();
 }
 
 void Menu::hideButtons()
@@ -227,6 +295,23 @@ void Menu::hideButtons()
     m_loadButton.hide();
     m_settingsButton.hide();
     m_exitButton.hide();
+}
+
+void Menu::display()
+{
+    m_canvas.setFillColor(0.0f, 0.48f, 0.69f, 0.9f);
+
+    if (m_cid != -1)
+    {
+        const std::string& caption = Captions[m_cid];
+
+        m_canvas.polygon(m_plaquePolygon);
+
+        short x = MenuWidth / 2 - m_canvas.getFont()->textWidth(caption) / 2;
+        short y = m_top;
+
+        m_canvas.text(x, y, caption);
+    }
 }
 
 } // namespace gamelogic

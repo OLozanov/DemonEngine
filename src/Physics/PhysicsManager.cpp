@@ -203,8 +203,8 @@ void PhysicsManager::resolveContact(RigidBody& bodyA, RigidBody& bodyB, const Co
 
     float impulse = m * speed;
 
-    bodyA.onCollide(contactInfo.norm, impulse * 0.1f);
-    bodyB.onCollide(-contactInfo.norm, impulse * 0.1f);
+    bodyA.onCollide(contactInfo.norm, lambda);
+    bodyB.onCollide(-contactInfo.norm, lambda);
 
     // friction
     velocityA = bodyA.m_velocity + (bodyA.m_angularVelocity ^ contactPointA);

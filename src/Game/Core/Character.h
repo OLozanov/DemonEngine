@@ -41,6 +41,9 @@ protected:
     void setAnimation(const AnimSet& anim);
 
 private:
+    void onCollide(const vec3& normal, float impulse) override;
+
+private:
     Collision::CollisionShape* m_staticCollision;
     Physics::StationaryBody m_staticBody;
     

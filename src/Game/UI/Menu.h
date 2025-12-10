@@ -85,6 +85,16 @@ private:
     AudioPanel m_audioPanel;
 };
 
+class SaveLoadPanel : public UI::Widget
+{
+public:
+    SaveLoadPanel(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+
+    void display() override;
+private:
+
+};
+
 class Menu : public UI::Widget
 {
 public:
@@ -101,24 +111,33 @@ public:
     void setSettings(const Settings& settings) { m_settingsPanel.setSettings(settings); }
     void setFullscreenStatus(bool fullscreen) { m_settingsPanel.setFullscreenStatus(fullscreen); }
 
+    void display() override;
+
 private:
     void showButtons();
     void hideButtons();
 
 private:
+    std::vector<vec2> m_plaquePolygon;
+
     Widgets::Button m_newButton;
     Widgets::Button m_saveButton;
     Widgets::Button m_loadButton;
     Widgets::Button m_settingsButton;
     Widgets::Button m_exitButton;
 
+    SaveLoadPanel m_saveloadPanel;
     SettingsPanel m_settingsPanel;
+
+    size_t m_cid;
 
     static constexpr uint16_t MenuWidth = 400;
     static constexpr uint16_t MenuHeight = 500;
 
     static constexpr uint16_t ButtonWidth = 200;
     static constexpr uint16_t ButtonHeight = 30;
+
+    static const std::string Captions[];
 };
 
 } // namespace gamelogic

@@ -53,7 +53,7 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
     vec3 boxcenter = (StaticObject::m_bbox.max + StaticObject::m_bbox.min) * 0.5f;
 
     m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, bbox, boxcenter);
-    m_layers = collision_solid | collision_pickable;
+    m_layers = collision_solid | collision_pickable | collision_character;
 
     if (!collisionData.empty()) m_staticCollision = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
     else m_staticCollision = new Collision::BoxCollisionShape(m_orientation, m_pos, bbox, boxcenter);
@@ -202,6 +202,7 @@ void Vehicle::update(float dt)
     DisplayObject::m_mat = transformMat();
     Render::SceneManager::GetInstance().moveObject(static_cast<StaticObject*>(this));
 
+    // Wheels
     for (size_t i = 0; i < m_suspension.size(); i++)
     {
         float speed = m_suspension[i]->wheelSpeed();
@@ -222,6 +223,7 @@ void Vehicle::update(float dt)
         setNodeMat(i, transform);
     }
 
+    // Steering wheel
     mat3 wheelRot = DisplayObject::m_mat * mat3::RotateX(m_steeringWheelAngle) * mat3::RotateY(m_steering * 2.0f);
     mat4 transform = mat4(wheelRot, DisplayObject::m_mat * m_steeringWheelPos);
     setNodeMat(m_wheelParams.size(), transform);
