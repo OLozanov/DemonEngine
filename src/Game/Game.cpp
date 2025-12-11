@@ -367,8 +367,8 @@ void Game::mapTransit(const std::string& mapname, bool new_game)
     {
         m_physicsManager.addRigidBody(&m_player);
 
-        //RagDoll* ragdoll = new RagDoll({ 1, 1.5, 0 }, {}, ResourceManager::GetModel("skel_anim2.msh"));
-        //m_objects.append(ragdoll);
+        RagDoll* ragdoll = new RagDoll({ 1, 1.5, 0 }, {}, ResourceManager::GetModel("Enemies/trooper01.msh")); //ResourceManager::GetModel("skel_anim2.msh"));
+        m_objects.append(ragdoll);
 
         // Joint test
         /*{

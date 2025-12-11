@@ -410,10 +410,6 @@ void CommandList::drawColor(const DisplayList& displayList)
 {
     D3DInstance& d3dInstance = D3DInstance::GetInstance();
 
-    const vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-
-    m_commandList->SetGraphicsRoot32BitConstants(2, 4, &color, 0);
-
     for (const DisplayBlock* block : displayList)
     {
         m_commandList->SetGraphicsRoot32BitConstants(1, 16, block->mat, 0);

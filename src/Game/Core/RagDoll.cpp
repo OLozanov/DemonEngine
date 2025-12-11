@@ -40,7 +40,7 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
     if ((corebbox.max - corebbox.min).length() > math::eps)
     {
         m_body = new RagDollBody(m_pos, m_omat[0], 60.0f, model);
-        m_pos = m_body->pos();
+        m_pos = m_body->location();
     }
 
     //m_bones.resize(m_model->bonenum());
@@ -58,6 +58,11 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
         mat4 tmat = m_body ? mat4::Translate(m_pos + brpos) : mat4::Translate(brpos);
         initBone(m_model->boneRoot(br).bid, tmat);
     }
+
+#ifdef _DEBUG
+    initDebugData();
+#endif
+
 }
 
 RagDoll::~RagDoll()
@@ -162,6 +167,32 @@ size_t RagDoll::initBone(size_t b, const mat4& pmat)
     return bid;
 }
 
+#ifdef _DEBUG
+void RagDoll::initDebugData()
+{
+    m_debugBoxData = { nullptr, 0, 24 };
+    m_debugMat.resize(m_bones.size());
+    m_debugBBox.resize(m_bones.size());
+
+    const Render::VertexBuffer& bboxVertexBuffer = Render::SceneManager::GetInstance().bboxVertexBuffer();
+    const Render::IndexBuffer& bboxIndexBuffer = Render::SceneManager::GetInstance().bboxIndexBuffer();
+
+    for (size_t i = 0; i < m_bones.size(); i++)
+    {
+        m_displayData.emplace_back(Render::DisplayBlock::display_debug,
+                                   &m_debugMat[i],
+                                   bboxVertexBuffer,
+                                   bboxIndexBuffer,
+                                   &m_debugBoxData);
+
+        float length = m_model->bone(m_bones[i]->boneid()).length;
+        float width = m_model->boneParameters(m_bones[i]->boneid()).width;
+
+        m_debugBBox[i] = { width, length * 0.5f, width };
+    }
+}
+#endif
+
 void RagDoll::remove()
 {
     Physics::PhysicsManager& pm = Physics::PhysicsManager::GetInstance();
@@ -174,7 +205,7 @@ void RagDoll::update(float dt)
 {
     if (m_body)
     {
-        m_pos = m_body->pos();
+        m_pos = m_body->location();
         m_omat[0] = m_body->transformMat();
     }
     else
@@ -201,6 +232,10 @@ void RagDoll::update(float dt)
         const mat4& localmat = m_model->bonebasis(bid);
 
         m_bspace[bid] = bonemat * localmat;
+
+#ifdef _DEBUG
+        m_debugMat[b] = mat4(m_bones[b]->orientation(), m_bones[b]->location()) * mat4::Scale(m_debugBBox[b]);
+#endif
     }
 
     m_boneBuffer.setData(m_bspace.data(), m_bspace.size());
@@ -223,14 +258,15 @@ RagDollBody::RagDollBody(const vec3& pos, const mat3& orientation, float mass, M
 
     const auto& collisionData = model->collisionData();
 
-    m_center = (bbox.max + bbox.min) * 0.5f;
-    m_pos += m_center;
+    vec3 cbbox = (bbox.max - bbox.min) * 0.5f;
+    vec3 center = (bbox.max + bbox.min) * 0.5f;
+    //m_pos += m_center;
 
-    vec3& cbbox = bbox.max - m_center;
+    //vec3& cbbox = bbox.max - m_center;
     //cbbox.x *= 0.8;
 
     if (!collisionData.empty()) m_collisionShape = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
-    else m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, cbbox);
+    else m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, cbbox, center);
 
     vec3 inertiaTensor = Physics::BoxInertiaTensor(bbox.max - bbox.min, mass);
     setInertia(inertiaTensor);

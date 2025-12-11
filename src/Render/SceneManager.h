@@ -92,6 +92,11 @@ public:
     Camera& getCamera() { return m_camera; }
     World& getWorld() { return m_world; }
 
+#ifdef _DEBUG
+    const VertexBuffer& bboxVertexBuffer() { return m_volumeVertexBuffer; }
+    const IndexBuffer& bboxIndexBuffer() { return m_bboxIndexBuffer; }
+#endif
+
     void init(uint32_t width, uint32_t height);
     void resize(uint32_t width, uint32_t height);
 
@@ -300,6 +305,7 @@ private:
 
     // Debug
     PushBuffer<vec3> m_vertexBuffer;
+    IndexBuffer m_bboxIndexBuffer;
 
     //
     vec3 m_topleft;

@@ -207,15 +207,20 @@ void Model::calculateBoneData()
     {
         uint32_t bid = m_boneid[v];
 
-        vec3 dvert = (bid != -1) ? m_bbase[bid] * m_vertices[v].position : m_vertices[v].position;
+        //vec3 dvert = (bid != -1) ? m_bbase[bid] * m_vertices[v].position : m_vertices[v].position;
 
-        if (bid != -1 && dvert.y > 0.0f && dvert.y < m_bones[bid].length)
+        if (bid != -1)
         {
-            float length = dvert.y;
-            float width = sqrt(dvert.x * dvert.x + dvert.z * dvert.z);
+            vec3 dvert = m_bbase[bid] * m_vertices[v].position;
 
-            m_boneparams[bid].length = std::max(m_boneparams[bid].length, length);
-            m_boneparams[bid].width = std::max(m_boneparams[bid].width, width);
+            if (dvert.y > 0.0f && dvert.y < m_bones[bid].length)
+            {
+                float length = dvert.y;
+                float width = sqrt(dvert.x * dvert.x + dvert.z * dvert.z);
+
+                m_boneparams[bid].length = std::max(m_boneparams[bid].length, length);
+                m_boneparams[bid].width = std::max(m_boneparams[bid].width, width);
+            }
         }
     }
 }

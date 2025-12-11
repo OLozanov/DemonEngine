@@ -461,26 +461,43 @@ void SceneManager::initResources()
     m_skyboxBuffer.setData(skyboxVerts, sizeof(skyboxVerts) / sizeof(SimpleVertex));
 
     static const vec3 volumeVertices[] = { {1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
-                                     {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, -1.0f} };
+                                           {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, -1.0f} };
 
-    static const uint16_t volumeIndices[] = { 1,     // Front-top-left
-                                              0,      // Front-top-right
+    static const uint16_t volumeIndices[] = { 1,    // Front-top-left
+                                              0,    // Front-top-right
                                               5,    // Front-bottom-left
-                                              4,     // Front-bottom-right
+                                              4,    // Front-bottom-right
                                               6,    // Back-bottom-right
-                                              0,      // Front-top-right
-                                              2,     // Back-top-right
-                                              1,     // Front-top-left
+                                              0,    // Front-top-right
+                                              2,    // Back-top-right
+                                              1,    // Front-top-left
                                               3,    // Back-top-left
                                               5,    // Front-bottom-left
-                                              7,   // Back-bottom-left
+                                              7,    // Back-bottom-left
                                               6,    // Back-bottom-right
                                               3,    // Back-top-left
-                                              2      // Back-top-right
-                                              };
+                                              2     // Back-top-right
+                                            };
 
     m_volumeVertexBuffer.setData(volumeVertices, _countof(volumeVertices));
     m_volumeIndexBuffer.setData(volumeIndices, _countof(volumeIndices));
+
+#ifdef _DEBUG
+    static const uint16_t bboxIndices[] = { 0, 1, 
+                                            1, 3,
+                                            3, 2,
+                                            2, 0,
+                                            4, 5,
+                                            5, 7,
+                                            7, 6,
+                                            6, 4,
+                                            1, 5,
+                                            3, 7,
+                                            2, 6,
+                                            0, 4};
+
+    m_bboxIndexBuffer.setData(bboxIndices, _countof(bboxIndices));
+#endif
 }
 
 void SceneManager::processSkeletalObjects()
@@ -1255,6 +1272,9 @@ void SceneManager::wireframePass()
 
     m_commandList.clearBuffer(frameBuffer, { 0.0f, 0.6f, 0.8f, 1.0f });
 
+    const vec4 GeometryColor = vec4(1.0, 1.0, 1.0, 1.0);
+    m_commandList.setConstant(2, GeometryColor);
+
     m_commandList.setTopology(topology_trianglelist);
     m_commandList.drawColor(m_scene.displayList());
 
@@ -1299,6 +1319,10 @@ void SceneManager::wireframePass()
             offset += verts.size() + 1;
         }
     }
+
+    m_commandList.setTopology(topology_linelist);
+    m_commandList.setConstant(2, BBoxColor);
+    m_commandList.drawColor(m_scene.displayListDebug());
 
     //m_commandList.setTopology(RenderingPipeline::topology_linelist);
     //commandList->SetGraphicsRoot32BitConstants(2, 4, &BBoxColor, 0);

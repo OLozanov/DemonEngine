@@ -524,15 +524,15 @@ class DCMExport(bpy.types.Operator, ExportHelper):
         bone = dcbone.bone;
         
         head = (0, 0, 0); #bone.bone.head;
-        tail = bone.bone.tail_local - bone.bone.head_local;
-        len = tail.length;       
+        #tail = bone.bone.tail_local - bone.bone.head_local;
+        #len = tail.length;       
        
         #rhead = self.glmat@Vector((head[0], head[1], head[2]));
         #rtail = self.glmat@Vector((tail[0], tail[1], tail[2]));
             
         #file.write(pack('fff', rhead[0]*self.scale, rhead[1]*self.scale, rhead[2]*self.scale));
         #file.write(pack('fff', rtail[0]*self.scale, rtail[1]*self.scale, rtail[2]*self.scale));
-        file.write(pack('fhhhh', len*self.scale, dcbone.parent, dcbone.cfirst, dcbone.clast, dcbone.constraint_id));    
+        file.write(pack('fhhhh', bone.bone.length*self.scale, dcbone.parent, dcbone.cfirst, dcbone.clast, dcbone.constraint_id));    
     
     def savebone_matrix(self, dcbone, file):
         bone = dcbone.bone.bone;

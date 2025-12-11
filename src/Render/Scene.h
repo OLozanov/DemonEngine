@@ -24,6 +24,7 @@ class Scene
     DisplayList m_emissiveList;
     DisplayList m_transparentList;
     DisplayList m_spriteList;
+    DisplayList m_debugList;
 
     InstancedList m_instancedList;
 
@@ -66,6 +67,7 @@ public:
     const DisplayList& displayListEmissive() const { return m_emissiveList; }
     const DisplayList& displayListTransparent() const { return m_transparentList; }
     const DisplayList& displayListSprites() const { return m_spriteList; }
+    const DisplayList& displayListDebug() const { return m_debugList; }
     const DisplayBlock& skyBlock() const { return m_skyGeometry; }
 
     const FogVolumeList& fogVolumes() const { return m_fogVolumes; }

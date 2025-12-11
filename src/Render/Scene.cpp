@@ -129,6 +129,7 @@ void Scene::markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3
                 case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
                 case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
                 case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
+                case DisplayBlock::display_debug: m_debugList.push_back(&block); break;
                 }
             }
 
@@ -463,6 +464,7 @@ void Scene::calculateVisibility(const vec3& pos, const vec4& screenPlane, const 
     m_emissiveList.clear();
     m_transparentList.clear();
     m_spriteList.clear();
+    m_debugList.clear();
 
     m_instancedList.clear();
 

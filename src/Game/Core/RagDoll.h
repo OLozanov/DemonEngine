@@ -25,11 +25,21 @@ private:
 
     size_t initBone(size_t b, const mat4& pmat);
 
+#ifdef _DEBUG
+    void initDebugData();
+#endif
+
     vec3 m_pos;
 
     RagDollBody* m_body;
     std::vector<RagDollBone*> m_bones;
     std::vector<Physics::Constraint*> m_constraints;
+
+#ifdef _DEBUG
+    Render::DisplayData m_debugBoxData;
+    std::vector<vec3> m_debugBBox;
+    std::vector<mat4> m_debugMat;
+#endif
 };
 
 class RagDollBody : public Physics::RigidBody
@@ -38,8 +48,8 @@ class RagDollBody : public Physics::RigidBody
 public:
     RagDollBody(const vec3& pos, const mat3& orientation, float mass, Model* model);
 
-    const vec3& pos() const { return m_pos + m_center; }
-    const vec3& center() const { return m_center; }
+    //const vec3& pos() const { return m_pos + m_center; }
+    //const vec3& center() const { return m_center; }
 
 private:
     void onCollide(const vec3& normal, float impulse) override;
