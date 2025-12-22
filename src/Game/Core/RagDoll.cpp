@@ -33,7 +33,7 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
     m_bbox = { { -size, -size, -size }, { size, size, size } };
 
     setAnimRange(0.0, 14.0);
-    setAnimTime(0.0f * m_frame_rate);
+    setAnimTime(8.0f * m_frame_rate);
 
     const BBox& corebbox = m_model->corebbox();
 
@@ -52,9 +52,6 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
     {
         vec3 brpos = bpos[br] + dbpos[br] * m_dtime;
 
-        //mat4 rmat = mat4::Translate(m_model->boneRoot(br).pos + brpos);
-
-        //mat4::Translate(m_model->boneRoot(br).pos + brpos + m_pos);
         mat4 tmat = m_body ? mat4::Translate(m_pos + brpos) : mat4::Translate(brpos);
         initBone(m_model->boneRoot(br).bid, tmat);
     }
@@ -82,10 +79,9 @@ size_t RagDoll::initBone(size_t b, const mat4& pmat)
     float length = m_model->bone(b).length;
     float width = m_model->boneParameters(b).width;
 
-    const mat3& bonemat = m_model->bonemat(b);
-    const vec3& bonepos = m_model->bonepos(b);
-
-    mat4 mat = pmat * mat4::Translate(bonepos) * mat4::Rotate(crot.x, crot.y, crot.z);
+    // Pose bone matrix calculation scheme:
+    // parent * (parent_rest.inverted * rest) * rotation
+    mat4 mat = pmat * m_model->bonebasis(b) * mat4::Rotate(crot.x, crot.y, crot.z);
 
     size_t bid = -1;
 
@@ -100,16 +96,13 @@ size_t RagDoll::initBone(size_t b, const mat4& pmat)
         RagDollBone* bone = new RagDollBone(b, pos, bonemat, length, width);
         m_bones.push_back(bone);*/
 
-        mat3 bmat = mat * bonemat;
+        vec3 pos = mat[3].xyz + mat[1] * length * 0.5f;
 
-        vec3 pos = mat[3].xyz + bmat[1] * length * 0.5f;
-        //if (m_body) pos += m_pos;
-
-        RagDollBone* bone = new RagDollBone(b, pos, bmat, length, width);
+        RagDollBone* bone = new RagDollBone(b, pos, mat, length, width);
         m_bones.push_back(bone);
     }
 
-    mat = mat * mat4::Translate(-bonepos);
+    mat = mat * m_model->invbonebasis(b);
 
     if (m_model->bone(b).cfirst == Model::InvalidBoneIndex) return bid;
 
@@ -121,13 +114,6 @@ size_t RagDoll::initBone(size_t b, const mat4& pmat)
 
         if (bid != -1)
         {
-            /*constexpr float angmin = -110.0f / 180.0f * math::pi;
-            constexpr float angmax = 110.0f / 180.0f * math::pi;
-
-            Physics::Hinge* hinge = new Physics::Hinge(m_bones[bid], m_bones[bid]->tail(), m_bones[cid], m_bones[cid]->head(), 0, angmin, angmax);
-            m_constraints.push_back(hinge);
-            Physics::PhysicsManager::GetInstance().addJoint(hinge);*/
-
             uint16_t constraintIdx = m_model->bone(c).constraint;
 
             Physics::Joint* joint = nullptr;
@@ -229,7 +215,7 @@ void RagDoll::update(float dt)
         if (m_body) bonepos = bonepos * m_body->orientation();
 
         mat4 bonemat = mat4(rot, bonepos);
-        const mat4& localmat = m_model->bonebasis(bid);
+        const mat4& localmat = m_model->invbonebasis(bid);
 
         m_bspace[bid] = bonemat * localmat;
 

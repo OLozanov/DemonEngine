@@ -22,7 +22,7 @@ Character::Character(const vec3& pos, float ang, Model* model)
 , m_state(State::Idle)
 , m_damage(5)
 , m_attackDistance(2.0)
-, m_attackTime(85 / 5 * default_frame_rate)
+, m_attackTime(75 / 5 * default_frame_rate)
 , m_speed(1.2)
 , m_hit(false)
 , m_distribution(0.0, 1.0)
@@ -36,10 +36,10 @@ Character::Character(const vec3& pos, float ang, Model* model)
 
 	Physics::PhysicsManager::GetInstance().addStationaryBody(&m_staticBody);
 
-    m_animations = { { 0, 0 },
+    m_animations = { { 0, 30 },
                      { 30, 70 },
-                     { 80, 90 },
-                     { 90, 110 } };
+                     { 70, 80 },
+                     { 80, 100 } };
 
     setAnimation(m_animations[0]);
 
@@ -98,9 +98,9 @@ void Character::update(float dt)
 	{
 		const mat4& handTransform = getBoneTransform(15);
 
-		mat4 weaponTransform = m_mat * handTransform *
-							   mat4::Translate({ 0, -0.23f, 0.03f }) *
-							   mat4::Rotate(math::pi * 0.5f, 0, -math::pi * 0.5f);
+		mat4 weaponTransform = m_omat[0] * handTransform *
+							   mat4::Translate({0.26f, 0.0f, 0.03f }) *
+							   mat4::Rotate(math::pi * 0.5f, 0, 0);
 
 		m_weapon->setMat(weaponTransform);
 		Render::SceneManager::GetInstance().moveObject(m_weapon.get());

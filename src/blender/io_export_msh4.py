@@ -573,18 +573,11 @@ class DCMExport(bpy.types.Operator, ExportHelper):
         
     def savebone_anim(self, dcbone, file):
         bone = dcbone.bone;
-        
-        rotmat = bone.matrix_channel;
-
-        if bone.parent != None:
-            rotmat = bone.parent.matrix_channel.inverted()@rotmat;
-           
-        #bonemat = bone.bone.matrix_local;          
             
-        rot = rotmat.to_3x3().to_euler('XYZ'); #bone.rotation_quaternion.to_euler('XYZ');
-        file.write(pack('fff', rot[0], -rot[2], rot[1]));
-        #file.write(pack('fff', rot[0], rot[1], rot[2]));
-        
+        quat = bone.rotation_quaternion;
+        rot = quat.to_euler('XYZ');
+        file.write(pack('fff', rot[0], -rot[1], -rot[2]));
+               
     def savebone_anim_pos(self, dcbone, file):
         bone = dcbone.bone;
         
@@ -717,7 +710,7 @@ class DCMExport(bpy.types.Operator, ExportHelper):
 
                     file.write(pack('L', hide));
                     file.write(pack('fff', pos[0]*self.scale, pos[1]*self.scale, pos[2]*self.scale));
-                    file.write(pack('fff', -rot[0], rot[2], rot[1]));
+                    file.write(pack('fff', rot[0], rot[2], rot[1]));
 
                 frame = frame + self.frame_step; 
             

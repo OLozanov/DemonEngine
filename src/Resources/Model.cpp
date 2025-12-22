@@ -97,6 +97,7 @@ Model* Model::LoadModel(const char* name)
         fread(model->m_boneRoots.data(), sizeof(BoneRoot), header.brnum, file);
 
         model->m_bbase.resize(header.bonenum);
+        model->m_bbase_inv.resize(header.bonenum);
     }
 
     //Animation data
@@ -201,7 +202,11 @@ void Model::calculateCoreBBox()     //BBox of the core/body of articulated figur
 
 void Model::calculateBoneData()
 {
-    for (size_t i = 0; i < m_bonenum; i++) m_bbase[i] = mat4(m_bonespace[i].mat, m_bonespace[i].pos).inverse();
+    for (size_t i = 0; i < m_bonenum; i++)
+    {
+        m_bbase[i] = mat4(m_bonespace[i].mat, m_bonespace[i].pos);
+        m_bbase_inv[i] = mat4(m_bonespace[i].mat, m_bonespace[i].pos).inverse();
+    }
 
     for (int v = 0; v < m_vertices.size(); v++)
     {
@@ -211,7 +216,7 @@ void Model::calculateBoneData()
 
         if (bid != -1)
         {
-            vec3 dvert = m_bbase[bid] * m_vertices[v].position;
+            vec3 dvert = m_bbase_inv[bid] * m_vertices[v].position;
 
             if (dvert.y > 0.0f && dvert.y < m_bones[bid].length)
             {

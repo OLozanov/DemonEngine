@@ -118,6 +118,7 @@ public:
     const mat3& bonemat(size_t b) const { return m_bonespace[b].mat; }
     const vec3& bonepos(size_t b) const { return m_bonespace[b].pos; }
     const mat4& bonebasis(size_t b) const { return m_bbase[b]; }
+    const mat4& invbonebasis(size_t b) const { return m_bbase_inv[b]; }
     const BoneParameters& boneParameters(size_t b) const { return m_boneparams[b]; }
 
     const BoneConstraint& constraint(size_t i) const { return m_constraints[i]; }
@@ -176,7 +177,9 @@ private:
     std::vector<vec3> m_bonerot;
     std::vector<vec3> m_dbonerot;
 
+    // rest bone matrices
     std::vector<mat4> m_bbase;
+    std::vector<mat4> m_bbase_inv;
 
     // Skeletal data
     Render::Buffer<uint32_t> m_boneIdBuffer;

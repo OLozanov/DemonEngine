@@ -111,11 +111,14 @@ void ArticulatedObject::calcFrameBones()
     m_rot = m_model->bonesrot(m_frame);
     m_drot = m_model->dbrot(m_frame);
 
+    // Pose bone matrix calculation scheme:
+    // parent * (parent_rest.inverted * rest) * rotation
+
     for (size_t br = 0; br < m_model->boneRoots().size(); br++)
     {
         vec3 brpos = bpos[br] + dbpos[br] * m_dtime;
 
-        mat4 rmat = mat4::Translate(m_model->boneRoot(br).pos + brpos);
+        mat4 rmat = mat4::Translate(brpos);
 
         int b = m_model->boneRoot(br).bid;
 
@@ -123,12 +126,8 @@ void ArticulatedObject::calcFrameBones()
 
         vec3 crot = m_rot[b] + m_drot[b] * m_dtime;
 
-        const mat3& bonemat = m_model->bonemat(b);
-        const vec3& bonepos = m_model->bonepos(b);
-
-        mat4 mat = rmat * mat4::Rotate(crot.x, crot.y, crot.z);
-
-        m_bspace[b] = mat * mat4::Translate(-bonepos);;
+        mat4 mat = rmat * m_model->bonebasis(b) * mat4::Rotate(crot.x, crot.y, crot.z);
+        m_bspace[b] = mat * m_model->invbonebasis(b);
     }
 
     for (size_t i = 0; i < m_model->bonenum(); i++)
@@ -139,12 +138,8 @@ void ArticulatedObject::calcFrameBones()
 
         vec3 crot = m_rot[i] + m_drot[i] * m_dtime;
 
-        const mat3& bonemat = m_model->bonemat(i);
-        const vec3& bonepos = m_model->bonepos(i);
-
-        mat4 mat = m_bspace[bone.parent] * mat4::Translate(bonepos) * mat4::Rotate(crot.x, crot.y, crot.z);
-
-        m_bspace[i] = mat * mat4::Translate(-bonepos);
+        mat4 mat = m_bspace[bone.parent] * m_model->bonebasis(i) * mat4::Rotate(crot.x, crot.y, crot.z);
+        m_bspace[i] = mat * m_model->invbonebasis(i);
     }
 }
 
