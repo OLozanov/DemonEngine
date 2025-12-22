@@ -69,9 +69,11 @@ void Character::setAnimation(const AnimSet& anim)
 
 void Character::onDeath(uint32_t damage)
 {
-	setAnimation(m_animations[State::Dead]);
-	setRepeat(false);
-	run();
+	//setAnimation(m_animations[State::Dead]);
+	//setRepeat(false);
+	//run();
+
+	stop();
 
 	m_weapon->hideSubmesh(1, true);
 
@@ -80,7 +82,7 @@ void Character::onDeath(uint32_t damage)
 	Physics::PhysicsManager::GetInstance().removeRigidBody(this);
 	Physics::PhysicsManager::GetInstance().removeStationaryBody(&m_staticBody);
 
-	OnDie(this);
+	OnDeath(this);
 }
 
 void Character::onCollide(const vec3& normal, float impulse)
@@ -90,6 +92,8 @@ void Character::onCollide(const vec3& normal, float impulse)
 
 void Character::update(float dt)
 {
+	if (m_state == State::Dead) return;
+
     //if (m_state != State::Idle) 
 		animate(dt);
 	m_mat = mat4::Translate(m_pos + vec3{0, 0.2, 0})* mat4::RotateY(m_ang);
@@ -105,8 +109,6 @@ void Character::update(float dt)
 		m_weapon->setMat(weaponTransform);
 		Render::SceneManager::GetInstance().moveObject(m_weapon.get());
 	}
-
-	if (m_state == State::Dead) return;
 
 	bool attack = false;
 

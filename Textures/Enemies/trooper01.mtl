@@ -1,0 +1,7 @@
+material
+{
+	diffuse = 'Enemies/trooper01.dds'
+	normal = 'Enemies/trooper01_n.dds'
+    
+    roughness = 0.95
+}

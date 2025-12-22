@@ -706,13 +706,19 @@ void Game::loadEntities(FILE* file)
         {
             float rot = atan2(-mat[0].z, mat[0].x);
 
-            Character* test_actor = new Character(pos, rot, ResourceManager::GetModel("enemies/trooper.msh"));
-            m_objects.append(test_actor);
+            Character* actor = new Character(pos, rot, ResourceManager::GetModel("enemies/trooper01.msh"));
+            m_objects.append(actor);
 
-            test_actor->setTarget(&m_player);
-        }
+            actor->OnDeath.bind_async(m_asyncQueue, [this](Character* character)
+            {
+                onCharacterDeath(character);
+            });
 
-        if (eclass == EntityClass::TechSwitch)
+            actor->setTarget(&m_player);
+  
+      }
+
+       if (eclass == EntityClass::TechSwitch)
         {
             std::string objectId;
             bool switchOn;

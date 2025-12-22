@@ -16,6 +16,7 @@ class RagDoll : public GameObject
 public:
 
     RagDoll(const vec3& pos, float animTime, Model* model);
+    RagDoll(Render::ArticulatedObject* object);
     ~RagDoll();
 
     void remove();

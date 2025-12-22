@@ -24,6 +24,7 @@
 #include "Game/ClimbArea.h"
 
 #include "Game/Core/Player.h"
+#include "Game/Core/Character.h"
 #include "Game/Core/Vehicle.h"
 #include "Game/Objects/Item.h"
 #include "Game/Objects/Container.h"
@@ -105,6 +106,8 @@ private:
 
     void destroyContainer(Container* container);
     void destroyBarrel(Breakable* barrel);
+
+    void onCharacterDeath(Character* character);
 
     void onConsoleCommand(const std::string& cmd);
 

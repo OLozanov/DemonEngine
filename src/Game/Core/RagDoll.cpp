@@ -59,7 +59,55 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
 #ifdef _DEBUG
     initDebugData();
 #endif
+}
 
+RagDoll::RagDoll(Render::ArticulatedObject* object)
+: ArticulatedObject(object->model())
+, m_body(nullptr)
+{
+    const mat4& mat = object->mat();
+
+    Render::SceneManager::GetInstance().addObject(this);
+    Render::SceneManager::GetInstance().registerSkeletalObject(this);
+
+    m_mat = mat;
+    m_pos = mat[3].xyz;
+
+    float size = 0;
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (fabs(m_bbox.min[i]) > size) size = fabs(m_bbox.min[i]);
+        if (fabs(m_bbox.max[i]) > size) size = fabs(m_bbox.max[i]);
+    }
+
+    size *= 1.5;
+    m_bbox = { { -size, -size, -size }, { size, size, size } };
+
+    setAnimTime(object->getAnimTime());
+
+    const BBox& corebbox = m_model->corebbox();
+
+    if ((corebbox.max - corebbox.min).length() > math::eps)
+    {
+        m_body = new RagDollBody(m_pos, m_omat[0], 60.0f, m_model.get());
+        m_pos = m_body->location();
+    }
+
+    const vec3* bpos = m_model->bonespos(m_frame);
+    const vec3* dbpos = m_model->dbpos(m_frame);
+
+    for (int br = 0; br < m_model->boneRoots().size(); br++)
+    {
+        vec3 brpos = bpos[br] + dbpos[br] * m_dtime;
+
+        mat4 tmat = m_body ? mat4::Translate(m_pos + brpos) : mat4::Translate(brpos);
+        initBone(m_model->boneRoot(br).bid, mat);
+    }
+
+#ifdef _DEBUG
+    initDebugData();
+#endif
 }
 
 RagDoll::~RagDoll()
@@ -226,6 +274,8 @@ void RagDoll::update(float dt)
 
     m_boneBuffer.setData(m_bspace.data(), m_bspace.size());
     m_update = true;
+
+    Render::SceneManager::GetInstance().moveObject(static_cast<DisplayObject*>(this));
 
     //animate(dt);
 }

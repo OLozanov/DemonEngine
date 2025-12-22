@@ -367,10 +367,7 @@ void Game::mapTransit(const std::string& mapname, bool new_game)
     {
         m_physicsManager.addRigidBody(&m_player);
 
-        RagDoll* ragdoll = new RagDoll({ 1, 1.5, 0 }, {}, ResourceManager::GetModel("Enemies/trooper01.msh")); //ResourceManager::GetModel("skel_anim2.msh"));
-        m_objects.append(ragdoll);
-
-        // Joint test
+        // Joint test setup
         /*{
             PhysicsObject* obj[3];
 
@@ -878,6 +875,18 @@ void Game::destroyBarrel(Breakable* barrel)
         m_objects.remove(obj);
         delete obj;
     });
+}
+
+void Game::onCharacterDeath(Character* character)
+{
+    RagDoll* ragdoll = new RagDoll(character);
+    m_objects.append(ragdoll);
+
+    m_objects.remove(character);
+    m_physicsManager.removeRigidBody(character);
+    m_sceneManager.removeObject(character);
+    m_sceneManager.unregisterSkeletalObject(character);
+    delete character;
 }
 
 void Game::onConsoleCommand(const std::string& cmd)

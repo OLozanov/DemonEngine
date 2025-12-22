@@ -30,12 +30,16 @@ public:
         Dead = 3
     };
 
+    using CharacterEvent = Event<void(Character*)>;
+
 public:
     Character(const vec3& pos, float ang, Model* model);
     ~Character();
 
     void onDeath(uint32_t damage) override;
     void update(float dt) override;
+
+    CharacterEvent OnDeath;
 
 protected:
     void setAnimation(const AnimSet& anim);

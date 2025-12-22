@@ -72,6 +72,7 @@ public:
 	ArticulatedObject(Model* model, float frate = default_frame_rate);
 	~ArticulatedObject();
 
+	Model* model() const { return m_model.get(); }
 	void setModel(Model* model, float frate);
 
 	void run() { m_run = true; }
