@@ -354,7 +354,7 @@ void Player::onCollide(const vec3& normal, float impulse)
     //checkCollision = true;
 }
 
-void Player::onDeath(uint32_t damage)
+void Player::onDeath(uint32_t damage, const vec3& impulse)
 {
     //m_camera.setPos(m_pos - vec3(0.0f, 0.35f, 0.0f));
     OnDie(this);

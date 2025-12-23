@@ -107,7 +107,7 @@ private:
     void destroyContainer(Container* container);
     void destroyBarrel(Breakable* barrel);
 
-    void onCharacterDeath(Character* character);
+    void onCharacterDeath(Character* character, const vec3& impulse);
 
     void onConsoleCommand(const std::string& cmd);
 

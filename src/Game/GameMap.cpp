@@ -709,9 +709,9 @@ void Game::loadEntities(FILE* file)
             Character* actor = new Character(pos, rot, ResourceManager::GetModel("enemies/trooper01.msh"));
             m_objects.append(actor);
 
-            actor->OnDeath.bind_async(m_asyncQueue, [this](Character* character)
+            actor->OnDeath.bind_async(m_asyncQueue, [this](Character* character, const vec3& impulse)
             {
-                onCharacterDeath(character);
+                onCharacterDeath(character, impulse);
             });
 
             actor->setTarget(&m_player);

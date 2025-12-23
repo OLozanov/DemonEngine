@@ -71,6 +71,12 @@ void RigidBody::setInertia(const vec3& inertia)
     m_invInertia = { 1.0f / inertia.x, 1.0f / inertia.y, 1.0f / inertia.z };
 }
 
+void RigidBody::applyImpulse(const vec3& impulse)
+{
+    m_velocity += impulse * m_invMass;
+    m_rest = false;
+}
+
 void RigidBody::applyImpulse(const vec3& impulse, const vec3& point)
 {
     m_velocity += impulse*m_invMass;

@@ -66,7 +66,7 @@ private:
     void onUpdate(float dt) override;
     void onCollide(const vec3& normal, float impulse) override;
 
-    void onDeath(uint32_t damage) override;
+    void onDeath(uint32_t damage, const vec3& impulse) override;
 
 public:
 

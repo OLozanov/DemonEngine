@@ -30,6 +30,7 @@ public:
     void setTarget(Actor* target) { m_target = target; }
 
     void damage(uint32_t damage);
+    void damage(uint32_t damage, const vec3& impulse);
     void kill();
     bool heal(uint32_t health);
     bool isDead() { return m_health == 0; }
@@ -38,7 +39,7 @@ public:
     void makeInvulnerable(bool invulnerable) { m_invulnerable = invulnerable; }
     bool toggleInvulnerability() {return m_invulnerable = !m_invulnerable; }
 
-    virtual void onDeath(uint32_t damage);
+    virtual void onDeath(uint32_t damage, const vec3& impulse);
 
     int health() { return m_health; }
 

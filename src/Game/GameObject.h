@@ -26,7 +26,7 @@ public:
 private:
     static LinkedList<Hitable> ObjectList;
 
-    static constexpr float DistFactor = 0.02f;
+    static constexpr float DistFactor = 0.05f;
     static constexpr float PowerFactor = 0.5f;
 };
 

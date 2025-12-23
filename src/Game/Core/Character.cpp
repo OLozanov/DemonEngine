@@ -67,7 +67,7 @@ void Character::setAnimation(const AnimSet& anim)
     setFrame(anim.start / 5);
 }
 
-void Character::onDeath(uint32_t damage)
+void Character::onDeath(uint32_t damage, const vec3& impulse)
 {
 	//setAnimation(m_animations[State::Dead]);
 	//setRepeat(false);
@@ -82,12 +82,16 @@ void Character::onDeath(uint32_t damage)
 	Physics::PhysicsManager::GetInstance().removeRigidBody(this);
 	Physics::PhysicsManager::GetInstance().removeStationaryBody(&m_staticBody);
 
-	OnDeath(this);
+	OnDeath(this, impulse);
 }
 
 void Character::onCollide(const vec3& normal, float impulse)
 {
-	if (fabs(impulse) > 20.0f) kill();
+	if (fabs(impulse) > 20.0f)
+	{
+		onDeath(m_health, normal * impulse * 12.0f);
+		m_health = 0;
+	}
 }
 
 void Character::update(float dt)

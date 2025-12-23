@@ -13,6 +13,7 @@ namespace GameLogic
 
 RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
 : ArticulatedObject(model)
+, m_active(true)
 , m_pos(pos)
 , m_body(nullptr)
 {
@@ -23,10 +24,12 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
 
     float size = 0;
 
+    const BBox& bbox = model->bbox();
+
     for (int i = 0; i < 3; i++)
     {
-        if (fabs(m_bbox.min[i]) > size) size = fabs(m_bbox.min[i]);
-        if (fabs(m_bbox.max[i]) > size) size = fabs(m_bbox.max[i]);
+        if (fabs(bbox.min[i]) > size) size = fabs(bbox.min[i]);
+        if (fabs(bbox.max[i]) > size) size = fabs(bbox.max[i]);
     }
     
     size *= 1.5;
@@ -63,6 +66,7 @@ RagDoll::RagDoll(const vec3& pos, float animTime, Model* model)
 
 RagDoll::RagDoll(Render::ArticulatedObject* object)
 : ArticulatedObject(object->model())
+, m_active(true)
 , m_body(nullptr)
 {
     const mat4& mat = object->mat();
@@ -75,13 +79,15 @@ RagDoll::RagDoll(Render::ArticulatedObject* object)
 
     float size = 0;
 
+    const BBox& bbox = m_model->bbox();
+
     for (int i = 0; i < 3; i++)
     {
-        if (fabs(m_bbox.min[i]) > size) size = fabs(m_bbox.min[i]);
-        if (fabs(m_bbox.max[i]) > size) size = fabs(m_bbox.max[i]);
+        if (fabs(bbox.min[i]) > size) size = fabs(bbox.min[i]);
+        if (fabs(bbox.max[i]) > size) size = fabs(bbox.max[i]);
     }
 
-    size *= 1.5;
+    size *= 1.5f;
     m_bbox = { { -size, -size, -size }, { size, size, size } };
 
     setAnimTime(object->getAnimTime());
@@ -112,7 +118,7 @@ RagDoll::RagDoll(Render::ArticulatedObject* object)
 
 RagDoll::~RagDoll()
 {
-    remove();
+    if (m_active) remove();
 
     if (m_body) delete m_body;
 
@@ -227,16 +233,63 @@ void RagDoll::initDebugData()
 }
 #endif
 
+void RagDoll::applyImpulse(const vec3& impulse)
+{
+    float w = 1.0f / ((m_body ? 1 : 0) + m_bones.size());
+
+    if (m_body) m_body->applyImpulse(impulse * w);
+    for (size_t b = 0; b < m_bones.size(); b++) m_bones[b]->applyImpulse(impulse * w);
+}
+
 void RagDoll::remove()
 {
-    Physics::PhysicsManager& pm = Physics::PhysicsManager::GetInstance();
+    Physics::PhysicsManager& physics = Physics::PhysicsManager::GetInstance();
 
-    for (size_t i = 0; i < m_constraints.size(); i++) pm.removeConstraint(m_constraints[i]);
-    for (size_t i = 0; i < m_bones.size(); i++) pm.removeRigidBody(m_bones[i]);
+    if (m_body) physics.removeRigidBody(m_body);
+
+    for (size_t i = 0; i < m_constraints.size(); i++) physics.removeConstraint(m_constraints[i]);
+    for (size_t i = 0; i < m_bones.size(); i++) physics.removeRigidBody(m_bones[i]);
+}
+
+bool RagDoll::isMoving()
+{
+    if (m_body)
+    {
+        constexpr float LinearSpeedEps = 0.035f;
+        constexpr float AngularSpeedEps = 0.9f;
+
+        float speed = m_body->velocity().length();
+        float angSpeed = m_body->angularVelocity().length();
+
+        if (speed > LinearSpeedEps) return true;
+        if (angSpeed > AngularSpeedEps) return true;
+    }
+
+    for (RagDollBone* bone : m_bones)
+    {
+        constexpr float LinearSpeedEps = 0.1f;
+        constexpr float AngularSpeedEps = 0.9f;
+
+        float speed = bone->velocity().length();
+        float angSpeed = bone->angularVelocity().length();
+
+        if (speed > LinearSpeedEps) return true;
+        if (angSpeed > AngularSpeedEps) return true;
+    }
+
+    return false;
+}
+
+void RagDoll::deactivate()
+{
+    remove();
+    m_active = false;
 }
 
 void RagDoll::update(float dt)
 {
+    if (!m_active) return;
+
     if (m_body)
     {
         m_pos = m_body->location();
@@ -251,6 +304,8 @@ void RagDoll::update(float dt)
         m_pos *= 1.0f / m_bones.size();
         m_omat[0] = mat4::Translate(m_pos);
     }
+
+    m_mat = m_omat[0];
 
     for (size_t b = 0; b < m_bones.size(); b++)
     {
@@ -277,11 +332,11 @@ void RagDoll::update(float dt)
 
     Render::SceneManager::GetInstance().moveObject(static_cast<DisplayObject*>(this));
 
-    //animate(dt);
+    if (!isMoving()) deactivate();
 }
 
 RagDollBody::RagDollBody(const vec3& pos, const mat3& orientation, float mass, Model* model)
-: RigidBody(pos, mass, 0.3f, 0.9f, collision_solid)
+: RigidBody(pos, mass, 0.3f, 0.9f, collision_ragdoll)
 {
     Physics::PhysicsManager::GetInstance().addRigidBody(static_cast<RigidBody*>(this));
     
@@ -296,10 +351,6 @@ RagDollBody::RagDollBody(const vec3& pos, const mat3& orientation, float mass, M
 
     vec3 cbbox = (bbox.max - bbox.min) * 0.5f;
     vec3 center = (bbox.max + bbox.min) * 0.5f;
-    //m_pos += m_center;
-
-    //vec3& cbbox = bbox.max - m_center;
-    //cbbox.x *= 0.8;
 
     if (!collisionData.empty()) m_collisionShape = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
     else m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, cbbox, center);
@@ -308,10 +359,6 @@ RagDollBody::RagDollBody(const vec3& pos, const mat3& orientation, float mass, M
     setInertia(inertiaTensor);
 
     m_object = static_cast<Hitable*>(this);
-
-    m_layers = collision_solid | collision_hitable | collision_actor;
-
-    m_rest = true;
 }
 
 void RagDollBody::onCollide(const vec3& normal, float impulse)
@@ -328,7 +375,7 @@ void RagDollBody::hit(const vec3& point, const vec3& direction, uint32_t power)
 }
 
 RagDollBone::RagDollBone(size_t boneid, const vec3& pos, const mat3& orientation, float length, float width)
-: RigidBody(pos, 20.0f, 0.3, 0.9, collision_solid)
+: RigidBody(pos, 20.0f, 0.3, 0.9, collision_ragdoll)
 , m_boneid(boneid)
 , m_length(length)
 {
@@ -349,10 +396,6 @@ RagDollBone::RagDollBone(size_t boneid, const vec3& pos, const mat3& orientation
     Physics::PhysicsManager::GetInstance().addRigidBody(static_cast<RigidBody*>(this));
 
     m_object = static_cast<Hitable*>(this);
-
-    m_layers = collision_solid | collision_hitable | collision_actor;
-
-    m_rest = true;
 }
 
 void RagDollBone::onCollide(const vec3& normal, float impulse)

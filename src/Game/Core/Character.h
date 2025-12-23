@@ -30,13 +30,13 @@ public:
         Dead = 3
     };
 
-    using CharacterEvent = Event<void(Character*)>;
+    using CharacterEvent = Event<void(Character*, const vec3&)>;
 
 public:
     Character(const vec3& pos, float ang, Model* model);
     ~Character();
 
-    void onDeath(uint32_t damage) override;
+    void onDeath(uint32_t damage, const vec3& impulse) override;
     void update(float dt) override;
 
     CharacterEvent OnDeath;

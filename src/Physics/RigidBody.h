@@ -93,6 +93,7 @@ public:
 
     const vec3& angularVelocity() const { return m_angularVelocity; }
 
+    void applyImpulse(const vec3& impulse);
     void applyImpulse(const vec3& impulse, const vec3& point);
     void applyForce(const vec3& force);
     void applyForce(const vec3& force, const vec3& point);

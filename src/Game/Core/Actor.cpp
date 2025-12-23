@@ -29,7 +29,7 @@ void Actor::updateBBox()
 
 void Actor::hit(const vec3& point, const vec3& direction, uint32_t power)
 {
-    damage(power);
+    damage(power, power > 30 ? direction * power * 10 : vec3());
 }
 
 void Actor::update(float dt)
@@ -42,7 +42,12 @@ void Actor::moveTo(const vec3& location)
     m_pos = location;
 }
 
-void Actor::damage(uint32_t damage)
+void Actor::damage(uint32_t dmg)
+{
+    damage(dmg, {});
+}
+
+void Actor::damage(uint32_t damage, const vec3& impulse)
 {
     if (damage == 0) return;
     if (m_health == 0) return;
@@ -57,13 +62,13 @@ void Actor::damage(uint32_t damage)
     {
         m_health = 0;
         OnDamage(this, damage);
-        onDeath(damage);
+        onDeath(damage, impulse);
     }
 }
 
 void Actor::kill()
 {
-    onDeath(m_health);
+    onDeath(m_health, {});
     m_health = 0;
 }
 
@@ -85,7 +90,7 @@ bool Actor::heal(uint32_t health)
     return false;
 }
 
-void Actor::onDeath(uint32_t damage)
+void Actor::onDeath(uint32_t damage, const vec3& impulse)
 {
     OnDie(this);
 }

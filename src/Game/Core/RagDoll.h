@@ -19,6 +19,8 @@ public:
     RagDoll(Render::ArticulatedObject* object);
     ~RagDoll();
 
+    void applyImpulse(const vec3& impulse);
+
     void remove();
     void update(float dt) override;
 
@@ -29,6 +31,12 @@ private:
 #ifdef _DEBUG
     void initDebugData();
 #endif
+
+    bool isMoving();
+    void deactivate();
+
+private:
+    bool m_active;
 
     vec3 m_pos;
 
@@ -52,9 +60,6 @@ public:
 private:
     void onCollide(const vec3& normal, float impulse) override;
     void hit(const vec3& point, const vec3& direction, uint32_t power) override;
-
-private:
-    vec3 m_center;
 };
 
 class RagDollBone : public Physics::RigidBody

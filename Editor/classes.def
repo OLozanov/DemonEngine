@@ -9,7 +9,7 @@ class Medkit 100
 class Trooper 500
 {
     category = 'enemies'
-    mesh = 'Enemies/trooper.msh'
+    mesh = 'Enemies/trooper01.msh'
 }
 
 enum Item

@@ -832,7 +832,7 @@ void Game::destroyBarrel(Breakable* barrel)
 
     delete barrel;
 
-    Hitable::Impact(pos, 150);
+    Hitable::Impact(pos, 300);
 
     constexpr int N = 3;
 
@@ -877,16 +877,17 @@ void Game::destroyBarrel(Breakable* barrel)
     });
 }
 
-void Game::onCharacterDeath(Character* character)
+void Game::onCharacterDeath(Character* character, const vec3& impulse)
 {
     RagDoll* ragdoll = new RagDoll(character);
     m_objects.append(ragdoll);
 
     m_objects.remove(character);
-    m_physicsManager.removeRigidBody(character);
     m_sceneManager.removeObject(character);
     m_sceneManager.unregisterSkeletalObject(character);
     delete character;
+
+    ragdoll->applyImpulse(impulse);
 }
 
 void Game::onConsoleCommand(const std::string& cmd)
