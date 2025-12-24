@@ -12,20 +12,23 @@ namespace GameLogic
 
 constexpr vec3 cbbox = { 0.2, 0.5, 0.2 };
 
-Character::Character(const vec3& pos, float ang, Model* model)
-: Actor(cbbox, pos)
-, ArticulatedObject(model)
+Character::Character(const vec3& pos, float ang, const CharacterParams& params)
+: Actor(params.bbox, pos, params.mass, params.health)
+, ArticulatedObject(ResourceManager::GetModel(params.model))
 , m_staticCollision(new Collision::BoxCollisionShape(m_orientation, m_pos, Actor::m_bbox))
 , m_staticBody(m_staticCollision, { -Actor::m_bbox, Actor::m_bbox }, collision_actor)
 , m_ang(ang)
 , m_timer(0)
 , m_state(State::Idle)
-, m_damage(5)
-, m_attackDistance(2.0)
-, m_attackTime(75 / 5 * default_frame_rate)
-, m_speed(1.2)
+, m_damage(params.damage)
+, m_attackDistance(params.attackDistance)
+, m_attackTime(params.attackTime)
+, m_speed(params.speed)
 , m_hit(false)
 , m_distribution(0.0, 1.0)
+, m_weaponBone(params.weaponBone)
+, m_weaponTransform(mat4::Translate(params.weaponPos) * 
+					mat4::Rotate(params.weaponRot.x, params.weaponRot.y, params.weaponRot.z))
 {
 	m_layers = collision_hitable | collision_character;
 	m_object = static_cast<Hitable*>(this);
@@ -36,10 +39,10 @@ Character::Character(const vec3& pos, float ang, Model* model)
 
 	Physics::PhysicsManager::GetInstance().addStationaryBody(&m_staticBody);
 
-    m_animations = { { 0, 30 },
-                     { 30, 70 },
-                     { 70, 80 },
-                     { 80, 100 } };
+    m_animations = { params.idleAnim,
+                     params.moveAnim,
+                     params.attackAnim,
+                     params.deathAnim };
 
     setAnimation(m_animations[0]);
 
@@ -89,7 +92,7 @@ void Character::onCollide(const vec3& normal, float impulse)
 {
 	if (fabs(impulse) > 20.0f)
 	{
-		onDeath(m_health, normal * impulse * 12.0f);
+		onDeath(m_health, normal * impulse * 10.0f);
 		m_health = 0;
 	}
 }
@@ -104,11 +107,8 @@ void Character::update(float dt)
 
 	if (m_weapon)
 	{
-		const mat4& handTransform = getBoneTransform(15);
-
-		mat4 weaponTransform = m_omat[0] * handTransform *
-							   mat4::Translate({0.26f, 0.0f, 0.03f }) *
-							   mat4::Rotate(math::pi * 0.5f, 0, 0);
+		const mat4& handTransform = getBoneTransform(m_weaponBone);
+		mat4 weaponTransform = m_omat[0] * handTransform * m_weaponTransform;
 
 		m_weapon->setMat(weaponTransform);
 		Render::SceneManager::GetInstance().moveObject(m_weapon.get());

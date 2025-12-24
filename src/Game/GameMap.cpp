@@ -50,6 +50,23 @@ const VehicleParams JeepParams = { {-0.35f, 0.7f, 0.0f},      // viewPoint
                                    _countof(JeepWheels),      // numWheels
                                    JeepWheels };              // wheelPos
 
+const Character::CharacterParams TrooperParams = { "enemies/trooper01.msh",                                 // model;
+                                                   { 0.2f, 0.5f, 0.2f },                                    // bbox;
+                                                   40.0f,                                                   // mass;
+                                                   1.2f,                                                    // speed;
+                                                   25,                                                      // health;
+                                                   5,                                                       // damage;
+                                                   2.0f,                                                    // attackDistance;
+                                                   75 / 5 * Render::ArticulatedObject::default_frame_rate,  // attackTime;
+                                                   15,                                                      // weaponBone;
+                                                   {0.26f, 0.0f, 0.03f },                                   // weaponPos;
+                                                   {math::pi * 0.5f, 0, 0},                                 // weaponRot;
+                                                   { 0, 30 },                                               // idleAnim
+                                                   { 30, 70 },                                              // moveAnim
+                                                   { 70, 80 },                                              // attackAnim
+                                                   { 80, 100 }                                              // deathAnim
+                                                    };
+
 void readString(std::string& str, FILE* file)
 {
     uint16_t len;
@@ -516,9 +533,13 @@ void Game::loadObjects(FILE* file)
         if (otag == ObjectType::object_player_start)
         {
             vec3 pos;
+            float ang;
+
             fread(&pos, sizeof(vec3), 1, file);
+            fread(&ang, sizeof(float), 1, file);
 
             m_player.moveTo(pos);
+            m_playerCamera.setAngles(0.0f, ang + 180.0f);
         }
 
         if (otag == ObjectType::object_map_finish)
@@ -617,7 +638,7 @@ void Game::loadEntities(FILE* file)
 
         if (eclass == EntityClass::Barrel)
         {
-            Breakable* object = new Breakable(pos, mat, 100, 60,
+            Breakable* object = new Breakable(pos, mat, 20, 60,
                                               ResourceManager::GetModel("Tech/barrel.msh"),
                                               nullptr,
                                               nullptr,
@@ -693,7 +714,7 @@ void Game::loadEntities(FILE* file)
 
         if (eclass == EntityClass::Medkit)
         {
-            Item* object = new Item(pos, mat, 0.1, 20, ResourceManager::GetModel("Items/medkit.msh"));
+            Item* object = new Item(pos, mat, 0.1f, 20.0f, ResourceManager::GetModel("Items/medkit.msh"));
 
             object->OnPickup.bind([this, object]() {
                 pickMedkit(object);
@@ -706,7 +727,7 @@ void Game::loadEntities(FILE* file)
         {
             float rot = atan2(-mat[0].z, mat[0].x);
 
-            Character* actor = new Character(pos, rot, ResourceManager::GetModel("enemies/trooper01.msh"));
+            Character* actor = new Character(pos, rot, TrooperParams);
             m_objects.append(actor);
 
             actor->OnDeath.bind_async(m_asyncQueue, [this](Character* character, const vec3& impulse)

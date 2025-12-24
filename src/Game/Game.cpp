@@ -685,7 +685,7 @@ void Game::weaponFire()
         if (traceInfo.object)
         {
             vec3 point = camera.pos() + direction * traceInfo.dist;
-            reinterpret_cast<Hitable*>(traceInfo.object)->hit(point, direction, 25);
+            reinterpret_cast<Hitable*>(traceInfo.object)->hit(point, direction, 5);
         }
 
         if (traceInfo.dist < 200)
@@ -832,7 +832,7 @@ void Game::destroyBarrel(Breakable* barrel)
 
     delete barrel;
 
-    Hitable::Impact(pos, 300);
+    Hitable::Impact(pos, 150);
 
     constexpr int N = 3;
 

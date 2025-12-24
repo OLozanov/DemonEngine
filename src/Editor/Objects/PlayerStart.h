@@ -2,7 +2,7 @@
 
 #include "Object.h"
 
-class PlayerStart : public BoxObject
+class PlayerStart : public OrientedBoxObject
 {
 public:
 

@@ -118,6 +118,8 @@ void Vehicle::use()
     OnMount(this);
 
     for (const auto& suspension : m_suspension) suspension->setHandbrake(false);
+
+    Physics::PhysicsManager::GetInstance().removeStationaryBody(&m_staticBody);
 }
 
 void Vehicle::dismount()
@@ -128,6 +130,8 @@ void Vehicle::dismount()
     m_turnRight = false;
 
     for (const auto& suspension : m_suspension) suspension->setHandbrake(true);
+
+    Physics::PhysicsManager::GetInstance().addStationaryBody(&m_staticBody);
 }
 
 void Vehicle::input(int key, bool keyDown)

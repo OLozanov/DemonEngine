@@ -180,11 +180,14 @@ Object* ObjectFactory::CreateTrigger(FILE* file)
 Object* ObjectFactory::CreatePlayerStart(FILE* file)
 {
     vec3 pos;
+    float ang;
 
     fread(&pos, sizeof(vec3), 1, file);
+    fread(&ang, sizeof(float), 1, file);
 
     PlayerStart* ps = new PlayerStart();
     ps->setPos(pos);
+    ps->setAngle(ang);
 
     return ps;
 }

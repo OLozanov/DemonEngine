@@ -17,7 +17,7 @@ public:
 
 public:
 
-    Actor(const vec3& bbox, const vec3& pos);
+    Actor(const vec3& bbox, const vec3& pos, float mass = 40.0f, uint32_t health = 100);
 
     const vec3& center() const override { return m_pos; }
     void hit(const vec3& point, const vec3& direction, uint32_t power) override;

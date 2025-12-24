@@ -30,10 +30,29 @@ public:
         Dead = 3
     };
 
+    struct CharacterParams
+    {
+        const std::string& model;
+        vec3 bbox;
+        float mass;
+        float speed;
+        uint32_t health;
+        uint32_t damage;
+        float attackDistance;
+        float attackTime;
+        int weaponBone;
+        vec3 weaponPos;
+        vec3 weaponRot;
+        AnimSet idleAnim;
+        AnimSet moveAnim;
+        AnimSet attackAnim;
+        AnimSet deathAnim;
+    };
+
     using CharacterEvent = Event<void(Character*, const vec3&)>;
 
 public:
-    Character(const vec3& pos, float ang, Model* model);
+    Character(const vec3& pos, float ang, const CharacterParams& params);
     ~Character();
 
     void onDeath(uint32_t damage, const vec3& impulse) override;
@@ -66,6 +85,9 @@ private:
     bool m_hit;
 
     const float m_speed;
+
+    const size_t m_weaponBone;
+    const mat4 m_weaponTransform;
 
     std::mt19937 m_randomGenerator;
     std::uniform_real_distribution<float> m_distribution;

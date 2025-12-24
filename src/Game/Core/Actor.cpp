@@ -9,12 +9,12 @@
 namespace GameLogic
 {
 
-Actor::Actor(const vec3& bbox, const vec3& pos)
-: RigidBody({}, 40, 0.0, 0.01, collision_actor, false, true)
+Actor::Actor(const vec3& bbox, const vec3& pos, float mass, uint32_t health)
+: RigidBody({}, mass, 0.0, 0.01, collision_actor, false, true)
 , m_bbox(bbox)
 , m_target(nullptr)
-, m_health(100)
-, m_maxHealth(100)
+, m_health(health)
+, m_maxHealth(health)
 {
     //m_bbox = vec3(0.25, 0.5, 0.25);
     BBox box = { -m_bbox, m_bbox };
@@ -29,7 +29,7 @@ void Actor::updateBBox()
 
 void Actor::hit(const vec3& point, const vec3& direction, uint32_t power)
 {
-    damage(power, power > 30 ? direction * power * 10 : vec3());
+    damage(power, power > 30 ? direction * power * 20.0f : vec3());
 }
 
 void Actor::update(float dt)
