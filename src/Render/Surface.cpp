@@ -353,7 +353,7 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
 
     std::uniform_real_distribution<float> distribution(-0.25f, 0.25f);
 
-    std::vector<vec3> points;
+    std::vector<vec4> points;
 
     for (int k = 0; k < xsize - 1; k++)
     {
@@ -379,8 +379,10 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
 
             if (occluded) continue;*/
 
-            auto isOccluded = [&layers, &layerDetails, v, xsize](float x, float y) -> bool
+            auto occlusionAlpha = [&layers, &layerDetails, v, xsize](float x, float y) -> float
             {
+                float alpha = 0.0f;
+
                 for (size_t l = layerDetails.layer; l < layers.size(); l++)
                 {
                     float a = layers[l].mask[v];
@@ -391,17 +393,15 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
                     float a1 = a * (1.0 - x) + b * x;
                     float a2 = c * (1.0 - x) + d * x;
 
-                    float alpha = a1 * (1.0 - y) + a2 * y;
-
-                    if (alpha > 0.45) return true;
+                    alpha += a1 * (1.0 - y) + a2 * y;
                 }
 
-                return false;
+                return std::min(alpha, 1.0f);
             };
 
-            auto belongsToLayer = [&layers, &layerDetails, v, xsize](float x, float y) -> bool
+            auto layerAlpha = [&layers, &layerDetails, v, xsize](float x, float y) -> float
             {
-                if (layerDetails.layer == 0) return true;
+                if (layerDetails.layer == 0) return 1.0f;
 
                 size_t l = layerDetails.layer - 1;
 
@@ -415,9 +415,7 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
 
                 float alpha = a1 * (1.0 - y) + a2 * y;
 
-                if (alpha > 0.6f) return true;
-
-                return false;
+                return alpha;
             };
 
             int densx = std::max(1.0f, x.length() * layerDetails.density);
@@ -436,11 +434,15 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
                     float xpos = granx * (l + 0.5f + xdev);
                     float ypos = grany * (m + 0.5f + ydev);
 
-                    if (!belongsToLayer(xpos, ypos) || isOccluded(xpos, ypos)) continue;
+                    float alpha = layerAlpha(xpos, ypos) - occlusionAlpha(xpos, ypos);
+
+                    if (alpha < 0.3f) continue;
+
+                    float scale = std::max(alpha, 0.45f);
 
                     vec3 pt = verts[v].position + x * xpos + y * ypos;
 
-                    points.push_back(pt);
+                    points.push_back(vec4(pt, scale));
                 }
             }
 

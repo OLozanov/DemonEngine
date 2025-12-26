@@ -1472,7 +1472,7 @@ void RenderingPipeline::SetupGBufferShader()
         { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         { "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "INSTANCEPOS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+        { "INSTANCEPOS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
     };
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescInstanced = {};
@@ -1481,6 +1481,7 @@ void RenderingPipeline::SetupGBufferShader()
     psoDescInstanced.VS = CD3DX12_SHADER_BYTECODE(vertexShaderInstanced.Get());
     psoDescInstanced.PS = CD3DX12_SHADER_BYTECODE(pixelShaderInstanced.Get());
     psoDescInstanced.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    psoDescInstanced.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
     psoDescInstanced.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     psoDescInstanced.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     psoDescInstanced.DepthStencilState.StencilEnable = TRUE;

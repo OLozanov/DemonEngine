@@ -46,16 +46,15 @@ Texture2D height_map : register(t5);
 
 SamplerState g_sampler : register(s0);
 
-PSInput VSMain(float3 position : POSITION, float4 tcoord : TEXCOORD, float3 normal : NORMAL, float3 tangent : TANGENT, float3 binormal : BINORMAL, float3 instpos : INSTANCEPOS)
+PSInput VSMain(float3 position : POSITION, float4 tcoord : TEXCOORD, float3 normal : NORMAL, float3 tangent : TANGENT, float3 binormal : BINORMAL, float4 instpos : INSTANCEPOS)
 {
     PSInput result;
 
-    float4 pos = float4(position + instpos, 1.0);
+    float4 pos = float4(position * instpos.w + instpos, 1.0);
     
     result.position = mul(projViewMat, mul(modelMat, pos));
     result.tcoord = tcoord;
     
-
     float3x3 normalMat = modelMat;
     
 	result.normal = mul(normalMat, normal);
@@ -69,6 +68,7 @@ PSOutput PSMain(PSInput input) : SV_TARGET
 {
 	float4 color = diffuse_map.Sample(g_sampler, input.tcoord);
     
+	if (input.position.w > 80.0) discard;
     if (color.w < 0.2) discard;
     
 	float3 norm_local = normal_map.Sample(g_sampler, input.tcoord);
