@@ -82,7 +82,8 @@ float DirectedShadow(float3 world_pos, float3 norm)
 		shadowLod = 1;
 		blurScale = 0.33;
 	}
-    else  if (abs(ltpos.x) > 2.95 || abs(ltpos.y) > 2.95)
+    
+	if (abs(ltpos.x) > 2.95 || abs(ltpos.y) > 2.95)
     {
     	shadowLod = 2;
 		blurScale = 0.33 * 0.33;

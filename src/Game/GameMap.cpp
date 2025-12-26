@@ -625,7 +625,7 @@ void Game::loadEntities(FILE* file)
             Container* container = new Container(pos, mat, 0, item);
             m_objects.append(container);
 
-            container->OnDestroy.bind([this](Breakable* object) { 
+            container->OnDestroy.bind_async(m_asyncQueue, [this](Breakable* object) { 
                 destroyContainer(reinterpret_cast<Container*>(object));
             });
         }

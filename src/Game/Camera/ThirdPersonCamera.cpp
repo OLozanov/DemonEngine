@@ -38,15 +38,15 @@ void ThirdPersonCamera::onScroll(int delta)
 
 void ThirdPersonCamera::update()
 {
-	float tsin = sinf(m_tilt / 180.0f * math::pi);
-	float tcos = cosf(m_tilt / 180.0f * math::pi);
+	vec3 yaxis = { 0.0f, 1.0f, 0.0f };
 
-	vec3 zaxis = { 0.0f, -tsin, tcos };
-	vec3 xaxis = { 1.0f, 0.0f, 0.0f };
-	vec3 yaxis = zaxis ^ xaxis;
+	const mat3& objmat = m_object->orientation();
+	vec3 xaxis = objmat[0] - yaxis * (yaxis * objmat[0]);
+	xaxis.normalize();
+	
+	vec3 zaxis = xaxis ^ yaxis;
 
-	mat3 cammat = m_object->orientation() * mat3::RotateY(m_rot / 180.0f * math::pi) * mat3(xaxis, yaxis, zaxis);
-
+	mat3 cammat = mat3(xaxis, yaxis, zaxis) * mat3::RotateY(m_rot / 180.0f * math::pi) * mat3::RotateX(m_tilt / 180.0f * math::pi);
 	vec3 pos = m_object->location() - cammat[2] * m_dist;
 
 	m_camera.update(pos, cammat);

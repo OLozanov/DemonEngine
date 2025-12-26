@@ -832,8 +832,6 @@ void Game::destroyBarrel(Breakable* barrel)
 
     delete barrel;
 
-    Hitable::Impact(pos, 150);
-
     constexpr int N = 3;
 
     std::uniform_real_distribution<float> distribution(0.0f, 5.0f);
@@ -874,6 +872,10 @@ void Game::destroyBarrel(Breakable* barrel)
     {
         m_objects.remove(obj);
         delete obj;
+    });
+
+    m_asyncQueue.invoke([this, pos]() {
+        Hitable::Impact(pos, 150);
     });
 }
 

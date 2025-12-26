@@ -11,7 +11,7 @@ const std::string Container::ContainerModel[] = {"Containers/crate.msh",
                                                  "Containers/barrel.msh"};
 
 const float Container::ContainerMass[] = {160, 30, 80};
-const float Container::ContainerSolidity[] = {300, 150, 250};
+const float Container::ContainerSolidity[] = {30, 10, 25};
 
 Container::Container(const vec3& pos, const mat3& rot, uint32_t type, Item item)
 : Breakable(pos, rot, ContainerSolidity[type], ContainerMass[type], 
