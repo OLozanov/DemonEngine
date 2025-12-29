@@ -87,6 +87,62 @@ bool FrustumObjVis(const vec3& pos, const vec3* frustum, const vec4& plane, cons
     return FrustumTest(pos, frustum, plane, box, bbpos, &rot[0]);
 }
 
+bool FrustumAABBVis(const Frustum& frustum, const vec3& bbpos, const vec3& size)
+{
+    return frustum.test(size, bbpos);
+}
+
+bool FrustumLeafVis(const Frustum& frustum, const vec4& plane, const BBox& bbox)
+{
+    vec3 mid = (bbox.min + bbox.max) * 0.5;
+    vec3 bbpos = mid;
+
+    vec3 box = bbox.max - mid;
+
+    static const vec3 axis[3] = { {1, 0, 0},
+                                  {0, 1, 0},
+                                  {0, 0, 1} };
+
+    return frustum.test(box, bbpos);
+}
+
+bool FrustumObjVis(const Frustum& frustum, const vec4& plane, const DisplayObject& obj)
+{
+    const BBox& bbox = obj.bbox();
+    const mat4& mat = obj.mat();
+
+    vec3 opos = mat[3];
+
+    const mat3 rot = mat;
+
+    vec3 mid = (bbox.min + bbox.max) * 0.5;
+    vec3 bbpos = opos + rot * mid;
+
+    vec3 box = bbox.max - mid;
+
+    return frustum.test(box, bbpos, rot);
+}
+
+float PlaneDist(const vec4& plane, const DisplayObject* object)
+{
+    const BBox& bbox = object->bbox();
+    const mat4& mat = object->mat();
+
+    vec3 opos = mat[3];
+
+    const mat3 rot = mat;
+
+    vec3 mid = (bbox.min + bbox.max) * 0.5;
+    vec3 bpos = opos + rot * mid;
+
+    vec3 box = bbox.max - mid;
+
+    float r = fabs(rot[0] * plane.xyz) * box.x + fabs(rot[1] * plane.xyz) * box.y + fabs(rot[2] * plane.xyz) * box.z;
+    float dist = plane.xyz * bpos + plane.w;
+
+    return dist - r;
+}
+
 bool OBBVis(vec3 pos, const Portal& portal, vec3 box, vec3 bpos, vec3* axis)
 {
     unsigned long vnum;

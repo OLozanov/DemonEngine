@@ -16,6 +16,33 @@ Scene::Scene(World& world, uint8_t flags)
     m_transparentGeometry.mat = &Render::World::GlobalMat();
 }
 
+void Scene::addObjectData(DisplayObject* object)
+{
+    for (const DisplayBlock& block : object->displayData())
+    {
+        if (block.hide) continue;
+    
+        switch (block.type)
+        {
+        case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
+        case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
+        case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
+        case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
+        case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
+        case DisplayBlock::display_debug: m_debugList.push_back(&block); break;
+        }
+    }
+    
+    if (!(m_flags && vis_instanced)) return;
+    if (object->instanceData().empty()) return;
+
+    float dist = Clipping::PlaneDist(m_screenPlane, object);
+
+    if (dist > 60) return;
+    
+    for (const InstanceData& data : object->instanceData()) m_instancedList.push_back(&data);
+}
+
 void Scene::markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustum)
 {
     Index lfid = 0;
@@ -116,27 +143,7 @@ void Scene::markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3
 
         obj->setFrame(m_frame);
 
-        if (Clipping::FrustumObjVis(pos, frustum, screenPlane, *obj))
-        {
-            for (const DisplayBlock& block : obj->displayData())
-            {
-                if (block.hide) continue;
-
-                switch (block.type)
-                {
-                case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-                case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
-                case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-                case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
-                case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
-                case DisplayBlock::display_debug: m_debugList.push_back(&block); break;
-                }
-            }
-
-            if (obj->instanceData().empty()) continue;
-
-            for (const InstanceData& data : obj->instanceData()) m_instancedList.push_back(&data);
-        }
+        if (Clipping::FrustumObjVis(pos, frustum, screenPlane, *obj)) addObjectData(obj);
     }
 
     for (FogVolume* volume : zone.fogVolumes)
@@ -315,28 +322,7 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
                 if(!(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
             }
 
-            if (Clipping::ObjVis(pos, portal, obj))
-            {
-                if (obj->frame() != m_frame)
-                {
-                    obj->setFrame(m_frame);
-
-                    for (const DisplayBlock& block : obj->displayData())
-                    {
-                        switch (block.type)
-                        {
-                        case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-                        case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
-                        case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-                        case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
-                        }
-                    }
-
-                    if (obj->instanceData().empty()) continue;
-
-                    for (const InstanceData& data : obj->instanceData()) m_instancedList.push_back(&data);
-                }
-            }
+            if (Clipping::ObjVis(pos, portal, obj)) addObjectData(obj);
         }
 
         zoneVisibility(pos, opzoneInd, zoneInd, pind);
@@ -408,31 +394,7 @@ void Scene::zoneVisibility(vec3 pos, const vec4& screenPlane, const vec3* frustu
         //Object visibility
         for (DisplayObject* obj : opzone.objects)
         {
-            if (Clipping::ObjVis(pos, portal, obj))
-            {
-                if (obj->frame() != m_frame)
-                {
-                    obj->setFrame(m_frame);
-
-                    for (const DisplayBlock& block : obj->displayData())
-                    {
-                        if (block.hide) continue;
-
-                        switch (block.type)
-                        {
-                        case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-                        case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
-                        case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-                        case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
-                        case DisplayBlock::display_sprite: if(block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
-                        }
-                    }
-
-                    if (obj->instanceData().empty()) continue;
-
-                    for (const InstanceData& data : obj->instanceData()) m_instancedList.push_back(&data);
-                }
-            }
+            if (Clipping::ObjVis(pos, portal, obj)) addObjectData(obj);
         }
 
         // Fog volumes visibility
@@ -455,6 +417,7 @@ void Scene::zoneVisibility(vec3 pos, const vec4& screenPlane, const vec3* frustu
 void Scene::calculateVisibility(const vec3& pos, const vec4& screenPlane, const vec3* frustum, uint64_t frame)
 {
     m_frame = frame;
+    m_screenPlane = screenPlane;
 
     m_skyVisible = false;
 

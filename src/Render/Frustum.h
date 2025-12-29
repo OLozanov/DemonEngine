@@ -12,6 +12,7 @@ public:
     Frustum() = default;
 
     void update(const mat4& mat);
+    bool test(const vec3& pos, const vec3& bbox, const mat3& axis) const;
     bool test(const vec3& pos, const vec3& bbox) const;
     bool test(const BBox& bbox) const;
 

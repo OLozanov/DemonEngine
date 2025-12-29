@@ -3,15 +3,23 @@
 #include "math/math3d.h"
 #include "Render/World.h"
 
+#include "Render/Frustum.h"
+
 namespace Render
 {
 
 namespace Clipping
 {
 
+bool FrustumAABBVis(const Frustum& frustum, const vec3& bbpos, const vec3& size);
+bool FrustumLeafVis(const Frustum& frustum, const vec4& plane, const BBox& bbox);
+bool FrustumObjVis(const Frustum& frustum, const vec4& plane, const DisplayObject& obj);
+
 bool FrustumAABBVis(const vec3& pos, const vec3* frustum, const vec4& plane, const vec3& bbpos, const vec3& size);
 bool FrustumLeafVis(const vec3& pos, const vec3* frustum, const vec4& plane, const BBox& bbox);
 bool FrustumObjVis(const vec3& pos, const vec3* frustum, const vec4& plane, const DisplayObject& obj);
+
+float PlaneDist(const vec4& plane, const DisplayObject* obj);
 
 bool LeafVis(const vec3& pos, const Portal& portal, const BBox& bbox);
 bool ObjVis(const vec3& pos, const Portal& portal, const DisplayObject* obj);

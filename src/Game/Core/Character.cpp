@@ -90,7 +90,7 @@ void Character::onDeath(uint32_t damage, const vec3& impulse)
 
 void Character::onCollide(const vec3& normal, float impulse)
 {
-	if (fabs(impulse) > 20.0f)
+	if (fabs(impulse) > 50.0f)
 	{
 		onDeath(m_health, normal * impulse * 10.0f);
 		m_health = 0;

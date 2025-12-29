@@ -891,7 +891,9 @@ void Game::loadSurfaces(FILE* file)
             if (cresx != 0)
                 fread(clvertices.data(), sizeof(vec3), clvertices.size(), file);
 
-            Render::Surface* surface = (layerNum > 0) ? new Render::LayeredSurface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices, layers, layerDetails) :
+            bool layered = layerNum > 0 || layerDetailsNum > 0;
+
+            Render::Surface* surface = layered ? new Render::LayeredSurface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices, layers, layerDetails) :
                                                         new Render::Surface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices);
         
             const BBox& bbox = surface->bbox();

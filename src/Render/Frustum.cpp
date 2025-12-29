@@ -42,6 +42,21 @@ void Frustum::update(const mat4& mat)
 	m_planes[5].w = mat[3].w - mat[3].z;
 }
 
+bool Frustum::test(const vec3& pos, const vec3& bbox, const mat3& axis) const
+{
+	for (size_t i = 0; i < 6; i++)
+	{
+		const vec4& plane = m_planes[i];
+
+		float r = fabs(axis[0] * plane.xyz) * bbox.x + fabs(axis[1] * plane.xyz) * bbox.y + fabs(axis[2] * plane.xyz) * bbox.z;
+		float dist = plane.xyz * pos + plane.w;
+
+		if (dist < -r) return false;
+	}
+
+	return true;
+}
+
 bool Frustum::test(const vec3& pos, const vec3& bbox) const
 {
     for (size_t i = 0; i < 6; i++)

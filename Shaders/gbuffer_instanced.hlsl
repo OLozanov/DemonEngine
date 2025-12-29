@@ -50,7 +50,8 @@ PSInput VSMain(float3 position : POSITION, float4 tcoord : TEXCOORD, float3 norm
 {
     PSInput result;
 
-    float4 pos = float4(position * instpos.w + instpos, 1.0);
+	float3 scaledpos = float3(position.x, position.y * instpos.w, position.z);
+    float4 pos = float4(scaledpos + instpos.xyz, 1.0);
     
     result.position = mul(projViewMat, mul(modelMat, pos));
     result.tcoord = tcoord;
@@ -68,7 +69,7 @@ PSOutput PSMain(PSInput input) : SV_TARGET
 {
 	float4 color = diffuse_map.Sample(g_sampler, input.tcoord);
     
-	if (input.position.w > 80.0) discard;
+	if (input.position.w > 60.0) discard;
     if (color.w < 0.2) discard;
     
 	float3 norm_local = normal_map.Sample(g_sampler, input.tcoord);

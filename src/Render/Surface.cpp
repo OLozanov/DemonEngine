@@ -295,13 +295,16 @@ LayeredSurface::LayeredSurface(const vec3& pos,
                                m_indexBuffer,
                                &m_displayElement);
 
-    m_displayData.emplace_back(DisplayBlock::display_layered,
-                               &m_mat,
-                               m_vertexBuffer,
-                               m_indexBuffer,
-                               layerDisplayList);
+    if (!layers.empty())
+    {
+        m_displayData.emplace_back(DisplayBlock::display_layered,
+                                   &m_mat,
+                                   m_vertexBuffer,
+                                   m_indexBuffer,
+                                   layerDisplayList);
 
-    m_displayData.back().layersData = m_layersData.data();
+        m_displayData.back().layersData = m_layersData.data();
+    }
 
     m_mat = mat4::Translate(pos);
 
@@ -364,21 +367,6 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
             vec3 x = verts[v + 1].position - verts[v].position;
             vec3 y = verts[v + xsize].position - verts[v].position;
 
-            //float xdev = distribution(randomGenerator);
-            //float ydev = distribution(randomGenerator);
-
-            /*bool occluded = false;
-
-            for (size_t l = layerDetails.layer; l < layers.size(); l++)
-            {
-                if (layers[l].mask[v] > 0.5) { occluded = true; break; }
-                if (layers[l].mask[v + 1] > 0.5) { occluded = true; break; }
-                if (layers[l].mask[v + xsize] > 0.5) { occluded = true; break; }
-                if (layers[l].mask[v + xsize + 1] > 0.5) { occluded = true; break; }
-            }
-
-            if (occluded) continue;*/
-
             auto occlusionAlpha = [&layers, &layerDetails, v, xsize](float x, float y) -> float
             {
                 float alpha = 0.0f;
@@ -438,11 +426,9 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
 
                     if (alpha < 0.3f) continue;
 
-                    float scale = std::max(alpha, 0.45f);
-
                     vec3 pt = verts[v].position + x * xpos + y * ypos;
 
-                    points.push_back(vec4(pt, scale));
+                    points.push_back(vec4(pt, alpha));
                 }
             }
 

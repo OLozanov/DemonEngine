@@ -39,6 +39,8 @@ class Scene
     uint64_t m_frame;
     Index m_zone;
 
+    vec4 m_screenPlane;
+
     bool m_skyVisible;
 
 public:
@@ -48,7 +50,8 @@ public:
         vis_objects = 2,
         vis_static = 4,
         vis_dynamic = 8,
-        vis_restrict_dist = 16,
+        vis_instanced = 16,
+        vis_restrict_dist = 32,
     };
 
 public:
@@ -80,6 +83,8 @@ public:
     bool isGlobalLit();
 
 private:
+    void addObjectData(DisplayObject* object);
+
     void markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustum);
     void markAll(const vec3& pos);
     void markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3* frustum, Index zone);
