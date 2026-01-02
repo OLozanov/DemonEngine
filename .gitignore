@@ -47,6 +47,10 @@ settings.cfg
 # Visual Studio
 src/.vs/
 src/x64/
+src/FontExporter/x64/
+
+# Fonts
+Font/
 
 *.vcxproj.user
 *.opendb
