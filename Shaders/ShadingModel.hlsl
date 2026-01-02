@@ -1,5 +1,13 @@
 static const float pi = 3.1415;
 
+float3 CorrectNormal(float3 n, float3 v)
+{
+	float NdotV = dot(n, v);
+	n += (2.0 * saturate(-NdotV)) * v;
+
+	return n;
+}
+
 float NormalDistribution(float3 n, float3 h, float a)
 {   
     float a2 = a*a;
@@ -21,7 +29,7 @@ float GeometrySchlickGGX(float NdotV, float k)
 float GeometryFunction(float3 n, float3 v, float3 l, float a)
 {
     float k = (a + 1)*(a + 1)/8.0;
-    
+
     float NdotV = max(dot(n, v), 0.0);
     float NdotL = max(dot(n, l), 0.0);
     float ggx1 = GeometrySchlickGGX(NdotV, k);
@@ -46,6 +54,8 @@ float3 BRDF(float3 n,               // surface normal
 	float3 h = normalize(l + v); // half vector
 
     float ltCos = max(0.0, dot(l, n));
+
+	n = CorrectNormal(n, v);
 
     float ndf = NormalDistribution(n, h, roughness);
     float geom = GeometryFunction(n, v, l, roughness);

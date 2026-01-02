@@ -88,6 +88,21 @@ void Character::onDeath(uint32_t damage, const vec3& impulse)
 	OnDeath(this, impulse);
 }
 
+bool Character::targetVisibility()
+{
+	if (!m_target) return false;
+
+	vec3 dir = m_target->pos() - m_pos;
+	float dist = dir.normalize();
+
+	Collision::TraceRayInfo tinfo;
+
+	if (Physics::PhysicsManager::GetInstance().traceRay(m_pos, dir, collision_solid | collision_target, tinfo, dist))
+		if (tinfo.object == m_target) return true;
+
+	return false;
+}
+
 void Character::onCollide(const vec3& normal, float impulse)
 {
 	if (fabs(impulse) > 50.0f)
@@ -116,7 +131,7 @@ void Character::update(float dt)
 
 	bool attack = false;
 
-	if (m_state == State::Attack)
+	if (m_state == State::Attack && targetVisibility())
 	{
 		if (m_timer > dt) m_timer -= dt;
 		else startAnimation();
@@ -159,7 +174,7 @@ void Character::update(float dt)
 		}
 		else if (dist <= 10)
 		{
-			if (m_state != State::Move)
+			if (m_state != State::Move && targetVisibility())
 			{
 				m_state = State::Move;
 				setAnimation(m_animations[State::Move]);
@@ -178,7 +193,7 @@ void Character::update(float dt)
 			}
 		}
 
-		if ((m_pos.y - m_target->location().y) > 2.5)
+		if ((m_pos.y - m_target->location().y) > 2.5f)
 		{
 			if (m_state != State::Idle)
 			{

@@ -832,38 +832,45 @@ void Game::destroyBarrel(Breakable* barrel)
 
     delete barrel;
 
-    constexpr int N = 3;
+    m_asyncQueue.invoke([this, pos]() {
+        Hitable::Impact(pos, 150);
+    });
 
-    std::uniform_real_distribution<float> distribution(0.0f, 5.0f);
+    // Run this after explosion, otherwise scraps speed is too high
+    m_asyncQueue.invoke([this, pos]() {
+        constexpr int N = 3;
 
-    for (int i = 0; i < N; i++)
-    {
-        float ang = 360.0 / N * i;
-        mat3 mat = mat3::Rotate(0, ang / 180.0f * math::pi, 0);
+        std::uniform_real_distribution<float> distribution(0.0f, 5.0f);
 
-        vec3 fpos = pos + mat[0] * 0.2 + mat[2] * 0.2;
-        vec3 velocity = fpos - pos;
-        velocity.normalize();
-
-        fpos += mat[1] * 0.2;
-
-        float lifetime = 10.0f + distribution(m_randomGenerator);
-
-        Debris* scrap = new Debris(fpos, mat, lifetime, 0);
-
-        scrap->setVelocity(velocity * 6);
-
-        m_objects.append(scrap);
-
-        scrap->OnLifetimeExpires.bind_async(m_asyncQueue, [this](Debris* obj)
+        for (int i = 0; i < N; i++)
         {
-            m_physicsManager.removeRigidBody(obj);
-            m_sceneManager.removeObject(obj);
-            m_objects.remove(obj);
+            float ang = 360.0 / N * i;
+            mat3 mat = mat3::Rotate(0, ang / 180.0f * math::pi, 0);
 
-            delete obj;
-        });
-    }
+            vec3 fpos = pos + mat[0] * 0.2 + mat[2] * 0.2;
+            vec3 velocity = fpos - pos;
+            velocity.normalize();
+
+            fpos += mat[1] * 0.2;
+
+            float lifetime = 10.0f + distribution(m_randomGenerator);
+
+            Debris* scrap = new Debris(fpos, mat, lifetime, 0);
+
+            scrap->setVelocity(velocity * 6);
+
+            m_objects.append(scrap);
+
+            scrap->OnLifetimeExpires.bind_async(m_asyncQueue, [this](Debris* obj)
+                {
+                    m_physicsManager.removeRigidBody(obj);
+                    m_sceneManager.removeObject(obj);
+                    m_objects.remove(obj);
+
+                    delete obj;
+                });
+        }
+    });
 
     Explosion* explosion = new Explosion(pos, 5.0);
     m_objects.append(explosion);
@@ -872,10 +879,6 @@ void Game::destroyBarrel(Breakable* barrel)
     {
         m_objects.remove(obj);
         delete obj;
-    });
-
-    m_asyncQueue.invoke([this, pos]() {
-        Hitable::Impact(pos, 150);
     });
 }
 

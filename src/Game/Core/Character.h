@@ -64,6 +64,7 @@ protected:
     void setAnimation(const AnimSet& anim);
 
 private:
+    bool targetVisibility();
     void onCollide(const vec3& normal, float impulse) override;
 
 private:

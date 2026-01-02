@@ -28,11 +28,8 @@ class Player : public Actor
     bool m_walk = true;
 
     bool m_sitting = false;
-    bool m_canjump = true;
-    bool m_onfloor = false;
     bool m_tryStandUp = false;
 
-    float m_surfaceTilt;
     float m_headDist;
 
     const ClimbArea* m_climbArea;
@@ -49,9 +46,6 @@ class Player : public Actor
     static constexpr float SitDist = -(BBox.y - (CrouchBBox.y + CrouchHead));
 
     static constexpr vec3 ProbeBBox = vec3(0.199f, SitDiff + 0.05, 0.199f);
-
-    static constexpr float FallDamageThreshold = 10.0f;
-    static constexpr float FallDamageCoefficient = 0.3f;
 
 private:
 

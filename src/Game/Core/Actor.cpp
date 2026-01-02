@@ -95,4 +95,38 @@ void Actor::onDeath(uint32_t damage, const vec3& impulse)
     OnDie(this);
 }
 
+void Actor::testGroundHeight()
+{
+    auto& pm = Physics::PhysicsManager::GetInstance();
+
+    float height;
+    float tilt;
+
+    if (pm.testHeight(m_pos, m_bbox, collision_solid, height, tilt))
+    {
+        float stepheight = height - (m_pos.y - m_bbox.y);
+
+        constexpr float max = 0.25;
+        float min = m_canjump ? -max : 0;
+
+        if (stepheight > min && stepheight < max && tilt > 0.8)
+        {
+            if (m_velocity.y < -FallDamageThreshold) damage(-m_velocity.y * FallDamageCoefficient);
+
+            m_pos.y += stepheight + 0.001;
+            m_velocity.y = 0;
+            m_onfloor = true;
+            m_surfaceTilt = tilt;
+        }
+    }
+
+    m_canjump = m_onfloor;
+    m_onfloor = false;
+}
+
+void Actor::onUpdate(float dt)
+{
+    testGroundHeight();
+}
+
 } // namespace gamelogic

@@ -48,7 +48,10 @@ public:
 
 protected:
     void updateBBox();
+    void testGroundHeight();
+
     void onCollide(const vec3& normal, float impulse) override {}
+    void onUpdate(float dt) override;
 
     Actor* m_target;
 
@@ -57,6 +60,13 @@ protected:
     bool m_invulnerable;
     uint32_t m_maxHealth;
     uint32_t m_health;
+
+    bool m_canjump = true;
+    bool m_onfloor = false;
+    float m_surfaceTilt;
+
+    static constexpr float FallDamageThreshold = 10.0f;
+    static constexpr float FallDamageCoefficient = 0.3f;
 };
 
 } // namespace gamelogic
