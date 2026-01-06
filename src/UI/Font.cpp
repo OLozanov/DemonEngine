@@ -171,7 +171,7 @@ Font::Font(const std::string& fnt)
 
 long Font::charWidth(char chr) const
 {
-    return m_glyphs[(unsigned char)chr].width - 2;
+    return m_glyphs[(unsigned char)chr].width + m_glyphs[(unsigned char)chr].ox - 2 + Font::GlyphBorder;
 }
 
 long Font::textWidth(const std::string& str) const
@@ -182,10 +182,8 @@ long Font::textWidth(const std::string& str) const
     for (i = 0; i < str.size(); i++)
     {
         unsigned char ch = str[i];
-        width += m_glyphs[ch].width - 2;
+        width += m_glyphs[ch].width + m_glyphs[ch].ox - 2 + GlyphBorder;
     }
-
-    width += GlyphSpace * 2;
 
     return width;
 }

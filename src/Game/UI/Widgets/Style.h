@@ -2,6 +2,8 @@
 
 #include "math/math3d.h"
 
+#include <string>
+
 namespace GameLogic
 {
 namespace Widgets
@@ -20,6 +22,9 @@ public:
     static constexpr vec4 WidgetBgColor = { 0.0f, 0.6f, 0.8f, 1.0f };
     static constexpr vec4 WidgetBgColor2 = { 0.0f, 0.6f, 0.8f, 0.7f };
     static constexpr vec4 WidgetBgColorHighlight = { 1.0f, 0.99f, 0.79f, 1.0f };
+
+    static const std::string CaptionFont;
+    static const std::string CapitalFont;
 };
 
 } // namespace Widgets

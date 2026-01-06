@@ -347,6 +347,9 @@
     <ClCompile Include="Render\CompositeObject.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Game\UI\Widgets\Style.cpp">
+      <Filter>Source\Game\UI\Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Game.h">

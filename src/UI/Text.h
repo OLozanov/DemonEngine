@@ -49,7 +49,7 @@ public:
     //void onKeyUp(long key);
     void onClick(short x);
 
-	void draw(Canvas& canvas);
+	void display(Canvas& canvas);
 };
 
 } //namespace ui

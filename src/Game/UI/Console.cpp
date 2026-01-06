@@ -11,7 +11,7 @@ Console::Console()
 , m_cmdPtr(m_commands.end())
 , m_cmdText(5, m_height - 18, m_width)
 {
-	m_canvas.setFont("Tahoma");
+	m_canvas.setFont("Quantico");
 	m_canvas.setLineJointType(UI::JointType::Round);
 
 	m_cmdText.setFont(m_canvas.getFont());
@@ -89,12 +89,13 @@ void Console::onKeyDn(int key)
 
 	m_cmdText.onKeyPress(key);
 	updateCaretPos();
+
+	refresh();
 }
 
 void Console::updateCaretPos()
 {
-	//long cx = m_canvas.getFont()->textWidth(m_cmdText.text());
-	setCaretPos(2 + m_cmdText.caretPos(), m_height - 20);
+	setCaretPos(m_cmdText.caretPos(), m_height - 20);
 }
 
 void Console::print(const std::string& str)

@@ -12,6 +12,7 @@ class Label : public UI::Widget
 {
 public:
 
+	Label(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height, Alignment alignment = Alignment::TopLeft);
 	Label(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height, const std::string& font, Alignment alignment = Alignment::TopLeft);
 	~Label() {}
 

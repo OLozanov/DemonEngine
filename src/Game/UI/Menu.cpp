@@ -15,9 +15,9 @@ const std::string Menu::Captions[] = { "Save Game", "Load Game", "Settings" };
 VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 : UI::Widget(parent, x, y, width, height, 0)
 , m_settings(settings)
-, m_resLabel(this, 100, 30, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
-, m_windowedLabel(this, 100, 60, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
-, m_giLabel(this, 100, 90, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
+, m_resLabel(this, 100, 27, 50, 20, UI::Widget::Alignment::Right)
+, m_windowedLabel(this, 100, 57, 50, 20, UI::Widget::Alignment::Right)
+, m_giLabel(this, 100, 87, 50, 20, UI::Widget::Alignment::Right)
 , m_resolutionCombo(this, 112, 30, 100, UI::Widget::Alignment::Left)
 , m_windowedChbox(this, 120, 60)
 , m_giChbox(this, 120, 90)
@@ -88,7 +88,7 @@ void VideoPanel::updateFullscreenStatus()
 AudioPanel::AudioPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 : UI::Widget(parent, x, y, width, height, 0)
 , m_settings(settings)
-, m_volLabel(this, 100, 30, 50, 20, "Tahoma", UI::Widget::Alignment::Right)
+, m_volLabel(this, 120, 27, 50, 20, UI::Widget::Alignment::Right)
 , m_volSlider(this, 130, 30, 250, UI::Widget::Alignment::Left)
 {
     m_volLabel.setText("Sound volume:");
@@ -112,9 +112,9 @@ void AudioPanel::update()
 
 SettingsPanel::SettingsPanel(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 : UI::Widget(parent, x, y, width, height, 0)
-, m_videoButton(this, m_width / 3.0 * 0.5, m_bottom - 30, 100, 20, "Video")
-, m_audioButton(this, m_width / 3.0 * 1.5, m_bottom - 25, 100, 20, "Audio")
-, m_controlsButton(this, m_width / 3.0 * 2.5, m_bottom - 25, 100, 20, "Controls")
+, m_videoButton(this, m_width / 3.0 * 0.5, m_bottom - 30, 120, 25, "Video")
+, m_audioButton(this, m_width / 3.0 * 1.5, m_bottom - 25, 120, 25, "Audio")
+, m_controlsButton(this, m_width / 3.0 * 2.5, m_bottom - 25, 120, 25, "Controls")
 , m_videoPanel(this, m_settings, 0, 50, m_width, m_height - 100)
 , m_audioPanel(this, m_settings, 0, 50, m_width, m_height - 100)
 {
@@ -216,16 +216,16 @@ Menu::Menu()
 , m_settingsPanel(this, -MenuWidth * 0.1f, 0, MenuWidth * 1.2f, MenuHeight)
 , m_cid(-1)
 {
-    int16_t left = MenuWidth / 2 - 60;
+    int16_t left = MenuWidth / 2 - 70;
 
     m_plaquePolygon = { { float(left), float(m_top) },
-                        { float(left) + 110, float(m_top) },
-                        { float(left) + 120, float(m_top) + 12 },
-                        { float(left) + 120, float(m_top) + 20 },
-                        { float(left) + 10, float(m_top) + 20 }, 
+                        { float(left) + 130, float(m_top) },
+                        { float(left) + 140, float(m_top) + 17 },
+                        { float(left) + 140, float(m_top) + 25 },
+                        { float(left) + 10, float(m_top) + 25 }, 
                         { float(left), float(m_top) + 8 } };
 
-    m_canvas.setFont("Tahoma");
+    m_canvas.setFont("Audiowide");
     m_canvas.setTextColor(Widgets::Style::WidgetTextColor);
 
     m_newButton.enable();

@@ -1,9 +1,18 @@
 #include "Label.h"
+#include "Game/UI/Widgets/Style.h"
 
 namespace GameLogic
 {
 namespace Widgets
 {
+
+Label::Label(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height, Alignment alignment)
+: UI::Widget(parent, x, y, width, height, flag_visible, alignment)
+, m_text({})
+{
+    m_canvas.setTextColor(0.15, 0.15, 0.15);
+    m_canvas.setFont(Style::CaptionFont);
+}
 
 Label::Label(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, uint16_t height, const std::string& font, Alignment alignment)
 : UI::Widget(parent, x, y, width, height, flag_visible, alignment)

@@ -71,11 +71,11 @@ void Text::input(char chr)
 void Text::clear()
 {
     m_sel1 = 0;
-    m_car1 = MinLength;
+    m_car1 = 0;
     m_text.clear();
 }
 
-void Text::draw(Canvas& canvas)
+void Text::display(Canvas& canvas)
 {
     canvas.text(m_x, m_y, m_text);
 }
@@ -121,39 +121,7 @@ void Text::onKeyPress(long key)
 
         return;
     }
-
-    /*if((key < 0xFF) && isprint(key))
-    {
-        short wd = m_font->charWidth((char)key);
-
-        if(m_length + wd > m_width) return;
-
-        m_text.insert(m_sel1, 1, (char)key);
-
-        m_car1 += wd;
-        m_length += wd;
-
-        m_sel1++;
-    }*/
-
-    //m_car1 = m_font->TextWidth((char*)m_text.c_str(), m_text.length());
-    //SetCaretPos(2 + m_text.m_car1, 2);
 }
-
-/*void Text::onKeyUp(long key)
-{
-    if(key == VK_LSHIFT)
-    {
-        m_flags &= ~CFLAGS_LSHIFT;
-        return;
-    }
-
-    if(key == VK_RSHIFT)
-    {
-        m_flags &= ~CFLAGS_RSHIFT;
-        return;
-    }
-}*/
 
 void Text::onClick(short x)
 {

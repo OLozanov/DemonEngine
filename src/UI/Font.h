@@ -20,11 +20,12 @@ class Font
 		uint32_t x = 0;
 		uint32_t y = 0;
 
-		uint32_t oy = 0;
-		uint32_t ox = 0;
+		int32_t oy = 0;
+		int32_t ox = 0;
 	};
 
 	static constexpr uint32_t GlyphSpace = 2;
+	static constexpr uint32_t GlyphBorder = 3;
 
 	uint32_t m_height;
 

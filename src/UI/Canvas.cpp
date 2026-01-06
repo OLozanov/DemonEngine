@@ -352,17 +352,14 @@ void Canvas::text(short x, short y, const std::string& str)
         y1 += m_font->m_glyphs[ch].oy;
         y2 += m_font->m_glyphs[ch].oy;
 
+        x1 += m_font->m_glyphs[ch].ox;
+        x2 += m_font->m_glyphs[ch].ox;
+
         float u1 = (float)m_font->m_glyphs[ch].x / m_font->m_imgWidth;
         float v1 = (float)m_font->m_glyphs[ch].y / m_font->m_imgHeight;
 
         float u2 = u1 + (float)(m_font->m_glyphs[ch].width + 1) / m_font->m_imgWidth;
         float v2 = v1 + (float)(m_font->m_height) / m_font->m_imgHeight;
-
-        /*if (m_font->glyphs[ch].oy == 0)
-        {
-            x = x2 - 4;
-            continue;
-        }*/
 
         vec2 a = { x1, y1 }; vec2 ta = { u1, v1 };
         vec2 b = { x2, y1 }; vec2 tb = { u2, v1 };
@@ -377,7 +374,7 @@ void Canvas::text(short x, short y, const std::string& str)
         m_vertexBuffer.push(Vertex2d(d, td, m_textcolor));
         m_vertexBuffer.push(Vertex2d(c, tc, m_textcolor));
 
-        x = x2 - 4;
+        x = x2 - 4 + Font::GlyphBorder;
     }
 
     m_drawCommands.emplace_back(str.size() * 6, m_font->m_image, UiRenderer::topology_triangle_list);

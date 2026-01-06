@@ -18,7 +18,7 @@ ComboDropDown::ComboDropDown()
     m_canvas.setLineColor(Style::WidgetLineColor);
     m_canvas.setFillColor(Style::WidgetBgColor2);
 
-    m_canvas.setFont("Tahoma");
+    m_canvas.setFont(Style::CaptionFont);
 
     m_canvas.setLineSize(0.5f);
     m_canvas.setSmoothEdgeSize(1.0f);
@@ -131,7 +131,7 @@ void ComboDropDown::display()
         size_t last = first + std::ceilf((m_height - 2) / 18.0f);
         last = std::min(m_owner->m_items.size() - 1, last);
 
-        int16_t y = 2 - short(m_offset) + first * 18;
+        int16_t y = -short(m_offset) + first * 18;
 
         for (size_t i = first; i <= last; i++)
         {
@@ -223,7 +223,7 @@ ComboBox::ComboBox(UI::Widget* parent, uint16_t x, uint16_t y, uint16_t width, A
                   {float(m_left), m_top + 9.0f},
                   {float(m_left), m_top + 5.0f} };
 
-    m_canvas.setFont("Tahoma");
+    m_canvas.setFont(Style::CaptionFont);
 
     m_canvas.setLineColor(Style::WidgetLineColor);
     m_canvas.setFillColor(Style::WidgetBgColor);
@@ -307,7 +307,7 @@ void ComboBox::display()
         int16_t len = m_canvas.getFont()->textWidth(item);
         int16_t xpos = m_left + (m_width - len) / 2;
     
-        m_canvas.text(xpos, m_top - 2, item);
+        m_canvas.text(xpos, m_top - 4, item);
     }
 }
 
