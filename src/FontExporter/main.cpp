@@ -5,18 +5,21 @@
 #include "..\Resources\Formats\dds.h"
 
 #include <string>
+#include <string.h>
 #include <iostream>
 
 unsigned long img_width = 512;
 unsigned long img_height = 512;
 
-Font* CreateFontImg(int fsize, char* fname, long flags)
+std::string fontname = {};
+
+Font* CreateFontImg(int fsize, const char*& fname, long flags)
 {
     unsigned char* buf = nullptr;
     unsigned long bufsz;
 
-    GLYPHMETRICS gm;
-    TEXTMETRIC tm;
+    GLYPHMETRICS gm = {};
+    TEXTMETRIC tm = {};
     MAT2 mat;
 
     HDC hDC = GetDC(NULL);
@@ -29,9 +32,25 @@ Font* CreateFontImg(int fsize, char* fname, long flags)
     if (flags & TEXT_ITALIC) italic = TRUE;
     if (flags & TEXT_UNDERLINE) underline = TRUE;
 
+    // Load font from disk first
+    std::string path = fname;
+
+    if (size_t ext = path.find_last_of('.'))
+    {
+        if (!AddFontResourceExA(fname, FR_PRIVATE, NULL))
+            std::cout << "Can't open file " << fname << std::endl;
+
+        size_t first = path.find_last_of("/\\");
+
+        fontname = path.substr(first + 1, ext - first - 1);
+        fname = fontname.c_str();
+
+        std::cout << "font name: " << fontname << std::endl;
+    }
+
     HFONT hFont = CreateFontA(fsize, 0, 0, 0, weight, italic, underline, 0, DEFAULT_CHARSET,
-        OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-        VARIABLE_PITCH | FF_DONTCARE, fname);
+                              OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+                              VARIABLE_PITCH | FF_DONTCARE, fname);
 
     SelectObject(hDC, hFont);
 
@@ -54,14 +73,14 @@ Font* CreateFontImg(int fsize, char* fname, long flags)
     unsigned long cx = GLYPH_SPACE;
     unsigned long cy = GLYPH_SPACE;
 
-    unsigned long ch;
-
-    for (ch = 0; ch < 0x100; ch++)
+    for (unsigned long ch = 0; ch < 0x100; ch++)
     {
-        if (!ch)
+        if (ch == 0)
         {
             gm.gmBlackBoxY = fsize;
             gm.gmBlackBoxX = fsize * 0.7;
+
+            buf = nullptr;
         }
         else
         {
@@ -69,15 +88,28 @@ Font* CreateFontImg(int fsize, char* fname, long flags)
 
             if (!bufsz)
             {
-                font->glyphs[ch++] = font->glyphs[0];
-                continue;
-            }
+                if (ch == 32)
+                {
+                    gm.gmBlackBoxY = fsize;
+                    gm.gmBlackBoxX = tm.tmAveCharWidth;
+                    buf = nullptr;
 
-            buf = new unsigned char[bufsz];
-            GetGlyphOutline(hDC, ch, GGO_GRAY8_BITMAP, &gm, bufsz, buf, &mat);// == GDI_ERROR)
+                    std::cout << "Warning: No description for space." << std::endl;
+                }
+                else
+                {
+                    font->glyphs[ch] = font->glyphs[0];
+                    continue;
+                }
+            }
+            else
+            {
+                buf = new unsigned char[bufsz];
+                GetGlyphOutline(hDC, ch, GGO_GRAY8_BITMAP, &gm, bufsz, buf, &mat);
+            }
         }
 
-        unsigned long offset = GLYPH_SPACE;//fsize - gm.gmptGlyphOrigin.y;//gm.gmBlackBoxY;
+        unsigned long offset = GLYPH_SPACE;
 
         unsigned long pitch = gm.gmBlackBoxX >> 2;
         if (gm.gmBlackBoxX & 3) pitch++;
@@ -88,10 +120,16 @@ Font* CreateFontImg(int fsize, char* fname, long flags)
 
         unsigned char* ptr = buf;
 
-        if ((cx + gm.gmBlackBoxX + GLYPH_SPACE * 2) > (font->iwidth))
+        if ((cx + gm.gmBlackBoxX + GLYPH_SPACE) > (font->iwidth))
         {
             cx = GLYPH_SPACE;
             cy += font->height + GLYPH_SPACE;
+
+            if (cy > img_height)
+            {
+                std::cout << "Warning: Image size exceeded! Use bigger image." << std::endl;
+                break;
+            }
         }
 
         for (i = 0; i < gm.gmBlackBoxY; i++)
@@ -100,7 +138,7 @@ Font* CreateFontImg(int fsize, char* fname, long flags)
             {
                 unsigned char byte;
 
-                if (!ch) byte = 255;
+                if (!buf) byte = ch == 0 ? 255 : 0;
                 else byte = ptr[k] * GRAY_LEVEL;
 
                 font->img[(cy + i + offset) * font->iwidth + (cx + k)] = byte;
@@ -109,21 +147,22 @@ Font* CreateFontImg(int fsize, char* fname, long flags)
             ptr += pitch;
         }
 
-        font->glyphs[ch].width = gm.gmBlackBoxX + GLYPH_SPACE;
-        font->glyphs[ch].x = cx - GLYPH_SPACE;
+        font->glyphs[ch].width = gm.gmBlackBoxX;
+        font->glyphs[ch].x = cx;
         font->glyphs[ch].y = cy + 1;
+        font->glyphs[ch].ox = gm.gmptGlyphOrigin.x;
         if (gm.gmptGlyphOrigin.y) font->glyphs[ch].oy = fsize - gm.gmptGlyphOrigin.y;
         else font->glyphs[ch].oy = 0;
 
-        cx += gm.gmBlackBoxX + GLYPH_SPACE * 2;
+        cx += gm.gmBlackBoxX + GLYPH_SPACE;
 
-        if (ch) free(buf);
+        if (buf) free(buf);
     }
 
     return font;
 }
 
-void WriteFont(Font* font, char* fname, char* iname)
+void WriteFont(Font* font, const char* fname, const char* iname)
 {
     std::string img_name(iname);
     std::string desc_name(fname);
@@ -158,6 +197,7 @@ void WriteFont(Font* font, char* fname, char* iname)
 
     head.ddspf.dwSize = sizeof(DDS_PIXELFORMAT);
     head.ddspf.dwFlags = DDSF_ALPHA;
+    head.ddspf.dwABitMask = 0xff;
     //head.ddspf.dwFourCC = FOURCC_A8;
     head.ddspf.dwRGBBitCount = 8;
 
@@ -169,7 +209,7 @@ void WriteFont(Font* font, char* fname, char* iname)
 
     //Font description
     FILE* fdesc;
-    error = fopen_s(&fdesc, desc_name.c_str(), "wa");
+    error = fopen_s(&fdesc, desc_name.c_str(), "wt");
 
     if (error)
     {
@@ -191,6 +231,7 @@ void WriteFont(Font* font, char* fname, char* iname)
         fprintf(fdesc, "		width = %d\n", font->glyphs[g].width);
         fprintf(fdesc, "		x = %d\n", font->glyphs[g].x);
         fprintf(fdesc, "		y = %d\n", font->glyphs[g].y);
+        fprintf(fdesc, "		ox = %d\n", font->glyphs[g].ox);
         fprintf(fdesc, "		oy = %d\n", font->glyphs[g].oy);
 
         fprintf(fdesc, "	}\n\n");
@@ -222,9 +263,9 @@ int main(int argc, char* argv[])
 
     unsigned long size = 16;
     unsigned long flags = 0;
-    char* fnt;
-    char* fname;
-    char* iname;
+    const char* fname;
+    const char* outname = nullptr;
+    const char* imgname = nullptr;
 
     if (argc <= 1)
     {
@@ -239,9 +280,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        fnt = argv[1];
         fname = argv[1];
-        iname = argv[1];
 
         int arg = 2;
 
@@ -272,12 +311,15 @@ int main(int argc, char* argv[])
 
             case 'i':
                 arg++;
-                iname = argv[arg];
+                imgname = argv[arg];
                 break;
 
             case 'f':
                 arg++;
-                fname = argv[arg];
+                outname = argv[arg];
+
+                if (!imgname) imgname = outname;
+
                 break;
 
             case 'b':
@@ -300,8 +342,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    Font* font = CreateFontImg(size, fnt, flags);
-    WriteFont(font, fname, iname);
+    Font* font = CreateFontImg(size, fname, flags);
+    WriteFont(font, outname ? outname : fname, imgname ? imgname : fname);
 
     return 0;
 }

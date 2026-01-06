@@ -18,7 +18,8 @@ struct Glyph
 	unsigned long x;
 	unsigned long y;
 
-	unsigned long oy;
+	long ox;
+	long oy;
 };
 
 struct Font
