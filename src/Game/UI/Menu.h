@@ -18,6 +18,7 @@ struct Settings
 {
     size_t resolution = 7;
     bool fullscreen = false;
+    bool vsync = false;
 
     bool gi = true;
 
@@ -37,10 +38,12 @@ private:
 
     Widgets::Label m_resLabel;
     Widgets::Label m_windowedLabel;
+    Widgets::Label m_vsyncLabel;
     Widgets::Label m_giLabel;
 
     Widgets::ComboBox m_resolutionCombo;
     Widgets::CheckBox m_windowedChbox;
+    Widgets::CheckBox m_vsyncChbox;
     
     Widgets::CheckBox m_giChbox;
 

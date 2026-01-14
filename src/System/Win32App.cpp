@@ -25,7 +25,7 @@ bool Win32App::m_active = false;
 std::vector<Win32App::DisplayMode> Win32App::m_displayModeList;
 UINT Win32App::m_displayMode = 7;
 
-DWORD Win32App::m_time = 0;
+LONGLONG Win32App::m_time = 0;
 float Win32App::m_dt = 1.0f / 60.0f;
 
 GameLogic::Game* Win32App::m_game = nullptr;
@@ -111,20 +111,63 @@ int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
     //Main loop
     MSG message = {};
 
-    m_time = timeGetTime();
+    SyncTime();
 
-    while (message.message != WM_QUIT)
+    while (true)
     {
         if (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&message);
             DispatchMessage(&message);
+
+            if (message.message == WM_QUIT) break;
         }
+        else
+            GameTick();
     }
 
     m_game->saveSettings();
 
     return message.wParam;
+}
+
+void Win32App::FrameSync()
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER time;
+
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&time);
+
+    LONGLONG curtime = time.QuadPart * 1000000 / frequency.QuadPart;
+
+    if (curtime > m_time)
+    {
+        static constexpr double w = 1.0f / 5.0f;
+
+        LONGLONG deltaticks = curtime - m_time;
+
+        if (!m_swapChain.vsync())
+        {
+            constexpr double FpsCap = 1000000.0f / 120.0f;
+            float diff = FpsCap - deltaticks;
+
+            // Throttle
+            while (diff > 0)
+            {
+                QueryPerformanceCounter(&time);
+
+                curtime = time.QuadPart * 1000000 / frequency.QuadPart;
+                deltaticks = curtime - m_time;
+                diff = FpsCap - deltaticks;
+            }
+        }
+
+        double delta = deltaticks / 1000000.0f;
+
+        m_dt = delta * w + m_dt * (1.0f - w);
+        m_time = curtime;
+    }
 }
 
 void Win32App::GameTick()
@@ -135,17 +178,7 @@ void Win32App::GameTick()
     Render::SceneManager& sceneManager = Render::SceneManager::GetInstance();
     UI::UiLayer& uiLayer = UI::UiLayer::GetInstance();
 
-    DWORD curtime = timeGetTime();
-
-    if (curtime > m_time)
-    {
-        static constexpr float w = 1.0f / 30.0f;
-
-        float delta = (curtime - m_time) / 1000.0f;
-        m_dt = delta * w + m_dt * (1.0f - w);
-
-        m_time = curtime;
-    }
+    FrameSync();
 
     POINT cursorPos;
 
@@ -268,7 +301,13 @@ void Win32App::ToggleFullscreen()
 
 void Win32App::SyncTime()
 {
-    m_time = timeGetTime();
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER time;
+
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&time);
+
+    m_time = time.QuadPart * 1000000 / frequency.QuadPart;
 }
 
 LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -399,7 +438,11 @@ LRESULT CALLBACK Win32App::WindowProcedure(HWND hwnd, UINT message, WPARAM wPara
         break;
 
         case WM_PAINT:
-            GameTick();
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(m_hwnd, &ps);
+            EndPaint(m_hwnd, &ps);
+        }
         break;
 
         case WM_DESTROY:

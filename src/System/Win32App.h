@@ -27,6 +27,8 @@ public:
     static bool IsFullscreen() { return m_fullscreen; }
     static void ToggleFullscreen();
 
+    static void EnableVSync(bool enable) { m_swapChain.enableVSync(enable); }
+
     static inline HWND GetWindowHandle() { return m_hwnd; }
     static inline Render::FrameBuffer& GetFrameBuffer() { return m_swapChain.getFrameBuffer(); }
 
@@ -34,6 +36,7 @@ public:
 
 private:
     static void EnumDisplayModes();
+    static void FrameSync();
     static void GameTick();
 
     static LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -50,7 +53,7 @@ private:
     static bool m_fullscreen;
     static bool m_active;
 
-    static DWORD m_time;
+    static LONGLONG m_time;
     static float m_dt;
 
     static GameLogic::Game* m_game;

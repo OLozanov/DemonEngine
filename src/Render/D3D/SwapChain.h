@@ -13,6 +13,9 @@ public:
 
     ~SwapChain();
 
+    void enableVSync(bool enable) { m_vsync = enable; }
+    bool vsync() { return m_vsync; }
+
     FrameBuffer& getFrameBuffer();
     void present();
     void resize(int width, int height);
@@ -28,6 +31,7 @@ private:
     static constexpr UINT FrameCount = 2;
 
     bool m_useDepth;
+    bool m_vsync;
 
     ComPtr<IDXGISwapChain3> m_swapChain;
     D3D12_CPU_DESCRIPTOR_HANDLE m_depthHandle;

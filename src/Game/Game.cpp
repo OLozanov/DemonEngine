@@ -33,7 +33,7 @@ Game::Game()
 , m_physicsManager(Physics::PhysicsManager::GetInstance())
 , m_activeMap(false)
 , m_gameState(GameState::Run)
-, m_pauseLable(nullptr, 0, 0, 18, 18, UI::Widget::Alignment::Center)
+, m_pauseLable(nullptr, 0, 0, 18, 18, "Audiowide", UI::Widget::Alignment::Center)
 , m_msg(nullptr, 0, 0, 18, 18, UI::Widget::Alignment::Center)
 , m_fps(nullptr, 10, 10, 18, 18, UI::Widget::Alignment::TopLeft)
 , m_consoleState(ConsoleState::Closed)
@@ -101,7 +101,7 @@ Game::Game()
         App::Shutdown();
     });
 
-    m_pauseLable.setColor(0.0f, 0.7f, 1.0f);
+    m_pauseLable.setColor(0.0f, 0.48f, 0.69f);
     m_pauseLable.setText("PAUSE");
     m_pauseLable.hide();
 }
@@ -118,6 +118,7 @@ void Game::saveSettings()
 
     out << "resolution " << settings.resolution << std::endl;
     out << "fullscreen " << App::IsFullscreen() << std::endl;  // We can bypass menu data here
+    out << "vsync " << settings.vsync << std::endl;
     out << "gi " << settings.gi << std::endl;
     out << "volume " << settings.volume << std::endl;
 }
@@ -138,6 +139,7 @@ void Game::readSettings(Settings& settings)
 
         if (param == "resolution") in >> settings.resolution;
         else if (param == "fullscreen") in >> settings.fullscreen;
+        else if (param == "vsync") in >> settings.vsync;
         else if (param == "gi") in >> settings.gi;
         else if (param == "volume") in >> settings.volume;
         else in >> param;
@@ -158,6 +160,7 @@ void Game::loadSettings()
 
     App::Resize(settings.resolution);
     if (settings.fullscreen) App::ToggleFullscreen();
+    App::EnableVSync(settings.vsync);
 }
 
 void Game::processCommandLine(const std::string& cmd)
@@ -355,6 +358,7 @@ void Game::mapTransit(const std::string& mapname, bool new_game)
     if (m_activeMap) resetMap();
 
     m_player.moveTo({ 0.0, 1.0, 0.0 });
+    m_player.resetInput();
 
     std::string filename = "./Maps/" + mapname + ".dcm";
 

@@ -49,7 +49,7 @@ Character::Character(const vec3& pos, float ang, const CharacterParams& params)
     m_pos = pos;
     m_mat = mat4::Translate(pos);
 
-	m_weapon = std::make_unique<Render::StaticObject>(ResourceManager::GetModel("Weapon/pistol.msh"));
+	m_weapon = std::make_unique<Render::StaticObject>(ResourceManager::GetModel("Weapon/pistol.msh"), true);
 	m_weapon->hideSubmesh(1);
 
 	m_shotSound = ResourceManager::GetSound("Weapon/pistol.wav");

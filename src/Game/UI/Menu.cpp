@@ -17,19 +17,23 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
 , m_settings(settings)
 , m_resLabel(this, 100, 27, 50, 20, UI::Widget::Alignment::Right)
 , m_windowedLabel(this, 100, 57, 50, 20, UI::Widget::Alignment::Right)
-, m_giLabel(this, 100, 87, 50, 20, UI::Widget::Alignment::Right)
+, m_vsyncLabel(this, 100, 87, 50, 20, UI::Widget::Alignment::Right)
+, m_giLabel(this, 100, 117, 50, 20, UI::Widget::Alignment::Right)
 , m_resolutionCombo(this, 112, 30, 100, UI::Widget::Alignment::Left)
 , m_windowedChbox(this, 120, 60)
-, m_giChbox(this, 120, 90)
+, m_vsyncChbox(this, 120, 90)
+, m_giChbox(this, 120, 120)
 {
     Render::GpuInstance& renderApi = Render::GpuInstance::GetInstance();
 
     m_resLabel.setText("Resolution:");
     m_windowedLabel.setText("Windowed:");
+    m_vsyncLabel.setText("VSync:");
     m_giLabel.setText("GI:");
 
     m_resLabel.setColor(1.0f, 1.0f, 1.0f);
     m_windowedLabel.setColor(1.0f, 1.0f, 1.0f);
+    m_vsyncLabel.setColor(1.0f, 1.0f, 1.0f);
     m_giLabel.setColor(1.0f, 1.0f, 1.0f);
 
     std::stringstream sstream;
@@ -63,6 +67,11 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
         App::ToggleFullscreen();
     });
 
+    m_vsyncChbox.OnChange.bind([this](bool enable) {
+        App::EnableVSync(enable);
+        m_settings.vsync = enable;
+    });
+
     m_giChbox.OnChange.bind([this](bool enable) {
         Render::SceneManager::GetInstance().enableGI(enable);
 
@@ -74,6 +83,7 @@ void VideoPanel::update()
 {
     m_resolutionCombo.selectItem(m_settings.resolution);
     m_windowedChbox.setValue(!m_settings.fullscreen);
+    m_vsyncChbox.setValue(m_settings.vsync);
     m_giChbox.setValue(m_settings.gi);
 
     refresh();

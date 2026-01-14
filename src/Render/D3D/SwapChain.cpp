@@ -7,6 +7,7 @@ namespace Render
 
 SwapChain::SwapChain(IDXGISwapChain3* swapChain, bool depthBuffer)
 : m_useDepth(depthBuffer)
+, m_vsync(false)
 {
     m_swapChain = swapChain;
 
@@ -29,7 +30,10 @@ FrameBuffer& SwapChain::getFrameBuffer()
 
 void SwapChain::present()
 {
-    m_swapChain->Present(1, 0);
+    UINT interval = m_vsync ? 1 : 0;
+    UINT flags = m_vsync ? 0 : DXGI_PRESENT_ALLOW_TEARING;
+
+    m_swapChain->Present(interval, flags);
     D3DInstance::GetInstance().WaitForGpu();
 }
 

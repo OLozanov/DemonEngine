@@ -133,7 +133,7 @@ float3 TraceIncidentRays(in float3 pos, in float3 normal)
     ray.Origin = pos + normal * 0.01;
     ray.Direction = normal * dir.z + tangent * dir.x + binormal * dir.y;
     ray.TMin = 0.001;
-    ray.TMax = 5000.0;
+    ray.TMax = 50.0;
 
     TraceRay(scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 0, 0, ray, payload);
 
