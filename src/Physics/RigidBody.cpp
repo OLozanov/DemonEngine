@@ -12,8 +12,12 @@ RigidBody::RigidBody(const vec3& pos,
             float friction,
             unsigned long layers,
             bool rotation,
-            bool updateHook)
-: m_rest(false)
+            bool updateHook,
+            float restLinearVelocity,
+            float restAngularVelocity)
+: m_restLinearVelocity(restLinearVelocity)
+, m_restAngularVelocity(restAngularVelocity)
+, m_rest(false)
 , m_rotation(rotation)
 , m_updateHook(updateHook)
 , m_mass(mass)
@@ -129,18 +133,11 @@ void RigidBody::integrate(float dt)
         vec3 axis = m_angularVelocity;
         float dangle = axis.normalize();
 
-        if (dangle > AngularSpeedEps) m_orientation = mat3::Rotate(axis, dangle * dt)*m_orientation;
-
-        //m_orientation += mat3::SkewSymmetric(m_angularVelocity * dt) * m_orientation;
-        //m_orientation.orthogonalize();
+        if (dangle > m_restAngularVelocity) m_orientation = mat3::Rotate(axis, dangle * dt)*m_orientation;
 
         //Drag
         m_angularMomentum -= m_angularMomentum * 0.005 * (dt / ReferenceFrameTime);
         //m_angularMomentum *= pow(0.99, dt);
-
-        //if (m_angularMomentum * m_angularMomentum > 10000.0f) m_angularMomentum = m_angularMomentum.normalized() * 100.0f;
-
-        //if (m_velocity * m_velocity < 0.0005 && dangle < math::eps) m_rest = true;
     }
 
     m_force = {};
@@ -157,7 +154,7 @@ void RigidBody::postUpdate(float dt)
     float speed = m_velocity.length();
     float angSpeed = m_angularVelocity.length();
 
-    if (speed < LinearSpeedEps && angSpeed < AngularSpeedEps) m_rest = true;
+    if (speed < m_restLinearVelocity && angSpeed < m_restAngularVelocity) m_rest = true;
 
     if (speed > 200) m_velocity *= pow(0.2f, dt);
     if (angSpeed > 200) m_angularMomentum *= pow(0.2f, dt);

@@ -18,8 +18,8 @@ class RigidBody : public ListNode<RigidBody>
 protected:
     static constexpr float ReferenceFrameTime = 0.025;
 
-    static constexpr float LinearSpeedEps = 0.035f; //0.018f;
-    static constexpr float AngularSpeedEps = 0.035f;
+    const float m_restLinearVelocity = 0.035f; //0.018f;
+    const float m_restAngularVelocity = 0.035f;
 
     bool m_rest;
 
@@ -70,7 +70,9 @@ public:
             float friction = 0.5,
             unsigned long layers = 1,
             bool rotation = true,
-            bool updateHook = false);
+            bool updateHook = false,
+            float restLinearVelocity = 0.018f,
+            float restAngularVelocity = 0.035f);
 
     virtual ~RigidBody();
 

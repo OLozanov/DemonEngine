@@ -75,7 +75,7 @@ private:
     static void resolveContactLinear(RigidBody& body, const Collision::ContactInfo& contactInfo);
 
     static void resolveContact(RigidBody& bodyA, RigidBody& bodyB, const Collision::ContactInfo& contactInfo);
-    static void resolveContact(RigidBody& body, const Collision::ContactInfo& contactInfo, float dt);
+    static void resolveContact(RigidBody& body, const Collision::ContactInfo& contactInfo);
 
     void resolveCollisions(float dt);
 

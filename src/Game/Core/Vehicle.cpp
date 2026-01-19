@@ -28,7 +28,7 @@ void DragForceGenerator::update(Physics::RigidBody& body, float dt)
 }
 
 Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel, Model* steerWheelModel)
-: RigidBody(pos, params.mass, 0.35f, 0.9f)
+: RigidBody(pos, params.mass, 0.35f, 0.9f, collision_solid | collision_pickable | collision_character, true, false, 0.035f)
 , CompositeObject(pos, orientation, model, true)
 , m_viewPoint(params.viewPoint)
 , m_steeringWheelPos(params.steeringWheelPos)
@@ -53,7 +53,6 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
     vec3 boxcenter = (StaticObject::m_bbox.max + StaticObject::m_bbox.min) * 0.5f;
 
     m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, bbox, boxcenter);
-    m_layers = collision_solid | collision_pickable | collision_character;
 
     if (!collisionData.empty()) m_staticCollision = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
     else m_staticCollision = new Collision::BoxCollisionShape(m_orientation, m_pos, bbox, boxcenter);

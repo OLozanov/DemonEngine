@@ -255,26 +255,26 @@ bool RagDoll::isMoving()
 {
     if (m_body)
     {
-        constexpr float LinearSpeedEps = 0.035f;
-        constexpr float AngularSpeedEps = 0.9f;
+        constexpr float RestLinearSpeed = 0.035f;
+        constexpr float RestAngularSpeed = 0.9f;
 
         float speed = m_body->velocity().length();
         float angSpeed = m_body->angularVelocity().length();
 
-        if (speed > LinearSpeedEps) return true;
-        if (angSpeed > AngularSpeedEps) return true;
+        if (speed > RestLinearSpeed) return true;
+        if (angSpeed > RestAngularSpeed) return true;
     }
 
     for (RagDollBone* bone : m_bones)
     {
-        constexpr float LinearSpeedEps = 0.1f;
-        constexpr float AngularSpeedEps = 0.9f;
+        constexpr float RestLinearSpeed = 0.1f;
+        constexpr float RestAngularSpeed = 0.9f;
 
         float speed = bone->velocity().length();
         float angSpeed = bone->angularVelocity().length();
 
-        if (speed > LinearSpeedEps) return true;
-        if (angSpeed > AngularSpeedEps) return true;
+        if (speed > RestLinearSpeed) return true;
+        if (angSpeed > RestAngularSpeed) return true;
     }
 
     return false;

@@ -13,7 +13,7 @@ namespace GameLogic
 {
 
 PhysicsObject::PhysicsObject(const vec3& pos, const mat3& mat, float mass, unsigned long layers, Model* model)
-: RigidBody(pos, mass, 0.2f, 0.9f)
+: RigidBody(pos, mass, 0.2f, 0.9f, layers, true, false, RestVelocity(model->bbox()))
 , StaticObject(pos, mat, model, true)
 , m_bumpImpulse(60)
 {
@@ -29,8 +29,6 @@ PhysicsObject::PhysicsObject(const vec3& pos, const mat3& mat, float mass, unsig
 
     if (!collisionData.empty()) m_collisionShape = new Collision::PolygonalCollisionShape(m_orientation, m_pos, collisionData.size(), collisionData.data());
     else m_collisionShape = new Collision::BoxCollisionShape(m_orientation, m_pos, StaticObject::m_bbox.max);
-
-    m_layers = layers;
 
     vec3 inertia = Physics::BoxInertiaTensor(StaticObject::m_bbox.max - StaticObject::m_bbox.min, m_mass);
     setInertia(inertia);
@@ -62,6 +60,14 @@ PhysicsObject::PhysicsObject(const vec3& pos, const mat3& mat, float mass, unsig
         vec3 applyPoint = { points[i].x * bbox.x, points[i].y * bbox.y, points[i].z * bbox.z };
         m_buoyancy->addPoint(applyPoint);
     }*/
+}
+
+float PhysicsObject::RestVelocity(const BBox& bbox)
+{
+    vec3 boxsz = (bbox.max - bbox.min) * 0.5f;
+    float size = std::max(boxsz.x, std::max(boxsz.y, boxsz.z));
+
+    return size > 0.4f ? 0.018f : 0.035f;
 }
 
 void PhysicsObject::update(float dt)

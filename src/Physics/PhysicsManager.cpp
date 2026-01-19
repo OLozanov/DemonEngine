@@ -249,7 +249,7 @@ void PhysicsManager::resolveContact(RigidBody& bodyA, RigidBody& bodyB, const Co
     }
 }
 
-void PhysicsManager::resolveContact(RigidBody& body, const Collision::ContactInfo& contactInfo, float dt)
+void PhysicsManager::resolveContact(RigidBody& body, const Collision::ContactInfo& contactInfo)
 {
     body.m_rest = false;
 
@@ -305,20 +305,12 @@ void PhysicsManager::resolveContact(RigidBody& body, const Collision::ContactInf
     
     //Friction
     //inverseInertiaTensor = body.inverseInertiaTensor();
-    //vec3 cvelocity = -velocity.normalized();
 
     velocity = body.m_velocity + (body.m_angularVelocity ^ contactPoint);
     vec3 tangent = -(velocity - contactInfo.norm * (contactInfo.norm * velocity));
     tangent.normalize();
 
     vec3 tangular = contactPoint ^ tangent;
-
-    //float vcos = cvelocity * -contactInfo.norm;
-    //float vsin = cvelocity * tangent;
-    //float vcos = -contactInfo.norm.y;
-    //float vsin = 1.0 - vcos * vcos; //-tangent.y;
-    //float tdist = contactInfo.dist / vcos * vsin;
-    //float bias = fabs(vcos) > math::eps ? tdist / dt : 0.0f;
 
     m = 1.0f / (body.m_invMass + (inverseInertiaTensor * tangular) * tangular);
     Jv = tangent * body.m_velocity + tangular * body.m_angularVelocity;
@@ -367,8 +359,7 @@ void PhysicsManager::resolveCollisions(float dt)
             }
         }
 
-        if(contact) resolveContact(*object, contactInfo, dt);
-        //if (contact) object->resolveStaticCollision(contactInfo);
+        if(contact) resolveContact(*object, contactInfo);
     }
 
     //Objects collision

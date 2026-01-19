@@ -44,10 +44,11 @@ Character::Character(const vec3& pos, float ang, const CharacterParams& params)
                      params.attackAnim,
                      params.deathAnim };
 
-    setAnimation(m_animations[0]);
-
     m_pos = pos;
-    m_mat = mat4::Translate(pos);
+	m_mat = mat4::Translate(m_pos) * mat4::RotateY(m_ang);
+
+	setAnimation(m_animations[0]);
+	setAnimTime(m_animations[0].start);
 
 	m_weapon = std::make_unique<Render::StaticObject>(ResourceManager::GetModel("Weapon/pistol.msh"), true);
 	m_weapon->hideSubmesh(1);
@@ -116,9 +117,9 @@ void Character::update(float dt)
 {
 	if (m_state == State::Dead) return;
 
-    //if (m_state != State::Idle) 
-		animate(dt);
-	m_mat = mat4::Translate(m_pos + vec3{0, 0.2, 0})* mat4::RotateY(m_ang);
+    if (m_state != State::Idle) animate(dt);
+
+	m_mat = mat4::Translate(m_pos + vec3{ 0, 0.2, 0 }) * mat4::RotateY(m_ang);
 
 	if (m_weapon)
 	{

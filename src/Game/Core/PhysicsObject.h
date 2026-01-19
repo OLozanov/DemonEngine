@@ -39,6 +39,8 @@ private:
 
     const vec3& center() const override { return m_pos; }
     void hit(const vec3& point, const vec3& direction, uint32_t power) override;
+
+    static float RestVelocity(const BBox& bbox);
 };
 
 } // namespace gamelogic
