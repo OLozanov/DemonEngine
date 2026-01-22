@@ -31,7 +31,7 @@ void FirstPersonCamera::onMouseMove(int x, int y)
     if (m_hrot < 0) m_hrot += 360;
 }
 
-void FirstPersonCamera::update()
+void FirstPersonCamera::update(float dt)
 {
     mat3 cammat = mat3::RotateY(m_hrot / 180 * math::pi) * mat3::RotateX(m_vrot / 180 * math::pi);
 

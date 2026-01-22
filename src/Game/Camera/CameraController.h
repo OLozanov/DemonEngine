@@ -15,7 +15,7 @@ public:
 
     virtual void onMouseMove(int x, int y) = 0;
     virtual void onScroll(int delta) = 0;
-    virtual void update() = 0;
+    virtual void update(float dt) = 0;
 
 protected:
     Render::Camera& m_camera;

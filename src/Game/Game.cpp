@@ -505,7 +505,7 @@ void Game::update(float dt)
 
     m_asyncQueue.execute();
 
-    m_cameraController->update();
+    m_cameraController->update(dt);
 }
 
 bool Game::isRunning()

@@ -29,7 +29,7 @@ public:
 
     void onMouseMove(int x, int y) override;
     void onScroll(int delta) override {} // ignore
-    void update() override;
+    void update(float dt) override;
 
 private:
     Physics::RigidBody* m_object;
