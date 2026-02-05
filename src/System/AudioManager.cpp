@@ -135,6 +135,7 @@ AudioManager::PlayId AudioManager::play(const Sound* sound, float volume, bool l
     if (playData.playing)
     {
         playData.playing = false;
+        playData.flush = true;
 
         playData.voice->Stop(0);
         playData.voice->FlushSourceBuffers();
@@ -174,11 +175,17 @@ AudioManager::PlayId AudioManager::play(const Sound* sound, const vec3& pos, boo
 
 void AudioManager::stop(PlayId playId)
 {
+    if (playId >= AudioChannels) return;
+    if (playId < 0) return;
+
+    if (!m_channels[playId].playing) return;
+
     PlayData& playData = m_channels[playId];
 
     playData.voice->Stop();
     playData.voice->FlushSourceBuffers();
     playData.playing = false;
+    playData.flush = true;
 
     freeChannel(playId);
 }
@@ -208,6 +215,12 @@ void AudioManager::OnBufferEnd(void* context)
 {
     // Dirty hack in fact. But should work.
     size_t channel = (reinterpret_cast<ptrdiff_t>(context) - reinterpret_cast<ptrdiff_t>(&m_channels[0])) / sizeof(PlayData);
+
+    if (m_channels[channel].flush)
+    {
+        m_channels[channel].flush = false;
+        return;
+    }
 
     if (m_channels[channel].playing) freeChannel(channel);
     m_channels[channel].playing = false;

@@ -27,9 +27,14 @@ void DragForceGenerator::update(Physics::RigidBody& body, float dt)
     body.applyForce(-velocity.normalized() * drag);
 }
 
-Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel, Model* steerWheelModel)
+Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, 
+                 Model* model, Model* wheelModel, Model* steerWheelModel,
+                 Sound* engineIdleSnd, Sound* engineFullSnd, Sound* bumpSnd)
 : RigidBody(pos, params.mass, 0.35f, 0.9f, collision_solid | collision_pickable | collision_character, true, false, 0.035f)
 , CompositeObject(pos, orientation, model, true)
+, m_engineIdleSound(engineIdleSnd)
+, m_engineFullSound(engineFullSnd)
+, m_bumpSound(bumpSnd)
 , m_viewPoint(params.viewPoint)
 , m_steeringWheelPos(params.steeringWheelPos)
 , m_steeringWheelAngle(params.steeringWheelAngle / 180.0f * math::pi)
@@ -37,6 +42,7 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
 , m_reverseMotor(-params.reverseMotorPower)
 , m_dragForce(15.0f)
 , m_steering(0.0f)
+, m_playId(AudioManager::InvalidId)
 {
     Physics::PhysicsManager::GetInstance().addRigidBody(static_cast<RigidBody*>(this));
     Physics::PhysicsManager::GetInstance().addForce(m_dragForce, *this);
@@ -74,6 +80,8 @@ Vehicle::Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& 
 
 Vehicle::~Vehicle()
 {
+    if (m_playId != AudioManager::InvalidId) AudioManager::Stop(m_playId);
+
     for (size_t i = 0; i < m_suspension.size(); i++)
     {
         Physics::PhysicsManager::GetInstance().removeConstraint(m_suspension[i]);
@@ -109,7 +117,7 @@ void Vehicle::setupWheels(const VehicleParams& params, Model* wheelModel)
 
 void Vehicle::onCollide(const vec3& normal, float impulse)
 {
-    //if (m_bumpSnd && impulse > m_bumpImpulse) AudioManager::Play(m_bumpSnd, m_pos);
+    if (m_bumpSound && impulse > BumpImpulse) AudioManager::Play(m_bumpSound, m_pos);
 }
 
 void Vehicle::use()
@@ -119,6 +127,8 @@ void Vehicle::use()
     for (const auto& suspension : m_suspension) suspension->setHandbrake(false);
 
     Physics::PhysicsManager::GetInstance().removeStationaryBody(&m_staticBody);
+
+    m_playId = AudioManager::Play(m_engineIdleSound, 1.0f, true);
 }
 
 void Vehicle::dismount()
@@ -131,11 +141,15 @@ void Vehicle::dismount()
     for (const auto& suspension : m_suspension) suspension->setHandbrake(true);
 
     Physics::PhysicsManager::GetInstance().addStationaryBody(&m_staticBody);
+
+    if (m_playId != AudioManager::InvalidId) AudioManager::Stop(m_playId);
+
+    m_playId = AudioManager::InvalidId;
 }
 
 void Vehicle::input(int key, bool keyDown)
 {
-    //if (!keyDown) return;
+    bool moveForward = m_moveForward;
 
     switch (key)
     {
@@ -170,6 +184,16 @@ void Vehicle::input(int key, bool keyDown)
     {
         m_suspension[0]->setMotor(0.0f);
         m_suspension[1]->setMotor(0.0f);
+    }
+
+    if (m_moveForward != moveForward)
+    {
+        if (m_playId != AudioManager::InvalidId) AudioManager::Stop(m_playId);
+
+        if (m_moveForward)
+            m_playId = AudioManager::Play(m_engineFullSound, 1.0f, true);
+        else
+            m_playId = AudioManager::Play(m_engineIdleSound, 1.0f, true);
     }
 }
 
@@ -211,7 +235,7 @@ void Vehicle::update(float dt)
         float speed = m_suspension[i]->wheelSpeed();
         m_wheelParams[i].dang = m_suspension[i]->surfaceContact() ? speed : m_wheelParams[i].dang * pow(0.8f, dt);
         m_wheelParams[i].ang += m_wheelParams[i].dang * dt;
-        m_wheelParams[i].ang = std::remainderf(m_wheelParams[i].ang, math::pi2);
+        m_wheelParams[i].ang = std::fmod(m_wheelParams[i].ang, math::pi2);
 
         if (fabs(m_wheelParams[i].dang) < 0.1f) m_wheelParams[i].dang = 0.0f;
 

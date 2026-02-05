@@ -771,7 +771,10 @@ void Game::loadEntities(FILE* file)
             Vehicle* vehicle = new Vehicle(pos, mat, JeepParams, 
                                            ResourceManager::GetModel("Vehicles/jeep.msh"), 
                                            ResourceManager::GetModel("Vehicles/wheel01.msh"),
-                                           ResourceManager::GetModel("Vehicles/steer_wheel.msh"));
+                                           ResourceManager::GetModel("Vehicles/steer_wheel.msh"),
+                                           ResourceManager::GetSound("Vehicle/engine_idle.wav"),
+                                           ResourceManager::GetSound("Vehicle/engine_full.wav"),
+                                           ResourceManager::GetSound("Vehicle/metal_slam.wav"));
 
             vehicle->OnMount.bind(this, &Game::mountVehicle);
 

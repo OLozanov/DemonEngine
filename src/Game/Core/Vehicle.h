@@ -3,9 +3,11 @@
 #include "Game/GameObject.h"
 #include "Render/CompositeObject.h"
 #include "Physics/PhysicsManager.h"
+#include "System/AudioManager.h"
 #include "Physics/RigidBody.h"
 #include "Physics/Suspension.h"
 #include "Resources/Model.h"
+#include "Resources/Resources.h"
 
 namespace GameLogic
 {
@@ -54,7 +56,9 @@ public:
     using OnMountEvent = Event<void(Vehicle*)>;
 
 public:
-    Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, Model* model, Model* wheelModel, Model* steerWheelModel);
+    Vehicle(const vec3& pos, const mat3& orientation, const VehicleParams& params, 
+            Model* model, Model* wheelModel, Model* steerWheelModel,
+            Sound* engineIdleSnd, Sound* engineFullSnd, Sound* bumpSnd);
     ~Vehicle();
 
     const vec3& viewPoint() { return m_viewPoint; }
@@ -73,6 +77,10 @@ protected:
     void setupWheels(const VehicleParams& params, Model* wheelModel);
 
 private:
+    SoundPtr m_engineIdleSound;
+    SoundPtr m_engineFullSound;
+    SoundPtr m_bumpSound;
+
     const vec3 m_viewPoint;
 
     const vec3 m_steeringWheelPos;
@@ -100,8 +108,12 @@ private:
     Collision::CollisionShape* m_staticCollision;
     Physics::StationaryBody m_staticBody;           // for player collision
 
+    AudioManager::PlayId m_playId;
+
     static constexpr float SteerAng = 15.0f / 180.0f * math::pi;
     static constexpr float SteerVel = 30.0f / 180.0f * math::pi;
+
+    static constexpr float BumpImpulse = 60.0f;
 };
 
 } // namespace GameLogic

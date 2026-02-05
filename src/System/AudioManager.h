@@ -74,6 +74,7 @@ private:
 
         bool playing = false;
         bool loop = false;
+        bool flush = false;
 
         int prev;
         int next;
@@ -86,8 +87,6 @@ private:
 
     ComPtr<IXAudio2> m_xaudio;
     IXAudio2MasteringVoice* m_masterVoice;
-
-    std::vector<uint8_t> m_buffer;
 
     PlayData m_channels[AudioChannels];
     int m_cpool[AudioChannels];
