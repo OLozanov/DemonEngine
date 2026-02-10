@@ -289,12 +289,9 @@ void UiLayer::updateLoop()
 {
     while (true)
     {
-        std::unique_lock lock(m_mutex);
-        m_cv.wait(lock);
-
+        m_updateStartEvent.wait();
         updateWidgets();
-    
-        lock.unlock();
+        m_updateEndEvent.notify();
     }
 }
 
@@ -311,13 +308,13 @@ void UiLayer::update(float dt)
         }
     }
 
-    m_cv.notify_one();
+    m_updateStartEvent.notify();
     //updateWidgets();
 }
 
 void UiLayer::display()
 {
-    std::unique_lock lock(m_mutex);
+    m_updateEndEvent.wait();
     m_renderer.render();
 }
 

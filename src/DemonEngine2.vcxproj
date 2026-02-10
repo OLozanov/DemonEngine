@@ -383,6 +383,7 @@
     <ClInclude Include="System\AudioManager.h" />
     <ClInclude Include="System\ErrorMsg.h" />
     <ClInclude Include="System\Keys.h" />
+    <ClInclude Include="System\Sync.h" />
     <ClInclude Include="System\Timer.h" />
     <ClInclude Include="System\Win32App.h" />
     <ClInclude Include="UI\Animation.h" />

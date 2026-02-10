@@ -758,6 +758,9 @@
     <ClInclude Include="Render\CompositeObject.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
+    <ClInclude Include="System\Sync.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Render\Shaders\GI.hlsl">

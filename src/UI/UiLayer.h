@@ -8,8 +8,9 @@
 #include "UI/Render.h"
 #include "UI/Font.h"
 
+#include "System/Sync.h"
+
 #include <map>
-#include <mutex>
 #include <thread>
 
 namespace UI
@@ -75,9 +76,10 @@ private:
     void updateLoop();
 
 private:
-    std::mutex m_mutex;
-    std::condition_variable m_cv;
     std::thread m_updateThread;
+
+    Signal m_updateStartEvent;
+    Signal m_updateEndEvent;
 
     int m_width;
     int m_height;
