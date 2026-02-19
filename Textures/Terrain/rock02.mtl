@@ -1,5 +1,7 @@
 material
 {
-	normal = 'Terrain\rock02_n.dds'
+	normal = 'Terrain\rock01_n.dds'
 	diffuse = 'Terrain\rock02.dds'
+	
+	roughness = 1.0
 }
