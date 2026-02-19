@@ -82,7 +82,7 @@ private:
 
     static AudioManager Instance;
 
-    static constexpr int AudioChannels = 8;
+    static constexpr int AudioChannels = 24;
     static constexpr uint32_t BufferSize = 1024;
 
     ComPtr<IXAudio2> m_xaudio;

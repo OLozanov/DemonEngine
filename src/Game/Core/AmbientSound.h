@@ -12,6 +12,7 @@ class AmbientSound : public GameObject
 {
 public:
     AmbientSound(const vec3& pos, float volume, Sound* sound);
+    ~AmbientSound();
 
     void update(float dt) override;
 

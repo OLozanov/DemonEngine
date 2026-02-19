@@ -1004,6 +1004,7 @@ void RenderingPipeline::SetupSkyShader()
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState.DepthEnable = FALSE;
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
@@ -1071,7 +1072,6 @@ void RenderingPipeline::SetupShadowShader()
 
     // Create the pipeline state, which includes compiling and loading shaders.
     ComPtr<ID3DBlob> vertexShader;
-    ComPtr<ID3DBlob> pixelShader;
 
 #if defined(_DEBUG)
     // Enable better shader debugging with the graphics debugging tools.
@@ -1083,7 +1083,6 @@ void RenderingPipeline::SetupShadowShader()
     std::wstring shaderPath = GetFullPath() + L"Shaders\\shadow.hlsl";
 
     ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
 
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -1097,7 +1096,6 @@ void RenderingPipeline::SetupShadowShader()
     psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
     psoDesc.pRootSignature = m_rootSignature[rm_shadow].Get();
     psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -1169,7 +1167,6 @@ void RenderingPipeline::SetupCascadedShadowShader()
     // Create the pipeline state, which includes compiling and loading shaders.
     ComPtr<ID3DBlob> vertexShader;
     ComPtr<ID3DBlob> geometryShader;
-    ComPtr<ID3DBlob> pixelShader;
 
 #if defined(_DEBUG)
     // Enable better shader debugging with the graphics debugging tools.
@@ -1182,7 +1179,6 @@ void RenderingPipeline::SetupCascadedShadowShader()
 
     ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
     ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "GSMain", "gs_5_0", compileFlags, 0, &geometryShader, nullptr));
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
 
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -1196,7 +1192,6 @@ void RenderingPipeline::SetupCascadedShadowShader()
     psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
     psoDesc.pRootSignature = m_rootSignature[rm_shadow_cascaded].Get();
     psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
     psoDesc.GS = CD3DX12_SHADER_BYTECODE(geometryShader.Get());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
@@ -1272,7 +1267,6 @@ void RenderingPipeline::SetupShadowCubeShader()
     // Create the pipeline state, which includes compiling and loading shaders.
     ComPtr<ID3DBlob> vertexShader;
     ComPtr<ID3DBlob> geometryShader;
-    ComPtr<ID3DBlob> pixelShader;
 
 #if defined(_DEBUG)
     // Enable better shader debugging with the graphics debugging tools.
@@ -1285,7 +1279,6 @@ void RenderingPipeline::SetupShadowCubeShader()
 
     ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
     ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "GSMain", "gs_5_0", compileFlags, 0, &geometryShader, nullptr));
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
 
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -1299,7 +1292,6 @@ void RenderingPipeline::SetupShadowCubeShader()
     psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
     psoDesc.pRootSignature = m_rootSignature[rm_shadow_cube].Get();
     psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
     psoDesc.GS = CD3DX12_SHADER_BYTECODE(geometryShader.Get());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     //psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;

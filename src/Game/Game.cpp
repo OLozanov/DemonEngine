@@ -62,6 +62,7 @@ Game::Game()
     m_console.OnCommand.bind(this, &Game::onConsoleCommand);
 
     m_hud.onScreenFaded().bind_async(m_asyncQueue, this, &Game::mapFinished);
+    m_hud.hide();
 
     uiLayer.setCursor(ResourceManager::GetImage("ui/cursor.dds"));
     //uiLayer.showCursor(true);
@@ -167,7 +168,8 @@ void Game::processCommandLine(const std::string& cmd)
 {
     if (cmd.empty())
     {
-        mapTransit("test1", true);
+        //mapTransit("test1", true);
+        showMenu();
         return;
     }
 

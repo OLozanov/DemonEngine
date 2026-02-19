@@ -11,6 +11,11 @@ AmbientSound::AmbientSound(const vec3& pos, float volume, Sound* sound)
 {
 }
 
+AmbientSound::~AmbientSound()
+{
+    if (m_playing) AudioManager::Stop(m_playId);
+}
+
 void AmbientSound::update(float dt)
 {
     float volume = AudioManager::GetVolumeLevel(m_pos) * m_volume;

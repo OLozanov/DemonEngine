@@ -630,12 +630,6 @@ void Game::loadEntities(FILE* file)
             });
         }
 
-        /*if (eclass == EntityClass::Barrel)
-        {
-            PhysicsObject* object = new PhysicsObject(pos, mat, 60, collision_solid | collision_actor | collision_hitable, ResourceManager::GetModel("Tech/barrel.msh"));
-            m_objects.append(object);
-        }*/
-
         if (eclass == EntityClass::Barrel)
         {
             Breakable* object = new Breakable(pos, mat, 20, 60,
@@ -714,7 +708,7 @@ void Game::loadEntities(FILE* file)
 
         if (eclass == EntityClass::Medkit)
         {
-            Item* object = new Item(pos, mat, 0.1f, 20.0f, ResourceManager::GetModel("Items/medkit.msh"));
+            Item* object = new Item(pos, mat, 0.1f, 15.0f, ResourceManager::GetModel("Items/medkit.msh"));
 
             object->OnPickup.bind([this, object]() {
                 pickMedkit(object);
