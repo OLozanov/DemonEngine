@@ -2,6 +2,45 @@
 #include "Resources.h"
 #include <iostream>
 
+Model* Model::DefaultModel()
+{
+    Model* model = new Model;
+
+    model->m_meshnum = 1;
+    model->m_objnum = 1;
+    model->m_rbonenum = 0;
+    model->m_bonenum = 0;
+    model->m_framenum = 0;
+
+    vec3 verts[6] = { {0.0f, 0.5f, 0.0f},
+                      {0.0f, -0.5f, 0.0f},
+                      {0.5f, 0.0f, 0.0f},
+                      {-0.5f, 0.0f, 0.0f},
+                      {0.0f, 0.0f, 0.5f,},
+                      {0.0f, 0.0f, -0.5f,},
+                    };
+
+    for (size_t i = 0; i < 6; i++) model->m_vertices.push_back({ verts[i], {0.0f, 0.0f}, verts[i], {}, {} });
+
+    model->m_indices = { 0, 4, 2,
+                         0, 2, 5,
+                         0, 5, 3,
+                         0, 3, 4,
+                         2, 4, 1,
+                         5, 2, 1,
+                         3, 5, 1,
+                         4, 3, 1 };
+
+    model->calculateBBox();
+
+    model->m_meshes.push_back({ ResourceManager::GetMaterial("default"), 0, 24 });
+
+    model->m_vertexBuffer.setData(model->m_vertices.data(), model->m_vertices.size());
+    model->m_indexBuffer.setData(model->m_indices.data(), model->m_indices.size());
+
+    return model;
+}
+
 Model::~Model()
 {
 }
@@ -16,7 +55,10 @@ Model* Model::LoadModel(const char* name)
     if (error)
     {
         std::cout << "Can't open file " << name << std::endl;
-        return nullptr;
+
+        static Model* defaultModel(DefaultModel());
+
+        return defaultModel;
     }
 
     MshHeader header;

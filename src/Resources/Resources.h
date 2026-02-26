@@ -29,7 +29,7 @@ private:
 
     static std::vector<AnimatedMap> m_animatedMaps;
 
-    static bool LoadMaterialMap(Lexer& lexer, Material* material, int mapn);
+    static bool LoadMaterialMap(Lexer& lexer, Material* material, uint32_t mapn);
     static bool ReadParam(Lexer& lexer, float& param);
     static bool ReadString(Lexer& lexer, std::string& str);
     static bool ReadColor(Lexer& lexer, vec3& color);

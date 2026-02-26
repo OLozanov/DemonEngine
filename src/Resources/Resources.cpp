@@ -77,7 +77,7 @@ Image* ResourceManager::GetImage(const std::string& name)
     return image;
 }
 
-bool ResourceManager::LoadMaterialMap(Lexer& lexer, Material* material, int mapn)
+bool ResourceManager::LoadMaterialMap(Lexer& lexer, Material* material, uint32_t mapn)
 {
     if (!lexer.match(Lexer::lex_assign)) return false;
 
@@ -96,8 +96,13 @@ bool ResourceManager::LoadMaterialMap(Lexer& lexer, Material* material, int mapn
         else
         {
             Image* image = GetImage(tname);
-            material->img[mapn] = image;
-            material->maps[mapn] = image->handle;
+
+            if (image)
+            {
+                material->img[mapn] = image;
+                material->maps[mapn] = image->handle;
+                material->flags |= 1 << mapn;
+            }
         }
     }
 
@@ -211,6 +216,13 @@ Material* ResourceManager::GetMaterial(const std::string& name)
     {
         material = new Material();
 
+        material->maps[Material::map_diffuse] = 1;
+        material->maps[Material::map_normal] = 1;
+        material->maps[Material::map_roughness] = 1;
+        material->maps[Material::map_metalness] = 1;
+        material->maps[Material::map_luminosity] = 1;
+        material->maps[Material::map_height] = 1;
+
         std::string filename = "Textures\\";
         filename += name;
         filename += ".mtl";
@@ -222,12 +234,6 @@ Material* ResourceManager::GetMaterial(const std::string& name)
             if (!lexer.match(Lexer::lex_id, "material")) return nullptr;
             if (!lexer.match(Lexer::lex_blopen)) return nullptr;
 
-            material->maps[Material::map_diffuse] = 1;
-            material->maps[Material::map_roughness] = 1;
-            material->maps[Material::map_metalness] = 1;
-            material->maps[Material::map_luminosity] = 1;
-            material->maps[Material::map_height] = 1;
-
             while (1)
             {
                 Lexer::Token tk = lexer.read();
@@ -238,42 +244,36 @@ Material* ResourceManager::GetMaterial(const std::string& name)
                     if (lexer.tokenValue() == "diffuse")
                     {
                         LoadMaterialMap(lexer, material, Material::map_diffuse);
-                        material->flags |= Material::mat_diffuse_map;
                         continue;
                     }
 
                     if (lexer.tokenValue() == "normal")
                     {
                         LoadMaterialMap(lexer, material, Material::map_normal);
-                        material->flags |= Material::mat_normal_map;
                         continue;
                     }
 
                     if (lexer.tokenValue() == "roughness_map")
                     {
                         LoadMaterialMap(lexer, material, Material::map_roughness);
-                        material->flags |= Material::mat_roughness_map;
                         continue;
                     }
 
                     if (lexer.tokenValue() == "metalness_map")
                     {
                         LoadMaterialMap(lexer, material, Material::map_metalness);
-                        material->flags |= Material::mat_metalness_map;
                         continue;
                     }
 
                     if (lexer.tokenValue() == "luminosity_map")
                     {
                         LoadMaterialMap(lexer, material, Material::map_luminosity);
-                        material->flags |= Material::mat_luminosity_map;
                         continue;
                     }
 
                     if (lexer.tokenValue() == "height_map")
                     {
                         LoadMaterialMap(lexer, material, Material::map_height);
-                        material->flags |= Material::mat_height_map;
                         continue;
                     }
 
@@ -299,17 +299,6 @@ Material* ResourceManager::GetMaterial(const std::string& name)
         catch (...)
         {
             std::cout << "Fail to parse material file " << filename << std::endl;
-        }
-
-        if (!material->img[Material::map_normal])
-        {
-            if (!m_flatNormal)
-            {
-                m_flatNormal = GetImage("flat_n.dds");
-                m_flatNormal->addReference();
-            }
-
-            material->maps[Material::map_normal] = m_flatNormal->handle;
         }
 
         m_materials.add(name, material);

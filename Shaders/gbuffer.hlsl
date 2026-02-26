@@ -129,17 +129,27 @@ PSOutput PSMain(PSInput input) : SV_TARGET
     else 
         tcoord = input.tcoord;
     
-	float4 color = diffuse_map.Sample(g_sampler, tcoord);
-    
+	float4 color = float4(material_color.xyz, 1.0);
+	
+	if (material_flags & DiffuseMap)
+		color *= diffuse_map.Sample(g_sampler, tcoord);
+	
     if (color.w < 0.2) discard;
     
-	float3 norm_local = normal_map.Sample(g_sampler, tcoord);
-	norm_local.xyz = norm_local.xyz*2.0 - 1.0;
+	float3 norm_local;
+	
+	if (material_flags & NormalMap)
+	{
+		norm_local = normal_map.Sample(g_sampler, tcoord);
+		norm_local.xyz = norm_local.xyz*2.0 - 1.0;
+	}
+	else
+		norm_local = float3(0.0, 0.0, 1.0);
 	
 	float3 norm_world;
 	norm_world.xyz = norm_local.x*input.tangent.xyz + 
-					norm_local.y*input.binormal.xyz + 
-					norm_local.z*input.normal.xyz;
+				     norm_local.y*input.binormal.xyz + 
+				     norm_local.z*input.normal.xyz;
 	
 	norm_world = normalize(norm_world);
     			
@@ -167,7 +177,7 @@ PSOutput PSMain(PSInput input) : SV_TARGET
         luminosity = material_luminosity;
     
 	PSOutput output;
-	output.color = float4(color.xyz * material_color.xyz, 1.0);
+	output.color = float4(color.xyz, 1.0);
 	output.normal = out_norm;
     output.flat_normal = float4(normalize(input.normal)*0.5 + 0.5, 1.0);
     output.params = float4(metalness, roughness, luminosity, 1.0);

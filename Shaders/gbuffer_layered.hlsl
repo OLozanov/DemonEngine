@@ -67,13 +67,24 @@ PSInput VSMain(float4 position : POSITION, float4 tcoord : TEXCOORD, float3 norm
 
 PSOutput PSMain(PSInput input) : SV_TARGET
 {
-	float4 color = diffuse_map.Sample(g_sampler, input.tcoord);
+	float4 color = float4(material_color.xyz, 1.0);
+	
+	if (material_flags & DiffuseMap)
+		color *= diffuse_map.Sample(g_sampler, input.tcoord);
+	
     color.w *= input.alpha;
     
     if (color.w < 0.01) discard;
     
-	float3 norm_local = normal_map.Sample(g_sampler, input.tcoord);
-	norm_local.xyz = norm_local.xyz*2.0 - 1.0;
+	float3 norm_local;
+	
+	if (material_flags & NormalMap)
+	{
+		norm_local = normal_map.Sample(g_sampler, input.tcoord);
+		norm_local.xyz = norm_local.xyz*2.0 - 1.0;
+	}
+	else
+		norm_local = float3(0.0, 0.0, 1.0);
 	
 	float3 norm_world;
 	norm_world.xyz = norm_local.x*input.tangent.xyz + 

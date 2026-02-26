@@ -138,6 +138,8 @@ public:
 
 private:
 
+    static Model* DefaultModel(); // Octahedron stub model
+
     void calculateBBox();
     void calculateCoreBBox();
     void calculateBoneData();
