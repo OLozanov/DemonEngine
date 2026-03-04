@@ -55,11 +55,14 @@ public:
 
         if (m_flags & BufferWrite) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+        CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+        CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T), flags);
+
         D3DInstance& d3dInstance = D3DInstance::GetInstance();
         d3dInstance.device()->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+            &heapProperties,
             D3D12_HEAP_FLAG_NONE,
-            &CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T), flags),
+            &resourceDesc,
             D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
             nullptr,
             IID_PPV_ARGS(&m_buffer));
@@ -169,11 +172,14 @@ public:
     {
         m_size = size;
 
+        CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+        CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T));
+
         D3DInstance& d3dInstance = D3DInstance::GetInstance();
         d3dInstance.device()->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+            &heapProperties,
             D3D12_HEAP_FLAG_NONE,
-            &CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T)),
+            &resourceDesc,
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS(&m_buffer));

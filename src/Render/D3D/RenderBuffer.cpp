@@ -30,10 +30,13 @@ void ColorBuffer::reset(UINT width, UINT height)
 
     if (m_uavHandle != 0) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(m_format, width, height, 1, 0, 1, 0, flags);
+
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Tex2D(m_format, width, height, 1, 0, 1, 0, flags),
+        &resourceDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
         &clearValue,
         IID_PPV_ARGS(&m_buffer));
@@ -72,6 +75,7 @@ void DepthBuffer::reset(UINT width, UINT height)
 
     if (m_uavHandle != 0) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     CD3DX12_RESOURCE_DESC texDesc(
         D3D12_RESOURCE_DIMENSION_TEXTURE2D,
         0,
@@ -86,7 +90,7 @@ void DepthBuffer::reset(UINT width, UINT height)
         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -122,6 +126,7 @@ void DepthBuffer::reset(UINT width, UINT height, UINT count)
 
     if (m_uavHandle != 0) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     CD3DX12_RESOURCE_DESC texDesc(
         D3D12_RESOURCE_DIMENSION_TEXTURE2D,
         0,
@@ -136,7 +141,7 @@ void DepthBuffer::reset(UINT width, UINT height, UINT count)
         flags);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -212,6 +217,7 @@ void RenderBuffer::createDepthBuffer(int width, int height)
     depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
     depthOptimizedClearValue.DepthStencil.Stencil = 0;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     CD3DX12_RESOURCE_DESC texDesc(
         D3D12_RESOURCE_DIMENSION_TEXTURE2D,
         0,
@@ -226,7 +232,7 @@ void RenderBuffer::createDepthBuffer(int width, int height)
         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
     d3dInstance.device()->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+            &heapProperties,
             D3D12_HEAP_FLAG_NONE,
             &texDesc,
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -260,6 +266,7 @@ void RenderBuffer::createDepthArray(int width, int height, int count)
     depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
     depthOptimizedClearValue.DepthStencil.Stencil = 0;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     CD3DX12_RESOURCE_DESC texDesc(
         D3D12_RESOURCE_DIMENSION_TEXTURE2D,
         0,
@@ -274,7 +281,7 @@ void RenderBuffer::createDepthArray(int width, int height, int count)
         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -312,10 +319,13 @@ void RenderBuffer::createColorBuffer(int n, int width, int height, DXGI_FORMAT f
 
     if (m_unorderedAccess) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    CD3DX12_RESOURCE_DESC texDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height, 1, 0, 1, 0, flags);
+
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Tex2D(format, width, height, 1, 0, 1, 0, flags),
+        &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
         &clearValue,
         IID_PPV_ARGS(&m_buffers[n]));
@@ -351,10 +361,13 @@ void RenderBuffer::createColorArray(int n, int width, int height, int count, DXG
 
     if (m_unorderedAccess) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    CD3DX12_RESOURCE_DESC texDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height, count, 0, 1, 0, flags);
+
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Tex2D(format, width, height, count, 0, 1, 0, flags),
+        &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
         &clearValue,
         IID_PPV_ARGS(&m_buffers[n]));

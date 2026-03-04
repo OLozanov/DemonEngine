@@ -2927,10 +2927,13 @@ void RenderingPipeline::BuildRaytracingShaderTables()
     void* data;
     CD3DX12_RANGE readRange(0, 0);
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+    CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+
     ThrowIfFailed(d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES),
+        &bufferDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&m_rayGenShaderTable)));
@@ -2940,9 +2943,9 @@ void RenderingPipeline::BuildRaytracingShaderTables()
     m_rayGenShaderTable->Unmap(0, nullptr);
 
     ThrowIfFailed(d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES),
+        &bufferDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&m_missShaderTable)));
@@ -2952,9 +2955,9 @@ void RenderingPipeline::BuildRaytracingShaderTables()
     m_missShaderTable->Unmap(0, nullptr);
 
     ThrowIfFailed(d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES),
+        &bufferDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&m_hitGroupShaderTable)));
@@ -3086,7 +3089,8 @@ void RenderingPipeline::RaytraceBuildAs(const D3D12_BUILD_RAYTRACING_ACCELERATIO
 
 void RenderingPipeline::RaytraceBuildBarrier(ID3D12Resource* resource)
 {
-    m_dxrCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::UAV(resource));
+    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::UAV(resource);
+    m_dxrCommandList->ResourceBarrier(1, &barrier);
 }
 
 void RenderingPipeline::RaytraceFinishBuild()

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d12.h>
+#include "Render/D3D/D3DInstance.h"
 #include <wrl.h>
 
 #include <vector>
@@ -93,11 +93,14 @@ public:
 
         m_size = size;
 
+        CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+        CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T), D3D12_RESOURCE_FLAG_NONE);
+
         Render::D3DInstance& d3dInstance = D3DInstance::GetInstance();
         d3dInstance.device()->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+            &heapProperties,
             D3D12_HEAP_FLAG_NONE,
-            &CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T), D3D12_RESOURCE_FLAG_NONE),
+            &resourceDesc,
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS(&m_buffer));

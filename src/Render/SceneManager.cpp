@@ -901,7 +901,7 @@ void SceneManager::lightPass()
 {
     m_lightingConstantBuffer->ambient_color = { 0.05f, 0.05f, 0.05f };
 
-    ComputeContext context = m_commandList;
+    ComputeContext context(m_commandList);
 
     LightGridParams params = { m_xtiles, m_width / LightGridTileSize, m_height / LightGridTileSize, m_omniLights.size(), m_spotLights.size() };
 
@@ -1083,7 +1083,7 @@ void SceneManager::denoisePass(ComputeContext& context)
 void SceneManager::giPass()
 {
     RaytraceContext rc = RenderingPipeline::StartRaytracing();
-    ComputeContext context = rc;
+    ComputeContext context(rc);
 
     raytracePass(rc);
     denoisePass(context);
@@ -1099,7 +1099,7 @@ void SceneManager::ambientPass()
     AmbientParams giParams = { vec3{ 2.0f, 2.0f, 2.0f },
                                vec3{ 0.005f, 0.005f, 0.005f} };
 
-    ComputeContext context = m_commandList;
+    ComputeContext context(m_commandList);
     
     context.setComputeMode(RenderingPipeline::cm_ambient);
     context.barrier(Barrier(m_hdrBuffer, STATE_RENDER, STATE_WRITE));

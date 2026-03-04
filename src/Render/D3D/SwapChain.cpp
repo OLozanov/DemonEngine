@@ -120,6 +120,7 @@ void SwapChain::createDepthBuffer()
     depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
     depthOptimizedClearValue.DepthStencil.Stencil = 0;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     CD3DX12_RESOURCE_DESC texDesc(
         D3D12_RESOURCE_DIMENSION_TEXTURE2D,
         0,
@@ -134,7 +135,7 @@ void SwapChain::createDepthBuffer()
         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
         D3D12_RESOURCE_STATE_DEPTH_WRITE,

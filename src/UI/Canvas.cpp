@@ -377,7 +377,7 @@ void Canvas::text(short x, short y, const std::string& str)
         x = x2 - 4 + Font::GlyphBorder;
     }
 
-    m_drawCommands.emplace_back(str.size() * 6, m_font->m_image, UiRenderer::topology_triangle_list);
+    m_drawCommands.emplace_back(str.size() * 6, m_font->m_image.get(), UiRenderer::topology_triangle_list);
 }
 
 } //namespace ui

@@ -31,7 +31,7 @@ class Text
 	short m_width;
 public:
 
-	Text::Text(short x, short y, short width);
+	Text(short x, short y, short width);
 	Text(const std::string& txt, short x, short y, short width);
 
 	const std::string& text() { return m_text; }
