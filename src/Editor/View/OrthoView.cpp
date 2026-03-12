@@ -41,7 +41,7 @@ int OrthoView::ViewAxes[ViewTypesCount][3] = { {0, 2, 1},
                                                {0, 1, 2} };
 
 OrthoView::OrthoView(wxWindow* parent, Editor& editor, ViewType type)
-: View(parent, editor)
+: Viewport(parent, editor)
 , m_type(type)
 , m_scale(0.5)
 , m_mousePan(false)

@@ -5,7 +5,7 @@
 const long PerspectiveView::ID_TIMER = wxNewId();
 
 PerspectiveView::PerspectiveView(wxWindow* parent, Editor& editor)
-: View(parent, editor, true)
+: Viewport(parent, editor, true)
 , m_mouseLook(false)
 , m_moveForward(false)
 , m_moveBackward(false)

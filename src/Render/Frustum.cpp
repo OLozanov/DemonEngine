@@ -3,43 +3,90 @@
 namespace Render
 {
 
+void Frustum::update(const vec3& pos, const vec3& dir, const vec3* verts, size_t num)
+{
+	float d = dir * pos;
+
+	m_planes[0] = { dir, -d };
+
+	for (size_t v = 0; v < num; v++)
+	{
+		int i1, i2;
+
+		i1 = v;
+		i2 = ((v + 1) == num) ? 0 : v + 1;
+
+		vec3 edge1 = verts[i1] - pos;
+		vec3 edge2 = verts[i2] - pos;
+
+		vec3 norm = edge1 ^ edge2;
+		norm.normalize();
+		m_planes[v + 1].xyz = norm;
+		m_planes[v + 1].w = -pos * norm;
+	}
+}
+
+void Frustum::update(const Camera& camera, float fovx, float fovy)
+{
+	vec3 verts[4];
+
+	static const vec2 quadVertices[] =
+	{
+		{ -1.0f, 1.0f },
+		{ 1.0f, 1.0f },
+		{ 1.0f, -1.0f },
+		{ -1.0f, -1.0f }
+	};
+
+	const vec3& pos = camera.pos();
+	const vec3& dir = camera.direction();
+	float d = dir * pos;
+
+	for (int i = 0; i < 4; i++)
+	{
+		verts[i] = camera.basis() * vec3(quadVertices[i].x * fovx, quadVertices[i].y * fovy, 1.0) + camera.pos();
+	}
+
+	update(pos, dir, verts, 4);
+}
+
 void Frustum::update(const mat4& mat)
 {
+	// near
+	m_planes[0].x = mat[0].w + mat[0].z;
+	m_planes[0].y = mat[1].w + mat[1].z;
+	m_planes[0].z = mat[2].w + mat[2].z;
+	m_planes[0].w = mat[3].w + mat[3].z;
+
+	// far
+	m_planes[1].x = mat[0].w - mat[0].z;
+	m_planes[1].y = mat[1].w - mat[1].z;
+	m_planes[1].z = mat[2].w - mat[2].z;
+	m_planes[1].w = mat[3].w - mat[3].z;
+
 	// left
-	m_planes[0].x = mat[0].w + mat[0].x;
-	m_planes[0].y = mat[1].w + mat[1].x;
-	m_planes[0].z = mat[2].w + mat[2].x;
-	m_planes[0].w = mat[3].w + mat[3].x;
+	m_planes[2].x = mat[0].w + mat[0].x;
+	m_planes[2].y = mat[1].w + mat[1].x;
+	m_planes[2].z = mat[2].w + mat[2].x;
+	m_planes[2].w = mat[3].w + mat[3].x;
 
 	// right
-	m_planes[1].x = mat[0].w - mat[0].x;
-	m_planes[1].y = mat[1].w - mat[1].x;
-	m_planes[1].z = mat[2].w - mat[2].x;
-	m_planes[1].w = mat[3].w - mat[3].x;
+	m_planes[3].x = mat[0].w - mat[0].x;
+	m_planes[3].y = mat[1].w - mat[1].x;
+	m_planes[3].z = mat[2].w - mat[2].x;
+	m_planes[3].w = mat[3].w - mat[3].x;
 
 	// top
-	m_planes[2].x = mat[0].w - mat[0].y;
-	m_planes[2].y = mat[1].w - mat[1].y;
-	m_planes[2].z = mat[2].w - mat[2].y;
-	m_planes[2].w = mat[3].w - mat[3].y;
+	m_planes[4].x = mat[0].w - mat[0].y;
+	m_planes[4].y = mat[1].w - mat[1].y;
+	m_planes[4].z = mat[2].w - mat[2].y;
+	m_planes[4].w = mat[3].w - mat[3].y;
 	
 	// bottom
-	m_planes[3].x = mat[0].w + mat[0].y;
-	m_planes[3].y = mat[1].w + mat[1].y;
-	m_planes[3].z = mat[2].w + mat[2].y;
-	m_planes[3].w = mat[3].w + mat[3].y;
-	
-	// near
-	m_planes[4].x = mat[0].w + mat[0].z;
-	m_planes[4].y = mat[1].w + mat[1].z;
-	m_planes[4].z = mat[2].w + mat[2].z;
-	m_planes[4].w = mat[3].w + mat[3].z;
-	
-	// far
-	m_planes[5].x = mat[0].w - mat[0].z;
-	m_planes[5].y = mat[1].w - mat[1].z;
-	m_planes[5].z = mat[2].w - mat[2].z;
-	m_planes[5].w = mat[3].w - mat[3].z;
+	m_planes[5].x = mat[0].w + mat[0].y;
+	m_planes[5].y = mat[1].w + mat[1].y;
+	m_planes[5].z = mat[2].w + mat[2].y;
+	m_planes[5].w = mat[3].w + mat[3].y;
 }
 
 bool Frustum::test(const vec3& pos, const vec3& bbox, const mat3& axis) const
@@ -76,6 +123,17 @@ bool Frustum::test(const BBox& bbox) const
 	vec3 extent = bbox.max - pos;
 
 	return test(pos, extent);
+}
+
+bool Frustum::test(const BBox& bbox, const mat4& mat) const
+{
+	const mat3 axis = mat;
+
+	vec3 mid = (bbox.min + bbox.max) * 0.5f;
+	vec3 pos = mat[3].xyz + axis * mid;
+	vec3 extent = bbox.max - mid;
+
+	return test(pos, extent, axis);
 }
 
 } // namespace Render

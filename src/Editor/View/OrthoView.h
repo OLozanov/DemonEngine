@@ -1,6 +1,6 @@
 #pragma once
 
-#include "View/View.h"
+#include "View/Viewport.h"
 
 enum ViewType
 {
@@ -10,7 +10,7 @@ enum ViewType
     ViewTypesCount
 };
 
-class OrthoView : public View
+class OrthoView : public Viewport
 {
 public:
     OrthoView(wxWindow* parent, Editor& editor, ViewType type);

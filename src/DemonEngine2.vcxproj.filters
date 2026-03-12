@@ -95,9 +95,6 @@
     <ClCompile Include="Game\GameMap.cpp">
       <Filter>Source\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Scene.cpp">
-      <Filter>Source\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\Lexer.cpp">
       <Filter>Source\Utils</Filter>
     </ClCompile>
@@ -350,6 +347,9 @@
     <ClCompile Include="Game\UI\Widgets\Style.cpp">
       <Filter>Source\Game\UI\Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="Render\View.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Game.h">
@@ -377,9 +377,6 @@
       <Filter>Source\math</Filter>
     </ClInclude>
     <ClInclude Include="Render\Camera.h">
-      <Filter>Source\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Scene.h">
       <Filter>Source\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\SceneManager.h">
@@ -760,6 +757,9 @@
     </ClInclude>
     <ClInclude Include="System\Sync.h">
       <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\View.h">
+      <Filter>Source\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

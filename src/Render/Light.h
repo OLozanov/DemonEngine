@@ -4,7 +4,7 @@
 #include "Utils/LinkedList.h"
 #include "Utils/MutualReference.h"
 
-#include "Render/Scene.h"
+#include "Render/View.h"
 
 namespace Render
 {
@@ -57,13 +57,15 @@ private:
 
     uint32_t m_id = 0;
 
-    Scene m_scene;
+    View m_view;
 
     OwnerRefList<Light> m_refs;
     uint64_t m_frame;
 
     size_t m_shadowIdx = InvalidShadowIndex;
     size_t m_cacheIdx = InvalidShadowIndex;
+
+    float m_affectedDist;
 
     bool m_staticUpdate;
 
@@ -119,7 +121,7 @@ public:
 
     float affectedDistance() { return m_omniData.radius + m_omniData.falloff; }
 
-    Scene& scene() { return m_scene; }
+    View& view() { return m_view; }
     void calculateVisibility(uint64_t frame);
     void updateVisibility(uint64_t frame);
 };

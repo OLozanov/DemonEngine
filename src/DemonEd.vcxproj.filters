@@ -546,7 +546,7 @@
     <ClInclude Include="Editor\View\PerspectiveView.h">
       <Filter>Source\Editor\View</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\View\View.h">
+    <ClInclude Include="Editor\View\Viewport.h">
       <Filter>Source\Editor\View</Filter>
     </ClInclude>
     <ClInclude Include="Editor\View\ViewCamera.h">

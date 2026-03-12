@@ -239,10 +239,10 @@
     <ClCompile Include="Render\Frustum.cpp" />
     <ClCompile Include="Render\Light.cpp" />
     <ClCompile Include="Render\ParticleSystem.cpp" />
-    <ClCompile Include="Render\Scene.cpp" />
     <ClCompile Include="Render\SceneManager.cpp" />
     <ClCompile Include="Render\StaticObject.cpp" />
     <ClCompile Include="Render\Surface.cpp" />
+    <ClCompile Include="Render\View.cpp" />
     <ClCompile Include="Render\World.cpp" />
     <ClCompile Include="Resources\AnimatedMap.cpp" />
     <ClCompile Include="Resources\Formats\bmp.cpp" />
@@ -361,11 +361,11 @@
     <ClInclude Include="Render\Light.h" />
     <ClInclude Include="Render\ParticleSystem.h" />
     <ClInclude Include="Render\Render.h" />
-    <ClInclude Include="Render\Scene.h" />
     <ClInclude Include="Render\SceneConstantBuffer.h" />
     <ClInclude Include="Render\SceneManager.h" />
     <ClInclude Include="Render\StaticObject.h" />
     <ClInclude Include="Render\Surface.h" />
+    <ClInclude Include="Render\View.h" />
     <ClInclude Include="Render\World.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Resources\AnimatedMap.h" />

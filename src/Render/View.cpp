@@ -1,4 +1,5 @@
-#include "Scene.h"
+#include "View.h"
+
 #include "Render/Light.h"
 #include "Render/Clipping.h"
 #include <algorithm>
@@ -6,7 +7,7 @@
 namespace Render
 {
 
-Scene::Scene(World& world, uint8_t flags)
+View::View(World& world, uint8_t flags)
 : m_world(world)
 , m_flags(flags)
 {
@@ -16,7 +17,26 @@ Scene::Scene(World& world, uint8_t flags)
     m_transparentGeometry.mat = &Render::World::GlobalMat();
 }
 
-void Scene::addObjectData(DisplayObject* object)
+void View::update(const vec3& pos, const mat4& viewMat, uint64_t frame)
+{
+    Frustum frustum;
+    frustum.update(viewMat);
+
+    updateVisibility(pos, frustum, frame);
+}
+
+void View::update(const vec3& pos, float dist, uint64_t frame)
+{
+    m_distance = dist;
+    updateVisibility(pos, frame);
+}
+
+void View::update(const vec3& dir, uint64_t frame)
+{
+    directionalVisibility(dir, frame);
+}
+
+void View::addObjectData(DisplayObject* object)
 {
     for (const DisplayBlock& block : object->displayData())
     {
@@ -33,7 +53,7 @@ void Scene::addObjectData(DisplayObject* object)
         }
     }
     
-    if (!(m_flags && vis_instanced)) return;
+    if (!(m_flags && view_instanced)) return;
     if (object->instanceData().empty()) return;
 
     float dist = Clipping::PlaneDist(m_screenPlane, object);
@@ -43,7 +63,7 @@ void Scene::addObjectData(DisplayObject* object)
     for (const InstanceData& data : object->instanceData()) m_instancedList.push_back(&data);
 }
 
-void Scene::markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustum)
+void View::markAll(const Frustum& frustum)
 {
     Index lfid = 0;
 
@@ -51,7 +71,7 @@ void Scene::markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustu
     {
         m_visLeaves.push_back(lfid++);
 
-        if (Clipping::FrustumLeafVis(pos, frustum, screenPlane, leaf.bbox))
+        if (frustum.test(leaf.bbox))
         {
             for (const auto& displayData : leaf.regularGeometry) m_global.displayData.push_back(&displayData);
             for (const auto& displayData : leaf.skyGeometry) m_skyGeometry.displayData.push_back(&displayData);
@@ -66,7 +86,7 @@ void Scene::markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustu
     {
         for (DisplayObject* obj : zone.objects)
         {
-            if (Clipping::FrustumObjVis(pos, frustum, screenPlane, *obj))
+            if (frustum.test(obj->bbox(), obj->mat()))
             {
                 for (const DisplayBlock& block : obj->displayData())
                 {
@@ -85,7 +105,7 @@ void Scene::markAll(const vec3& pos, const vec4& screenPlane, const vec3* frustu
     }
 }
 
-void Scene::markAll(const vec3& pos)
+void View::markAll(const vec3& pos)
 {
     Index lfid = 0;
 
@@ -114,7 +134,7 @@ void Scene::markAll(const vec3& pos)
     }
 }
 
-void Scene::markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3* frustum, Index zind)
+void View::markZoneObjects(const Frustum& frustum, Index zind)
 {
     Zone& zone = m_world.zone(zind);
 
@@ -126,7 +146,7 @@ void Scene::markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3
 
         const Leaf& leaf = m_world.leaf(lfid);
 
-        if (Clipping::FrustumLeafVis(pos, frustum, screenPlane, leaf.bbox))
+        if (frustum.test(leaf.bbox))
         {
             for (const auto& displayData : leaf.regularGeometry) m_global.displayData.push_back(&displayData);
             for (const auto& displayData : leaf.skyGeometry) m_skyGeometry.displayData.push_back(&displayData);
@@ -143,14 +163,14 @@ void Scene::markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3
 
         obj->setFrame(m_frame);
 
-        if (Clipping::FrustumObjVis(pos, frustum, screenPlane, *obj)) addObjectData(obj);
+        if (frustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
     }
 
     for (FogVolume* volume : zone.fogVolumes)
     {
         if (m_frame == volume->frame()) continue;
     
-        if (Clipping::FrustumAABBVis(pos, frustum, screenPlane, volume->pos(), volume->size()))
+        if (frustum.test(volume->pos(), volume->size()))
         {
             volume->setFrame(m_frame);
             m_fogVolumes.push_back(volume);
@@ -158,13 +178,13 @@ void Scene::markZoneObjects(const vec3& pos, const vec4& screenPlane, const vec3
     }
 }
 
-void Scene::markZoneObjects(const vec3& pos)
+void View::markZoneObjects(const vec3& pos)
 {
     Zone& zone = m_world.zone(m_zone);
 
     const auto& leafs = m_world.leafs();
 
-    if (m_flags & vis_leafs)
+    if (m_flags & view_leafs)
     {
         for (const auto& lfid : zone.leafs)
         {
@@ -175,7 +195,7 @@ void Scene::markZoneObjects(const vec3& pos)
 
             vec3 box = leaf.bbox.max - mid;
 
-            if ((m_flags & vis_restrict_dist) &&
+            if ((m_flags & view_restrict_dist) &&
                 !(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
 
             m_visLeaves.push_back(lfid);
@@ -189,13 +209,13 @@ void Scene::markZoneObjects(const vec3& pos)
     {
         if (m_frame == obj->frame()) continue;
 
-        bool visStatic = m_flags & vis_static;
-        bool visDynamic = m_flags & vis_dynamic;
+        bool visStatic = m_flags & view_static;
+        bool visDynamic = m_flags & view_dynamic;
 
         if (!visStatic && !obj->isDynamic()) continue;
         if (!visDynamic && obj->isDynamic()) continue;
 
-        if (m_flags & vis_restrict_dist)
+        if (m_flags & view_restrict_dist)
         {
             vec3 bbpos;
             vec3 box;
@@ -219,7 +239,7 @@ void Scene::markZoneObjects(const vec3& pos)
     }
 }
 
-void Scene::markZoneVis(const Zone& zone)
+void View::markZoneVis(const Zone& zone)
 {
     for (const auto& lfid : zone.leafs)
     {
@@ -245,7 +265,7 @@ void Scene::markZoneVis(const Zone& zone)
     }
 }
 
-void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
+void View::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
 {
     Zone& zone = m_world.zone(zoneInd);
 
@@ -270,7 +290,7 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
         Zone& opzone = m_world.zone(opzoneInd);
 
         //Check leaf visibility
-        if (m_flags & vis_leafs)
+        if (m_flags & view_leafs)
         {
             for (Index lid : opzone.leafs)
             {
@@ -281,7 +301,7 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
 
                 vec3 box = leaf.bbox.max - mid;
 
-                if ((m_flags & vis_restrict_dist) &&
+                if ((m_flags & view_restrict_dist) &&
                     !(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
 
                 if (Clipping::LeafVis(pos, portal, leaf.bbox))
@@ -306,13 +326,13 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
         {
             if (m_frame == obj->frame()) continue;
 
-            bool visStatic = m_flags & vis_static;
-            bool visDynamic = m_flags & vis_dynamic;
+            bool visStatic = m_flags & view_static;
+            bool visDynamic = m_flags & view_dynamic;
 
             if (!visStatic && !obj->isDynamic()) continue;
             if (!visDynamic && obj->isDynamic()) continue;
 
-            if (m_flags & vis_restrict_dist)
+            if (m_flags & view_restrict_dist)
             {
                 vec3 bbpos;
                 vec3 box;
@@ -329,7 +349,7 @@ void Scene::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
     }
 }
 
-void Scene::zoneVisibility(vec3 pos, const vec4& screenPlane, const vec3* frustum, Index zoneInd)
+void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
 {
     Zone& zone = m_world.zone(zoneInd);
 
@@ -346,19 +366,19 @@ void Scene::zoneVisibility(vec3 pos, const vec4& screenPlane, const vec3* frustu
         float pdist = portal.plane.xyz * pos + portal.plane.w;
         if (fabs(pdist) < math::eps)
         {
-            markZoneObjects(pos, screenPlane, frustum, opzoneInd);
-            zoneVisibility(pos, screenPlane, frustum, opzoneInd);
+            markZoneObjects(frustum, opzoneInd);
+            zoneVisibility(pos, frustum, opzoneInd);
 
             return;
         }
 
         //Split portal
-        if (!Clipping::PortalVisFrustum(pos, frustum, screenPlane, portal)) continue;
+        if (!Clipping::PortalVisFrustum(frustum, portal)) continue;
   
         Zone& opzone = m_world.zone(opzoneInd);
 
         //Check leaf visibility
-        if (m_flags & vis_leafs)
+        if (m_flags & view_leafs)
         {
             for (Index lid : opzone.leafs)
             {
@@ -369,7 +389,7 @@ void Scene::zoneVisibility(vec3 pos, const vec4& screenPlane, const vec3* frustu
 
                 vec3 box = leaf.bbox.max - mid;
 
-                if ((m_flags & vis_restrict_dist) &&
+                if ((m_flags & view_restrict_dist) &&
                     !(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
 
                 if (Clipping::LeafVis(pos, portal, leaf.bbox))
@@ -414,10 +434,10 @@ void Scene::zoneVisibility(vec3 pos, const vec4& screenPlane, const vec3* frustu
     }
 }
 
-void Scene::calculateVisibility(const vec3& pos, const vec4& screenPlane, const vec3* frustum, uint64_t frame)
+void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t frame)
 {
     m_frame = frame;
-    m_screenPlane = screenPlane;
+    m_screenPlane = frustum.plane(4);
 
     m_skyVisible = false;
 
@@ -452,14 +472,14 @@ void Scene::calculateVisibility(const vec3& pos, const vec4& screenPlane, const 
     if (leaf == InvalidIndex)
     {
         m_zone = InvalidIndex;
-        markAll(pos, screenPlane, frustum);
+        markAll(frustum);
         return;
     }
     
     m_zone = m_world.leaf(leaf).zone;
-    markZoneObjects(pos, screenPlane, frustum, m_zone);
+    markZoneObjects(frustum, m_zone);
 
-    zoneVisibility(pos, screenPlane, frustum, m_zone);
+    zoneVisibility(pos, frustum, m_zone);
 
     if (!m_emissiveGeometry.displayData.empty()) m_emissiveList.push_back(&m_emissiveGeometry);
     if (!m_transparentGeometry.displayData.empty()) m_transparentList.push_back(&m_transparentGeometry);
@@ -476,11 +496,11 @@ void Scene::calculateVisibility(const vec3& pos, const vec4& screenPlane, const 
     }
 }
 
-void Scene::calculateVisibility(const vec3& pos, uint64_t frame)
+void View::updateVisibility(const vec3& pos, uint64_t frame)
 {
     m_frame = frame;
 
-    if(m_flags & vis_leafs) m_visLeaves.clear();
+    if(m_flags & view_leafs) m_visLeaves.clear();
     m_regularList.clear();
     m_emissiveList.clear();
     m_transparentList.clear();
@@ -504,7 +524,7 @@ void Scene::calculateVisibility(const vec3& pos, uint64_t frame)
     zoneVisibility(pos, m_zone, InvalidIndex, InvalidIndex);
 }
 
-void Scene::globalLightZoneVisibility(const vec3& dir, Index zoneInd, Index pzoneInd, Index prt)
+void View::directionalZoneVisibility(const vec3& dir, Index zoneInd, Index pzoneInd, Index prt)
 {
     Zone& zone = m_world.zone(zoneInd);
 
@@ -568,11 +588,11 @@ void Scene::globalLightZoneVisibility(const vec3& dir, Index zoneInd, Index pzon
             }
         }*/
 
-        globalLightZoneVisibility(dir, opzoneInd, zoneInd, pind);
+        directionalZoneVisibility(dir, opzoneInd, zoneInd, pind);
     }
 }
 
-void Scene::globalLightVisibility(const vec3& dir, uint64_t frame)
+void View::directionalVisibility(const vec3& dir, uint64_t frame)
 {
     m_frame = frame;
 
@@ -597,7 +617,7 @@ void Scene::globalLightVisibility(const vec3& dir, uint64_t frame)
                 //m_visZones.push_back(zoneInd);
 
                 markZoneVis(zone);
-                globalLightZoneVisibility(dir, zoneInd, InvalidIndex, InvalidIndex);
+                directionalZoneVisibility(dir, zoneInd, InvalidIndex, InvalidIndex);
                 break;
             }
         }
@@ -608,7 +628,7 @@ void Scene::globalLightVisibility(const vec3& dir, uint64_t frame)
     for (unsigned long id : m_visLeaves) m_world.leaf(id).globalLit = true;
 }
 
-void Scene::addLightRefs(Light* light)
+void View::addLightRefs(Light* light)
 {
     for (Index lfid : m_visLeaves)
     {
@@ -617,7 +637,7 @@ void Scene::addLightRefs(Light* light)
     }
 }
 
-void Scene::enumLights(std::vector<Light*>& omni, std::vector<Light*>& spot, uint64_t frame)
+void View::enumLights(std::vector<Light*>& omni, std::vector<Light*>& spot, uint64_t frame)
 {
     omni.clear();
     spot.clear();
@@ -641,7 +661,7 @@ void Scene::enumLights(std::vector<Light*>& omni, std::vector<Light*>& spot, uin
     }
 }
 
-bool Scene::isGlobalLit()
+bool View::isGlobalLit()
 {
     for (unsigned long id : m_visLeaves)
     {

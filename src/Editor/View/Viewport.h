@@ -15,10 +15,10 @@ enum EditAxis
     ZAxis = 2
 };
 
-class View : public wxWindow
+class Viewport : public wxWindow
 {
 public:
-    View(wxWindow* parent, Editor& editor, bool depthBuffer = false)
+    Viewport(wxWindow* parent, Editor& editor, bool depthBuffer = false)
     : wxWindow(parent, wxID_ANY, {0, 0}, {500, 300}, wxBORDER_DOUBLE)
     , m_editor(editor)
     , m_swapChain(Render::GpuInstance::GetInstance().createSwapChain(GetHandle()), depthBuffer)

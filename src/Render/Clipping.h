@@ -11,10 +11,6 @@ namespace Render
 namespace Clipping
 {
 
-bool FrustumAABBVis(const Frustum& frustum, const vec3& bbpos, const vec3& size);
-bool FrustumLeafVis(const Frustum& frustum, const vec4& plane, const BBox& bbox);
-bool FrustumObjVis(const Frustum& frustum, const vec4& plane, const DisplayObject& obj);
-
 bool FrustumAABBVis(const vec3& pos, const vec3* frustum, const vec4& plane, const vec3& bbpos, const vec3& size);
 bool FrustumLeafVis(const vec3& pos, const vec3* frustum, const vec4& plane, const BBox& bbox);
 bool FrustumObjVis(const vec3& pos, const vec3* frustum, const vec4& plane, const DisplayObject& obj);
@@ -34,6 +30,8 @@ bool PortalVis(const vec3& pos, Portal& portal, Portal& testPortal);
 bool PortalVisDir(const vec3& dir, Portal& portal, Portal& tport);
 bool PortalVisFrustum(const vec3& pos, const vec3* frustum, const vec4& plane, Portal& tport);
 
-} //namespace clipping
+bool PortalVisFrustum(const Frustum& frustum, Portal& tport);
 
-} //namespace render
+} //namespace Clipping
+
+} //namespace Render

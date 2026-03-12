@@ -87,42 +87,6 @@ bool FrustumObjVis(const vec3& pos, const vec3* frustum, const vec4& plane, cons
     return FrustumTest(pos, frustum, plane, box, bbpos, &rot[0]);
 }
 
-bool FrustumAABBVis(const Frustum& frustum, const vec3& bbpos, const vec3& size)
-{
-    return frustum.test(size, bbpos);
-}
-
-bool FrustumLeafVis(const Frustum& frustum, const vec4& plane, const BBox& bbox)
-{
-    vec3 mid = (bbox.min + bbox.max) * 0.5;
-    vec3 bbpos = mid;
-
-    vec3 box = bbox.max - mid;
-
-    static const vec3 axis[3] = { {1, 0, 0},
-                                  {0, 1, 0},
-                                  {0, 0, 1} };
-
-    return frustum.test(box, bbpos);
-}
-
-bool FrustumObjVis(const Frustum& frustum, const vec4& plane, const DisplayObject& obj)
-{
-    const BBox& bbox = obj.bbox();
-    const mat4& mat = obj.mat();
-
-    vec3 opos = mat[3];
-
-    const mat3 rot = mat;
-
-    vec3 mid = (bbox.min + bbox.max) * 0.5;
-    vec3 bbpos = opos + rot * mid;
-
-    vec3 box = bbox.max - mid;
-
-    return frustum.test(box, bbpos, rot);
-}
-
 float PlaneDist(const vec4& plane, const DisplayObject* object)
 {
     const BBox& bbox = object->bbox();
@@ -567,6 +531,29 @@ bool PortalVisFrustum(const vec3& pos, const vec3* frustum, const vec4& plane, P
     return true;
 }
 
-} //namespace clipping
+bool PortalVisFrustum(const Frustum& frustum, Portal& tport)
+{
+    constexpr size_t vnum = 4;
 
-} //namespace render
+    tport.bid = -1;
+
+    for (size_t p = 1; p < 6; p++)
+    {
+        const vec4& plane = frustum.plane(p);
+
+        std::vector<vec3>& vin = (tport.bid == -1) ? tport.verts : tport.vbuff[tport.bid];
+        std::vector<vec3>& vout = (tport.bid == 0) ? tport.vbuff[1] : tport.vbuff[0];
+
+        PortalSplit(-plane.xyz, -plane.w, vin, vout);
+
+        tport.bid = (tport.bid == 0) ? 1 : 0;
+
+        if (vout.size() <= 2) return false;
+    }
+
+    return true;
+}
+
+} //namespace Clipping
+
+} //namespace Render

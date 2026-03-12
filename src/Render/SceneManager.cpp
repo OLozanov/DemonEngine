@@ -15,8 +15,8 @@ SceneManager::SceneManager()
 , m_wireframe(false)
 , m_enableGI(true)
 , m_frontBuffer(0)
-, m_scene(m_world)
-, m_dirLightScene(m_world)
+, m_mainView(m_world)
+, m_dirLightView(m_world)
 , m_dirLightActive(false)
 , m_width(1280)
 , m_height(720)
@@ -434,7 +434,7 @@ void SceneManager::updateWorld()
     for (size_t i = 0; i < ShadowCacheSize; i++) m_cachedSpotLights[i] = nullptr;
 
     incrementFrameNum();
-    m_dirLightScene.globalLightVisibility(m_dirLight.direction(), m_frame);
+    m_dirLightView.update(m_dirLight.direction(), m_frame);
 
     if (m_giActive) m_raytraceScene.build();
     m_lightingConstantBuffer->ambient_buffer = (m_giActive && m_enableGI) ? 1 : 0;
@@ -582,18 +582,18 @@ void SceneManager::geometryPass()
     drawOverlay();
 
     m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer);
-    m_geometryCommandList.draw(m_scene.displayList());
+    m_geometryCommandList.draw(m_mainView.displayList());
 
-    if (!m_scene.instancedList().empty())
+    if (!m_mainView.instancedList().empty())
     {
         m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer_instanced);
-        m_geometryCommandList.draw(m_scene.instancedList());
+        m_geometryCommandList.draw(m_mainView.instancedList());
     }
 
-    if (!m_scene.displayListLayered().empty())
+    if (!m_mainView.displayListLayered().empty())
     {
         m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer_layered);
-        m_geometryCommandList.drawLayered(m_scene.displayListLayered());
+        m_geometryCommandList.drawLayered(m_mainView.displayListLayered());
     }
    
     m_geometryCommandList.finish();
@@ -602,7 +602,7 @@ void SceneManager::geometryPass()
 
 void SceneManager::emissivePass()
 {
-    if (!m_emissiveOverlay && m_scene.displayListTransparent().empty() && m_scene.displayListEmissive().empty()) return;
+    if (!m_emissiveOverlay && m_mainView.displayListTransparent().empty() && m_mainView.displayListEmissive().empty()) return;
 
     m_commandList.setRenderMode(RenderingPipeline::rm_emissive);
     m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
@@ -614,7 +614,7 @@ void SceneManager::emissivePass()
 
     m_commandList.setTopology(topology_trianglelist);
 
-    if (!m_scene.displayListEmissive().empty()) m_commandList.drawSimple(m_scene.displayListEmissive());
+    if (!m_mainView.displayListEmissive().empty()) m_commandList.drawSimple(m_mainView.displayListEmissive());
 
     mat4 overlayMat = m_camera.viewMat().inverse();
 
@@ -635,7 +635,7 @@ void SceneManager::emissivePass()
         }
     }
 
-    if (!m_scene.displayListTransparent().empty())
+    if (!m_mainView.displayListTransparent().empty())
     {
         m_commandList.barrier({ Barrier(m_hdrBuffer, STATE_RENDER, STATE_COPY_SOURCE),
                                 Barrier(m_background, STATE_PIXEL_SHADER_READ, STATE_COPY_DEST) });
@@ -648,7 +648,7 @@ void SceneManager::emissivePass()
         m_commandList.setRenderMode(RenderingPipeline::rm_transparent);
         m_commandList.setConstant(2, std::make_pair<uint32_t, uint32_t>(m_width - 1, m_height - 1));
         m_commandList.bind(5, m_background);
-        m_commandList.drawRefract(m_scene.displayListTransparent());
+        m_commandList.drawRefract(m_mainView.displayListTransparent());
     }
 }
 
@@ -665,14 +665,14 @@ void SceneManager::drawShadow(CommandList& commandList, Light& light, CubemapBuf
 
     commandList.setTopology(topology_trianglelist);
 
-    commandList.drawDepth(light.scene().displayList());
+    commandList.drawDepth(light.view().displayList());
 
     commandList.barrier(buffer, STATE_PIXEL_SHADER_READ);
 
     commandList.setDefaultViewport();
 }
 
-void SceneManager::drawDirectionalShadow(CommandList& commandList, const Scene& scene)
+void SceneManager::drawDirectionalShadow(CommandList& commandList, const View& scene)
 {
     commandList.setViewport(DirShadowSize, DirShadowSize);
 
@@ -684,7 +684,7 @@ void SceneManager::drawDirectionalShadow(CommandList& commandList, const Scene& 
 
     commandList.setTopology(topology_trianglelist);
 
-    commandList.drawDepth(m_dirLightScene.displayList());
+    commandList.drawDepth(m_dirLightView.displayList());
 
     commandList.setDefaultViewport();
 }
@@ -714,7 +714,7 @@ void SceneManager::shadowPass()
             m_shadowCommandList.barrier(m_cubemapCache[cacheIdx], STATE_DEPTH_WRITE);
             m_shadowCommandList.bindDepthBuffer(m_cubemapCache[cacheIdx]);
             m_shadowCommandList.clearDepth(m_cubemapCache[cacheIdx], 1.0f);
-            m_shadowCommandList.drawDepth(light->scene().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList());
 
             light->setStaticUpdateFlag(false);
         }
@@ -731,7 +731,7 @@ void SceneManager::shadowPass()
             light->updateVisibility(m_frame);
             m_shadowCommandList.barrier(m_cubemapBuffers[shadowIdx], STATE_DEPTH_WRITE);
             m_shadowCommandList.bindDepthBuffer(m_cubemapBuffers[shadowIdx]);
-            m_shadowCommandList.drawDepth(light->scene().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList());
         }
     }
 
@@ -758,7 +758,7 @@ void SceneManager::shadowPass()
             m_shadowCommandList.bindDepthBuffer(m_shadowCache[cacheIdx]);
             m_shadowCommandList.clearDepth(m_shadowCache[cacheIdx], 1.0f);
             m_shadowCommandList.setConstant(0, light->shadowMat());
-            m_shadowCommandList.drawDepth(light->scene().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList());
 
             light->setStaticUpdateFlag(false);
         }
@@ -775,14 +775,14 @@ void SceneManager::shadowPass()
             m_shadowCommandList.barrier(m_shadowBuffers[shadowIdx], STATE_DEPTH_WRITE);
             m_shadowCommandList.bindDepthBuffer(m_shadowBuffers[shadowIdx]);
             m_shadowCommandList.setConstant(0, light->shadowMat());
-            m_shadowCommandList.drawDepth(light->scene().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList());
         }
     }
 
-    if (m_dirLightActive && m_scene.isGlobalLit())
+    if (m_dirLightActive && m_mainView.isGlobalLit())
     {
         m_shadowCommandList.setRenderMode(RenderingPipeline::rm_shadow_cascaded);
-        drawDirectionalShadow(m_shadowCommandList, m_dirLightScene);
+        drawDirectionalShadow(m_shadowCommandList, m_dirLightView);
     }
 
     m_shadowCommandList.finish();
@@ -876,7 +876,7 @@ void SceneManager::lightPassSimple()
         }
     }
 
-    if (m_dirLightActive && m_scene.isGlobalLit())
+    if (m_dirLightActive && m_mainView.isGlobalLit())
     {
         m_commandList.barrier(m_shadowBuffer, STATE_PIXEL_SHADER_READ);
         m_commandList.setRenderMode(RenderingPipeline::rm_dirlight);
@@ -951,7 +951,7 @@ void SceneManager::lightPass()
         }
     }
 
-    if (m_dirLightActive && m_scene.isGlobalLit())
+    if (m_dirLightActive && m_mainView.isGlobalLit())
         m_barriers.transit(m_shadowBuffer, STATE_READ);
 
     m_barriers.transit(m_lightGrid, STATE_SHADER_READ);
@@ -994,7 +994,7 @@ void SceneManager::lightPass()
 
 void SceneManager::skyPass()
 {
-    if (!m_scene.isSkyVisible()) return;
+    if (!m_mainView.isSkyVisible()) return;
 
     m_commandList.setRenderMode(RenderingPipeline::rm_sky);
     m_commandList.bindConstantBuffer(0, m_backgroundConstantBuffer);
@@ -1116,7 +1116,7 @@ void SceneManager::ambientPass()
 
 void SceneManager::spritePass()
 {
-    if (m_spriteBuffer.empty() && m_scene.displayListSprites().empty()) return;
+    if (m_spriteBuffer.empty() && m_mainView.displayListSprites().empty()) return;
 
     m_commandList.setRenderMode(RenderingPipeline::rm_sprite);
     m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
@@ -1134,7 +1134,7 @@ void SceneManager::spritePass()
         m_commandList.drawInstanced(m_spriteBuffer.size(), 4, 0);
     }
 
-    const DisplayList& displayList = m_scene.displayListSprites();
+    const DisplayList& displayList = m_mainView.displayListSprites();
 
     for (const DisplayBlock* block : displayList)
     {
@@ -1170,7 +1170,7 @@ void SceneManager::fogPass()
     m_commandList.bindVertexBuffer(m_volumeVertexBuffer);
     m_commandList.bindIndexBuffer(m_volumeIndexBuffer);
 
-    for (const FogVolume* volume : m_scene.fogVolumes())
+    for (const FogVolume* volume : m_mainView.fogVolumes())
     {
         m_commandList.setConstant(2, volume->data());
         m_commandList.drawIndexed(14);
@@ -1276,7 +1276,7 @@ void SceneManager::wireframePass()
     m_commandList.setConstant(2, GeometryColor);
 
     m_commandList.setTopology(topology_trianglelist);
-    m_commandList.drawColor(m_scene.displayList());
+    m_commandList.drawColor(m_mainView.displayList());
 
     // Draw portals
     static const mat4 PortalMat = {};
@@ -1322,7 +1322,7 @@ void SceneManager::wireframePass()
 
     m_commandList.setTopology(topology_linelist);
     m_commandList.setConstant(2, BBoxColor);
-    m_commandList.drawColor(m_scene.displayListDebug());
+    m_commandList.drawColor(m_mainView.displayListDebug());
 
     //m_commandList.setTopology(RenderingPipeline::topology_linelist);
     //commandList->SetGraphicsRoot32BitConstants(2, 4, &BBoxColor, 0);
@@ -1400,27 +1400,8 @@ void SceneManager::calculateVisibility()
 {
     incrementFrameNum();
 
-    vec3 frustum[4];
-
-    static const vec2 quadVertices[] =
-    {
-        { -1.0f, 1.0f },
-        { 1.0f, 1.0f },
-        { 1.0f, -1.0f },
-        { -1.0f, -1.0f }
-    };
-
-    const vec3& pos = m_camera.pos();
-    const vec3& dir = m_camera.direction();
-    float d = dir * pos;
-
-    for (int i = 0; i < 4; i++)
-    {
-        frustum[i] = m_camera.basis() * vec3(quadVertices[i].x * m_fovx, quadVertices[i].y * m_fovy, 1.0) + m_camera.pos();
-    }
-
-    m_scene.calculateVisibility(m_camera.pos(), vec4(dir, -d), frustum, m_frame);
-    m_scene.enumLights(m_omniLights, m_spotLights, m_frame);
+    m_mainView.update(m_camera.pos(), m_projView, m_frame);
+    m_mainView.enumLights(m_omniLights, m_spotLights, m_frame);
 
     if (m_omniLightIndices.size() < m_omniLights.size()) m_omniLightIndices.resize(m_omniLights.size() * 2);
     if (m_spotLightIndices.size() < m_spotLights.size()) m_spotLightIndices.resize(m_spotLights.size() * 2);
@@ -1434,10 +1415,10 @@ void SceneManager::calculateVisibility()
     if (!m_wireframe)
     {
         incrementFrameNum();
-        m_dirLightScene.globalLightVisibility(m_dirLight.direction(), m_frame);
+        m_dirLightView.update(m_dirLight.direction(), m_frame);
     }
 
-    bool dirLight = m_dirLightActive && m_scene.isGlobalLit();
+    bool dirLight = m_dirLightActive && m_mainView.isGlobalLit();
     m_lightingConstantBuffer->enable_dir_light = dirLight;
     m_raytraceContantBuffer->enable_dir_light = dirLight;
 }
@@ -1445,13 +1426,13 @@ void SceneManager::calculateVisibility()
 void SceneManager::setupView()
 {
     mat4 worldMat = m_camera.basis();
-    mat4 projView = m_projMat * m_camera.viewMat();
+    m_projView = m_projMat * m_camera.viewMat();
 
     m_raytraceContantBuffer->prev_eyepos = m_eyepos;
 
     m_eyepos = m_camera.pos();
 
-    m_sceneConstantBuffer->projViewMat = projView;
+    m_sceneConstantBuffer->projViewMat = m_projView;
     m_sceneConstantBuffer->worldMat = worldMat;
     m_sceneConstantBuffer->eyepos = m_eyepos;
 
@@ -1473,7 +1454,7 @@ void SceneManager::setupView()
     m_raytraceContantBuffer->frame++;
     m_raytraceContantBuffer->reprojectionMat = m_reprojectionMat;
 
-    m_reprojectionMat = projView;
+    m_reprojectionMat = m_projView;
 
     m_lightingConstantBuffer->topleft.xyz = m_topleft;
     m_lightingConstantBuffer->xdir.xyz = m_xdir;
@@ -1499,7 +1480,7 @@ void SceneManager::display()
     calculateVisibility();
     processSkeletalObjects();
 
-    bool dirLightActive = m_dirLightActive && m_scene.isGlobalLit();
+    bool dirLightActive = m_dirLightActive && m_mainView.isGlobalLit();
 
     if (m_wireframe) wireframePass();
     else

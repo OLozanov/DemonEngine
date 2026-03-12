@@ -9,7 +9,7 @@
 #include "Render/SceneConstantBuffer.h"
 
 #include "Render/World.h"
-#include "Render/Scene.h"
+#include "Render/View.h"
 
 #include "Render/Camera.h"
 
@@ -168,7 +168,7 @@ private:
     void setupView();
 
     void drawShadow(CommandList& commandList, Light& light, CubemapBuffer& buffer);
-    void drawDirectionalShadow(CommandList& commandList, const Scene& scene);
+    void drawDirectionalShadow(CommandList& commandList, const View& scene);
 
     void drawOverlay();
     void geometryPass();
@@ -213,8 +213,8 @@ private:
     float m_fovy;
 
     World m_world;
-    Scene m_scene;
-    Scene m_dirLightScene;
+    View m_mainView;
+    View m_dirLightView;
 
     Camera m_camera;
 
@@ -240,6 +240,8 @@ private:
 
     mat4 m_projMat;
     mat4 m_reprojectionMat;
+
+    mat4 m_projView;
 
     BarrierBlock m_barriers;
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "View/View.h"
+#include "View/Viewport.h"
 
 #include <wx/timer.h>
 
 #include "View/ViewCamera.h"
 #include "math/math3d.h"
 
-class PerspectiveView : public View
+class PerspectiveView : public Viewport
 {
 public:
     PerspectiveView(wxWindow* parent, Editor& editor);
