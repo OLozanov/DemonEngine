@@ -3,8 +3,37 @@
 namespace Render
 {
 
+void Frustum::update(const vec3& pos, const vec4& plane, const std::vector<vec3>& portal)
+{
+	float d = plane.xyz * pos + plane.w;
+
+	m_planes.resize(portal.size() + 1);
+	m_planes[0] = d < 0 ? plane : -plane;
+
+	size_t vnum = portal.size();
+
+	for (size_t v = 0; v < vnum; v++)
+	{
+		int i1, i2;
+
+		i1 = v;
+		i2 = ((v + 1) == vnum) ? 0 : v + 1;
+
+		vec3 edge1 = portal[i1] - pos;
+		vec3 edge2 = portal[i2] - pos;
+
+		vec3 norm = d < 0 ? edge1 ^ edge2 : edge2 ^ edge1;
+		norm.normalize();
+
+		m_planes[v + 1].xyz = norm;
+		m_planes[v + 1].w = -pos * norm;
+	}
+}
+
 void Frustum::update(const vec3& pos, const vec3& dir, const vec3* verts, size_t num)
 {
+	m_planes.resize(num + 1);
+
 	float d = dir * pos;
 
 	m_planes[0] = { dir, -d };
@@ -52,6 +81,8 @@ void Frustum::update(const Camera& camera, float fovx, float fovy)
 
 void Frustum::update(const mat4& mat)
 {
+	m_planes.resize(6);
+
 	// near
 	m_planes[0].x = mat[0].w + mat[0].z;
 	m_planes[0].y = mat[1].w + mat[1].z;
@@ -91,7 +122,7 @@ void Frustum::update(const mat4& mat)
 
 bool Frustum::test(const vec3& pos, const vec3& bbox, const mat3& axis) const
 {
-	for (size_t i = 0; i < 6; i++)
+	for (size_t i = 0; i < m_planes.size(); i++)
 	{
 		const vec4& plane = m_planes[i];
 
@@ -106,7 +137,7 @@ bool Frustum::test(const vec3& pos, const vec3& bbox, const mat3& axis) const
 
 bool Frustum::test(const vec3& pos, const vec3& bbox) const
 {
-    for (size_t i = 0; i < 6; i++)
+    for (size_t i = 0; i < m_planes.size(); i++)
     {
 		float r = fabs(m_planes[i].x) * bbox.x + fabs(m_planes[i].y) * bbox.y + fabs(m_planes[i].z) * bbox.z;
 		float dist = m_planes[i].xyz * pos + m_planes[i].w;

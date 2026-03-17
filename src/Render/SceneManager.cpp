@@ -582,7 +582,7 @@ void SceneManager::geometryPass()
     drawOverlay();
 
     m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer);
-    m_geometryCommandList.draw(m_mainView.displayList());
+    m_geometryCommandList.draw(m_mainView.displayList(View::DisplayRegular));
 
     if (!m_mainView.instancedList().empty())
     {
@@ -590,10 +590,10 @@ void SceneManager::geometryPass()
         m_geometryCommandList.draw(m_mainView.instancedList());
     }
 
-    if (!m_mainView.displayListLayered().empty())
+    if (!m_mainView.displayList(View::DisplayLayered).empty())
     {
         m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer_layered);
-        m_geometryCommandList.drawLayered(m_mainView.displayListLayered());
+        m_geometryCommandList.drawLayered(m_mainView.displayList(View::DisplayLayered));
     }
    
     m_geometryCommandList.finish();
@@ -602,7 +602,9 @@ void SceneManager::geometryPass()
 
 void SceneManager::emissivePass()
 {
-    if (!m_emissiveOverlay && m_mainView.displayListTransparent().empty() && m_mainView.displayListEmissive().empty()) return;
+    if (!m_emissiveOverlay && 
+        m_mainView.displayList(View::DisplayTransparent).empty() && 
+        m_mainView.displayList(View::DisplayEmissive).empty()) return;
 
     m_commandList.setRenderMode(RenderingPipeline::rm_emissive);
     m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
@@ -614,7 +616,7 @@ void SceneManager::emissivePass()
 
     m_commandList.setTopology(topology_trianglelist);
 
-    if (!m_mainView.displayListEmissive().empty()) m_commandList.drawSimple(m_mainView.displayListEmissive());
+    if (!m_mainView.displayList(View::DisplayEmissive).empty()) m_commandList.drawSimple(m_mainView.displayList(View::DisplayEmissive));
 
     mat4 overlayMat = m_camera.viewMat().inverse();
 
@@ -635,7 +637,7 @@ void SceneManager::emissivePass()
         }
     }
 
-    if (!m_mainView.displayListTransparent().empty())
+    if (!m_mainView.displayList(View::DisplayTransparent).empty())
     {
         m_commandList.barrier({ Barrier(m_hdrBuffer, STATE_RENDER, STATE_COPY_SOURCE),
                                 Barrier(m_background, STATE_PIXEL_SHADER_READ, STATE_COPY_DEST) });
@@ -648,7 +650,7 @@ void SceneManager::emissivePass()
         m_commandList.setRenderMode(RenderingPipeline::rm_transparent);
         m_commandList.setConstant(2, std::make_pair<uint32_t, uint32_t>(m_width - 1, m_height - 1));
         m_commandList.bind(5, m_background);
-        m_commandList.drawRefract(m_mainView.displayListTransparent());
+        m_commandList.drawRefract(m_mainView.displayList(View::DisplayTransparent));
     }
 }
 
@@ -665,7 +667,7 @@ void SceneManager::drawShadow(CommandList& commandList, Light& light, CubemapBuf
 
     commandList.setTopology(topology_trianglelist);
 
-    commandList.drawDepth(light.view().displayList());
+    commandList.drawDepth(light.view().displayList(View::DisplayRegular));
 
     commandList.barrier(buffer, STATE_PIXEL_SHADER_READ);
 
@@ -684,7 +686,7 @@ void SceneManager::drawDirectionalShadow(CommandList& commandList, const View& s
 
     commandList.setTopology(topology_trianglelist);
 
-    commandList.drawDepth(m_dirLightView.displayList());
+    commandList.drawDepth(m_dirLightView.displayList(View::DisplayRegular));
 
     commandList.setDefaultViewport();
 }
@@ -714,7 +716,7 @@ void SceneManager::shadowPass()
             m_shadowCommandList.barrier(m_cubemapCache[cacheIdx], STATE_DEPTH_WRITE);
             m_shadowCommandList.bindDepthBuffer(m_cubemapCache[cacheIdx]);
             m_shadowCommandList.clearDepth(m_cubemapCache[cacheIdx], 1.0f);
-            m_shadowCommandList.drawDepth(light->view().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList(View::DisplayRegular));
 
             light->setStaticUpdateFlag(false);
         }
@@ -731,7 +733,7 @@ void SceneManager::shadowPass()
             light->updateVisibility(m_frame);
             m_shadowCommandList.barrier(m_cubemapBuffers[shadowIdx], STATE_DEPTH_WRITE);
             m_shadowCommandList.bindDepthBuffer(m_cubemapBuffers[shadowIdx]);
-            m_shadowCommandList.drawDepth(light->view().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList(View::DisplayRegular));
         }
     }
 
@@ -758,7 +760,7 @@ void SceneManager::shadowPass()
             m_shadowCommandList.bindDepthBuffer(m_shadowCache[cacheIdx]);
             m_shadowCommandList.clearDepth(m_shadowCache[cacheIdx], 1.0f);
             m_shadowCommandList.setConstant(0, light->shadowMat());
-            m_shadowCommandList.drawDepth(light->view().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList(View::DisplayRegular));
 
             light->setStaticUpdateFlag(false);
         }
@@ -775,7 +777,7 @@ void SceneManager::shadowPass()
             m_shadowCommandList.barrier(m_shadowBuffers[shadowIdx], STATE_DEPTH_WRITE);
             m_shadowCommandList.bindDepthBuffer(m_shadowBuffers[shadowIdx]);
             m_shadowCommandList.setConstant(0, light->shadowMat());
-            m_shadowCommandList.drawDepth(light->view().displayList());
+            m_shadowCommandList.drawDepth(light->view().displayList(View::DisplayRegular));
         }
     }
 
@@ -1116,7 +1118,7 @@ void SceneManager::ambientPass()
 
 void SceneManager::spritePass()
 {
-    if (m_spriteBuffer.empty() && m_mainView.displayListSprites().empty()) return;
+    if (m_spriteBuffer.empty() && m_mainView.displayList(View::DisplaySprites).empty()) return;
 
     m_commandList.setRenderMode(RenderingPipeline::rm_sprite);
     m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
@@ -1134,7 +1136,7 @@ void SceneManager::spritePass()
         m_commandList.drawInstanced(m_spriteBuffer.size(), 4, 0);
     }
 
-    const DisplayList& displayList = m_mainView.displayListSprites();
+    const DisplayList& displayList = m_mainView.displayList(View::DisplaySprites);
 
     for (const DisplayBlock* block : displayList)
     {
@@ -1276,7 +1278,7 @@ void SceneManager::wireframePass()
     m_commandList.setConstant(2, GeometryColor);
 
     m_commandList.setTopology(topology_trianglelist);
-    m_commandList.drawColor(m_mainView.displayList());
+    m_commandList.drawColor(m_mainView.displayList(View::DisplayRegular));
 
     // Draw portals
     static const mat4 PortalMat = {};
@@ -1322,7 +1324,7 @@ void SceneManager::wireframePass()
 
     m_commandList.setTopology(topology_linelist);
     m_commandList.setConstant(2, BBoxColor);
-    m_commandList.drawColor(m_mainView.displayListDebug());
+    m_commandList.drawColor(m_mainView.displayList(View::DisplayDebug));
 
     //m_commandList.setTopology(RenderingPipeline::topology_linelist);
     //commandList->SetGraphicsRoot32BitConstants(2, 4, &BBoxColor, 0);

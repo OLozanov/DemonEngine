@@ -38,27 +38,29 @@ void View::update(const vec3& dir, uint64_t frame)
 
 void View::addObjectData(DisplayObject* object)
 {
+    object->setFrame(m_frame);
+
     for (const DisplayBlock& block : object->displayData())
     {
         if (block.hide) continue;
     
         switch (block.type)
         {
-        case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-        case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
-        case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-        case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
-        case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
-        case DisplayBlock::display_debug: m_debugList.push_back(&block); break;
+        case DisplayBlock::display_regular: m_displayList[DisplayRegular].push_back(&block); break;
+        case DisplayBlock::display_layered: m_displayList[DisplayLayered].push_back(&block); break;
+        case DisplayBlock::display_emissive: m_displayList[DisplayEmissive].push_back(&block); break;
+        case DisplayBlock::display_transparent: m_displayList[DisplayTransparent].push_back(&block); break;
+        case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_displayList[DisplaySprites].push_back(&block); break;
+        case DisplayBlock::display_debug: m_displayList[DisplayDebug].push_back(&block); break;
         }
     }
     
-    if (!(m_flags && view_instanced)) return;
+    if (!(m_flags & ViewInstanced)) return;
     if (object->instanceData().empty()) return;
 
     float dist = Clipping::PlaneDist(m_screenPlane, object);
 
-    if (dist > 60) return;
+    if (dist > 120.0f) return;
     
     for (const InstanceData& data : object->instanceData()) m_instancedList.push_back(&data);
 }
@@ -92,11 +94,11 @@ void View::markAll(const Frustum& frustum)
                 {
                     switch (block.type)
                     {
-                    case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-                    case DisplayBlock::display_layered: m_layeredList.push_back(&block); break;
-                    case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-                    case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
-                    case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_spriteList.push_back(&block); break;
+                    case DisplayBlock::display_regular: m_displayList[DisplayRegular].push_back(&block); break;
+                    case DisplayBlock::display_layered: m_displayList[DisplayLayered].push_back(&block); break;
+                    case DisplayBlock::display_emissive: m_displayList[DisplayEmissive].push_back(&block); break;
+                    case DisplayBlock::display_transparent: m_displayList[DisplayTransparent].push_back(&block); break;
+                    case DisplayBlock::display_sprite: if (block.displayData[0]->vertexnum) m_displayList[DisplaySprites].push_back(&block); break;
                     }
                 }
             }
@@ -125,9 +127,9 @@ void View::markAll(const vec3& pos)
             {
                 switch (block.type)
                 {
-                case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-                case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-                case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
+                case DisplayBlock::display_regular: m_displayList[DisplayRegular].push_back(&block); break;
+                case DisplayBlock::display_emissive: m_displayList[DisplayEmissive].push_back(&block); break;
+                case DisplayBlock::display_transparent: m_displayList[DisplayTransparent].push_back(&block); break;
                 }
             }
         }
@@ -161,7 +163,11 @@ void View::markZoneObjects(const Frustum& frustum, Index zind)
     {
         if (m_frame == obj->frame()) continue;
 
-        obj->setFrame(m_frame);
+        bool viewStatic = m_flags & ViewStatic;
+        bool viewDynamic = m_flags & ViewDynamic;
+
+        if (!viewStatic && !obj->isDynamic()) continue;
+        if (!viewDynamic && obj->isDynamic()) continue;
 
         if (frustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
     }
@@ -184,7 +190,7 @@ void View::markZoneObjects(const vec3& pos)
 
     const auto& leafs = m_world.leafs();
 
-    if (m_flags & view_leafs)
+    if (m_flags & ViewLeafs)
     {
         for (const auto& lfid : zone.leafs)
         {
@@ -195,7 +201,7 @@ void View::markZoneObjects(const vec3& pos)
 
             vec3 box = leaf.bbox.max - mid;
 
-            if ((m_flags & view_restrict_dist) &&
+            if ((m_flags & ViewRestrictDist) &&
                 !(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
 
             m_visLeaves.push_back(lfid);
@@ -209,13 +215,13 @@ void View::markZoneObjects(const vec3& pos)
     {
         if (m_frame == obj->frame()) continue;
 
-        bool visStatic = m_flags & view_static;
-        bool visDynamic = m_flags & view_dynamic;
+        bool viewStatic = m_flags & ViewStatic;
+        bool viewDynamic = m_flags & ViewDynamic;
 
-        if (!visStatic && !obj->isDynamic()) continue;
-        if (!visDynamic && obj->isDynamic()) continue;
+        if (!viewStatic && !obj->isDynamic()) continue;
+        if (!viewDynamic && obj->isDynamic()) continue;
 
-        if (m_flags & view_restrict_dist)
+        if (m_flags & ViewRestrictDist)
         {
             vec3 bbpos;
             vec3 box;
@@ -231,9 +237,9 @@ void View::markZoneObjects(const vec3& pos)
         {
             switch (block.type)
             {
-            case DisplayBlock::display_regular: m_regularList.push_back(&block); break;
-            case DisplayBlock::display_emissive: m_emissiveList.push_back(&block); break;
-            case DisplayBlock::display_transparent: m_transparentList.push_back(&block); break;
+            case DisplayBlock::display_regular: m_displayList[DisplayRegular].push_back(&block); break;
+            case DisplayBlock::display_emissive: m_displayList[DisplayEmissive].push_back(&block); break;
+            case DisplayBlock::display_transparent: m_displayList[DisplayTransparent].push_back(&block); break;
             }
         }
     }
@@ -260,12 +266,12 @@ void View::markZoneVis(const Zone& zone)
 
         for (const DisplayBlock& block : obj->displayData())
         {
-            if (block.type == DisplayBlock::display_regular) m_regularList.push_back(&block);
+            if (block.type == DisplayBlock::display_regular) m_displayList[DisplayRegular].push_back(&block);
         }
     }
 }
 
-void View::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
+void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd, Index pzoneInd)
 {
     Zone& zone = m_world.zone(zoneInd);
 
@@ -280,17 +286,18 @@ void View::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
         {
             if (opzoneInd == pzoneInd) continue;
 
-            Portal& clipPortal = m_world.portal(prt);
-
             //Split portal
-            if (!Clipping::PortalVis(pos, clipPortal, portal)) continue;
+            if (!Clipping::PortalVisFrustum(frustum, portal)) continue;
 
         } else portal.bid = -1;
 
         Zone& opzone = m_world.zone(opzoneInd);
 
+        Frustum pfrustum;
+        pfrustum.update(pos, portal.plane, portal.vertices());
+
         //Check leaf visibility
-        if (m_flags & view_leafs)
+        if (m_flags & ViewLeafs)
         {
             for (Index lid : opzone.leafs)
             {
@@ -301,10 +308,10 @@ void View::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
 
                 vec3 box = leaf.bbox.max - mid;
 
-                if ((m_flags & view_restrict_dist) &&
+                if ((m_flags & ViewRestrictDist) &&
                     !(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
 
-                if (Clipping::LeafVis(pos, portal, leaf.bbox))
+                if (pfrustum.test(leaf.bbox))
                 {
                     if (leaf.frame != m_frame)
                     {
@@ -326,13 +333,13 @@ void View::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
         {
             if (m_frame == obj->frame()) continue;
 
-            bool visStatic = m_flags & view_static;
-            bool visDynamic = m_flags & view_dynamic;
+            bool viewStatic = m_flags & ViewStatic;
+            bool viewDynamic = m_flags & ViewDynamic;
 
-            if (!visStatic && !obj->isDynamic()) continue;
-            if (!visDynamic && obj->isDynamic()) continue;
+            if (!viewStatic && !obj->isDynamic()) continue;
+            if (!viewDynamic && obj->isDynamic()) continue;
 
-            if (m_flags & view_restrict_dist)
+            if (m_flags & ViewRestrictDist)
             {
                 vec3 bbpos;
                 vec3 box;
@@ -342,10 +349,10 @@ void View::zoneVisibility(vec3 pos, Index zoneInd, Index pzoneInd, Index prt)
                 if(!(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
             }
 
-            if (Clipping::ObjVis(pos, portal, obj)) addObjectData(obj);
+            if (pfrustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
         }
 
-        zoneVisibility(pos, opzoneInd, zoneInd, pind);
+        zoneVisibility(pos, pfrustum, opzoneInd, zoneInd);
     }
 }
 
@@ -369,7 +376,7 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
             markZoneObjects(frustum, opzoneInd);
             zoneVisibility(pos, frustum, opzoneInd);
 
-            return;
+            continue;
         }
 
         //Split portal
@@ -377,8 +384,11 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
   
         Zone& opzone = m_world.zone(opzoneInd);
 
+        Frustum pfrustum;
+        pfrustum.update(pos, portal.plane, portal.vertices());
+
         //Check leaf visibility
-        if (m_flags & view_leafs)
+        if (m_flags & ViewLeafs)
         {
             for (Index lid : opzone.leafs)
             {
@@ -389,10 +399,10 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
 
                 vec3 box = leaf.bbox.max - mid;
 
-                if ((m_flags & view_restrict_dist) &&
+                if ((m_flags & ViewRestrictDist) &&
                     !(AABBTest(bbpos, box, pos, vec3(m_distance, m_distance, m_distance)))) continue;
 
-                if (Clipping::LeafVis(pos, portal, leaf.bbox))
+                if (pfrustum.test(leaf.bbox))
                 {
                     if (leaf.frame != m_frame)
                     {
@@ -414,7 +424,9 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
         //Object visibility
         for (DisplayObject* obj : opzone.objects)
         {
-            if (Clipping::ObjVis(pos, portal, obj)) addObjectData(obj);
+            if (m_frame == obj->frame()) continue;
+
+            if (pfrustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
         }
 
         // Fog volumes visibility
@@ -422,7 +434,7 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
         {
             if (m_frame == volume->frame()) continue;
 
-            if (Clipping::AABBVis(pos, portal, volume->size(), volume->pos()))
+            if (pfrustum.test(volume->pos(), volume->size()))
             {
                 volume->setFrame(m_frame);
 
@@ -430,24 +442,24 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
             }
         }
 
-        zoneVisibility(pos, opzoneInd, zoneInd, pind);
+        zoneVisibility(pos, pfrustum, opzoneInd, zoneInd);
     }
 }
 
 void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t frame)
 {
     m_frame = frame;
-    m_screenPlane = frustum.plane(4);
+    m_screenPlane = frustum.plane(0);
 
     m_skyVisible = false;
 
-    m_visLeaves.clear();
-    m_regularList.clear();
-    m_layeredList.clear();
-    m_emissiveList.clear();
-    m_transparentList.clear();
-    m_spriteList.clear();
-    m_debugList.clear();
+    if (m_flags & ViewLeafs) m_visLeaves.clear();
+    m_displayList[DisplayRegular].clear();
+    m_displayList[DisplayLayered].clear();
+    m_displayList[DisplayEmissive].clear();
+    m_displayList[DisplayTransparent].clear();
+    m_displayList[DisplaySprites].clear();
+    m_displayList[DisplayDebug].clear();
 
     m_instancedList.clear();
 
@@ -465,7 +477,7 @@ void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t fr
     m_transparentGeometry.vertexData = m_world.vertexData();
     m_transparentGeometry.displayData.clear();
 
-    m_regularList.push_back(&m_global);
+    m_displayList[DisplayRegular].push_back(&m_global);
 
     Index leaf = m_world.tracePos(pos);
 
@@ -481,8 +493,8 @@ void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t fr
 
     zoneVisibility(pos, frustum, m_zone);
 
-    if (!m_emissiveGeometry.displayData.empty()) m_emissiveList.push_back(&m_emissiveGeometry);
-    if (!m_transparentGeometry.displayData.empty()) m_transparentList.push_back(&m_transparentGeometry);
+    if (!m_emissiveGeometry.displayData.empty()) m_displayList[DisplayEmissive].push_back(&m_emissiveGeometry);
+    if (!m_transparentGeometry.displayData.empty()) m_displayList[DisplayTransparent].push_back(&m_transparentGeometry);
 
     if (!m_fogVolumes.empty())
     {
@@ -500,15 +512,15 @@ void View::updateVisibility(const vec3& pos, uint64_t frame)
 {
     m_frame = frame;
 
-    if(m_flags & view_leafs) m_visLeaves.clear();
-    m_regularList.clear();
-    m_emissiveList.clear();
-    m_transparentList.clear();
+    if(m_flags & ViewLeafs) m_visLeaves.clear();
+    m_displayList[DisplayRegular].clear();
+    m_displayList[DisplayEmissive].clear();
+    m_displayList[DisplayTransparent].clear();
 
     m_global.vertexData = m_world.vertexData();
     m_global.displayData.clear();
 
-    m_regularList.push_back(&m_global);
+    m_displayList[DisplayRegular].push_back(&m_global);
 
     Index leaf = m_world.tracePos(pos);
 
@@ -521,7 +533,7 @@ void View::updateVisibility(const vec3& pos, uint64_t frame)
     m_zone = m_world.leaf(leaf).zone;
     markZoneObjects(pos);
 
-    zoneVisibility(pos, m_zone, InvalidIndex, InvalidIndex);
+    zoneVisibility(pos, {}, m_zone, InvalidIndex);
 }
 
 void View::directionalZoneVisibility(const vec3& dir, Index zoneInd, Index pzoneInd, Index prt)
@@ -598,11 +610,11 @@ void View::directionalVisibility(const vec3& dir, uint64_t frame)
 
     m_visLeaves.clear();
 
-    m_regularList.clear();
+    m_displayList[DisplayRegular].clear();
     m_global.displayData.clear();
 
     m_global.vertexData = m_world.vertexData();
-    m_regularList.push_back(&m_global);
+    m_displayList[DisplayRegular].push_back(&m_global);
 
     Index zoneInd = 0;
 
@@ -672,4 +684,4 @@ bool View::isGlobalLit()
     return false;
 }
 
-} //namespace render
+} //namespace Render

@@ -531,22 +531,34 @@ bool PortalVisFrustum(const vec3& pos, const vec3* frustum, const vec4& plane, P
     return true;
 }
 
-bool PortalVisFrustum(const Frustum& frustum, Portal& tport)
+bool PortalVisFrustum(const Frustum& frustum, Portal& portal)
 {
-    constexpr size_t vnum = 4;
+    const std::vector<vec3>& pverts = portal.verts;
+    const vec4& plane = frustum.plane(0);
 
-    tport.bid = -1;
+    float dist = -std::numeric_limits<float>::infinity();
 
-    for (size_t p = 1; p < 6; p++)
+    for (size_t v = 0; v < pverts.size(); v++)
+    {
+        float d = plane.xyz * pverts[v] + plane.w;
+        dist = std::max(dist, d);
+    }
+
+    if (dist < math::eps) 
+        return false;
+
+    portal.bid = -1;
+
+    for (size_t p = 1; p < frustum.size(); p++)
     {
         const vec4& plane = frustum.plane(p);
 
-        std::vector<vec3>& vin = (tport.bid == -1) ? tport.verts : tport.vbuff[tport.bid];
-        std::vector<vec3>& vout = (tport.bid == 0) ? tport.vbuff[1] : tport.vbuff[0];
+        std::vector<vec3>& vin = (portal.bid == -1) ? portal.verts : portal.vbuff[portal.bid];
+        std::vector<vec3>& vout = (portal.bid == 0) ? portal.vbuff[1] : portal.vbuff[0];
 
         PortalSplit(-plane.xyz, -plane.w, vin, vout);
 
-        tport.bid = (tport.bid == 0) ? 1 : 0;
+        portal.bid = (portal.bid == 0) ? 1 : 0;
 
         if (vout.size() <= 2) return false;
     }

@@ -8,7 +8,7 @@ Light::Light()
 : m_type(LightType::Omni)
 , m_omniData{ vec3(0), 5, vec3(1), 2 }
 , m_shadowType(LightShadow::None)
-, m_view(SceneManager::GetInstance().getWorld(), View::view_leafs | View::view_objects | View::view_restrict_dist)
+, m_view(SceneManager::GetInstance().getWorld(), View::ViewLeafs | View::ViewObjects | View::ViewRestrictDist)
 {
     m_view.setDistance(affectedDistance());
 }
@@ -16,7 +16,7 @@ Light::Light()
 Light::Light(const vec3& pos, const vec3& color, float radius, float falloff, LightShadow shadow)
 : m_type(LightType::Omni)
 , m_shadowType(shadow)
-, m_view(SceneManager::GetInstance().getWorld(), View::view_leafs | View::view_objects | View::view_restrict_dist)
+, m_view(SceneManager::GetInstance().getWorld(), View::ViewLeafs | View::ViewObjects | View::ViewRestrictDist)
 {
     m_omniData.pos = pos;
     m_omniData.flux = color;
@@ -32,7 +32,7 @@ Light::Light(const vec3& pos, const vec3& dir, const vec3& color,
              float outerAngle, float innerAngle, LightShadow shadow)
 : m_type(LightType::Spot)
 , m_shadowType(shadow)
-, m_view(SceneManager::GetInstance().getWorld(), View::view_leafs | View::view_objects | View::view_restrict_dist)
+, m_view(SceneManager::GetInstance().getWorld(), View::ViewLeafs | View::ViewObjects | View::ViewRestrictDist)
 {
     m_spotData.pos = pos;
     m_spotData.dir = dir;
@@ -76,7 +76,7 @@ void Light::calculateVisibility(uint64_t frame)
     //uint8_t flags = Scene::vis_restrict_dist;
     //if (m_shadowType == LightShadow::Dynamic) flags |= Scene::vis_dynamic;
 
-    m_view.setFlags(View::view_restrict_dist | View::view_leafs | View::view_static);
+    m_view.setFlags(View::ViewRestrictDist | View::ViewLeafs | View::ViewStatic);
 
     if (m_type == LightType::Omni)
         m_view.update(m_omniData.pos, affectedDistance(), frame);
@@ -84,7 +84,7 @@ void Light::calculateVisibility(uint64_t frame)
         m_view.update(m_spotData.pos, m_spotData.projMat, frame);
 
     m_view.addLightRefs(this);
-    m_view.setFlags(View::view_restrict_dist | View::view_dynamic);
+    m_view.setFlags(View::ViewRestrictDist | View::ViewDynamic);
 }
 
 void Light::updateVisibility(uint64_t frame)

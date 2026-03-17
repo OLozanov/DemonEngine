@@ -74,6 +74,8 @@ struct Portal
 
     Index bid = -1;
     std::vector<vec3> vbuff[2];
+
+    const std::vector<vec3>& vertices() { return bid == -1 ? verts : vbuff[bid]; };
 };
 
 struct Zone
@@ -106,7 +108,6 @@ class World
     void traceFogVolume(FogVolume* volume, Node& node, const vec3& pos, const vec3& bbox);
 
 public:
-
     void setData(const std::vector<Render::Vertex>& vertices,
                  std::vector<Leaf>& leafs, 
                  std::vector<Node>& nodes, 
