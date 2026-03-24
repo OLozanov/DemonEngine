@@ -55,7 +55,7 @@ void Frustum::update(const vec3& pos, const vec3& dir, const vec3* verts, size_t
 	}
 }
 
-void Frustum::update(const Camera& camera, float fovx, float fovy)
+/*void Frustum::update(const Camera& camera, float fovx, float fovy)
 {
 	vec3 verts[4];
 
@@ -77,7 +77,7 @@ void Frustum::update(const Camera& camera, float fovx, float fovy)
 	}
 
 	update(pos, dir, verts, 4);
-}
+}*/
 
 void Frustum::update(const mat4& mat)
 {

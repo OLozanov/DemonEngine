@@ -466,6 +466,7 @@ void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t fr
     m_fogVolumes.clear();
 
     m_global.vertexData = m_world.vertexData();
+    m_global.indexData = m_world.indexData();
     m_global.displayData.clear();
 
     m_skyGeometry.vertexData = m_world.vertexData();
@@ -518,6 +519,7 @@ void View::updateVisibility(const vec3& pos, uint64_t frame)
     m_displayList[DisplayTransparent].clear();
 
     m_global.vertexData = m_world.vertexData();
+    m_global.indexData = m_world.indexData();
     m_global.displayData.clear();
 
     m_displayList[DisplayRegular].push_back(&m_global);
@@ -614,6 +616,7 @@ void View::directionalVisibility(const vec3& dir, uint64_t frame)
     m_global.displayData.clear();
 
     m_global.vertexData = m_world.vertexData();
+    m_global.indexData = m_world.indexData();
     m_displayList[DisplayRegular].push_back(&m_global);
 
     Index zoneInd = 0;

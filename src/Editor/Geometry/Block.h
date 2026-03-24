@@ -132,6 +132,9 @@ public:
     SurfaceGraph* getSurfaceGraph();
 
     std::vector<EditSurface*>& surfaces() { return m_surfaces; }
+    bool hasSurfaces() const { return !m_surfaces.empty(); }
+
+    const std::vector<EditPolygon>& geometry() const { return m_editPolygons; };
 
     void applyRotation();
     void applyScale();
@@ -186,6 +189,7 @@ private:
 
     Render::IndexBuffer m_indexBuffer;
 
+    //std::vector<Vertex> m_editVertices;
     std::vector<EditPolygon> m_editPolygons;
     Render::PushBuffer<Vertex> m_geometry;
 

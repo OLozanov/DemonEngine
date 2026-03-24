@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include "Render/DisplayData.h"
+
 namespace Render
 {
 
@@ -26,7 +28,7 @@ public:
     UINT size() const { return m_size; }
     bool empty() const { return m_size == 0; }
 
-    void setData(const uint16_t* data, UINT size);
+    void setData(const IndexType* data, UINT size);
 
     operator ID3D12Resource* () { return m_buffer.Get(); }
     operator const D3D12_INDEX_BUFFER_VIEW* () const { return &m_indexBufferView; }

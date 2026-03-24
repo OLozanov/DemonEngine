@@ -27,6 +27,7 @@ enum class TextureMapping : uint8_t
 };
 
 using Vertex = Render::Vertex;
+using IndexType = Render::IndexType;
 
 using VertexList = std::vector<Vertex>;
 
@@ -52,7 +53,9 @@ using PolygonList = std::vector<EditPolygon>;
 
 float RayIntersect(const vec3& origin1, const vec3& origin2, const vec3& ray1, const vec3& ray2, float& s, float& t);
 
+PointType ClassifyPoint(const vec4& plane, const vec3& vert);
 PolyType ClassifyPolygon(const vec4& plane, const VertexList& verts);
+Vertex SplitEdge(const vec4& plane, const Vertex& vert1, const Vertex& vert2);
 void SplitPoly(const vec4& plane, const VertexList& verts, VertexList& left, VertexList& right);
 
 PolyType ClassifyPolygon(const vec4& plane, const std::vector<vec3>& verts);

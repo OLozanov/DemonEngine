@@ -380,7 +380,7 @@ void Editor::write(const std::string& filename, const EditorInfo& editorInfo)
     {
         m_map.generateDisplayData();
 
-        m_map.writeVertices(file);
+        m_map.writeVertexData(file);
         offset = ftell(file);
         entry.push_back({ DcmEntryType::entry_geometry, offset - head.eoffset, head.eoffset });
         head.eoffset = offset;

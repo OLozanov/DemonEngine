@@ -3,9 +3,12 @@
 #include "math/math3d.h"
 #include "Render/Render.h"
 #include "Geometry.h"
+#include "Geometry/Block.h"
 
 #include <vector>
 #include <list>
+
+class Block;
 
 using MapIndex = uint32_t;
 
@@ -15,6 +18,17 @@ enum class ZoneType : uint8_t
 	Water,
 	Lava,
 	Slime
+};
+
+struct MapPolygon
+{
+	vec4 plane;
+
+	bool splitter;
+	uint8_t flags;
+	ResourcePtr<Material> material;
+
+	std::vector<IndexType> vertices;
 };
 
 struct Portal
@@ -39,7 +53,7 @@ struct Zone
 
 struct MapLeaf
 {
-    std::vector<EditPolygon> polygons;
+    std::vector<MapPolygon> polygons;
 	std::vector<Render::DisplayData> displayData;
 	Render::GeometryData rtxGeometry;
 
@@ -64,16 +78,20 @@ struct MapNode
 
 class Map
 {
+	using IndexList = std::vector<IndexType>;
+	using PolygonList = std::vector<MapPolygon>;
+
 public:
 	void cleanup();
 	void build(PolygonList& polygons);
+	void build(const LinkedList<Block>& blocks);
 
 	bool empty() const { return m_nodes.empty(); }
 	bool hasPortals() const { return !m_portals.empty(); }
 
 	void generateDisplayData();
 
-	void writeVertices(FILE* file);
+	void writeVertexData(FILE* file);
 	void writeLeafs(FILE* file);
 	void writeNodes(FILE* file);
 	void writePortals(FILE* file);
@@ -82,8 +100,12 @@ public:
 	void displayPortals(Render::CommandList& commandList) const;
 
 private:
-	static void CalcBBox(const PolygonList& plg, BBox& bbox);
+	void addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons);
 
+	void calcBBox(const PolygonList& plg, BBox& bbox);
+
+	PolyType classifyPolygon(const vec4& plane, const std::vector<IndexType>& verts);
+	void splitPoly(const vec4& plane, const IndexList& verts, IndexList& left, IndexList& right);
 	bool selectSplitter(const PolygonList& plg, size_t& splitterId, bool& zonePortal);
 	MapIndex buildTree(PolygonList& plg);
 
@@ -99,7 +121,7 @@ private:
 	void collectLeafs(MapIndex zoneId, MapIndex leafId);
 	void generateZones();
 
-	void addZonePortal(const EditPolygon& poly);
+	void addZonePortal(const MapPolygon& poly);
 
 	void buildPortlaGeometry();
 
@@ -111,7 +133,7 @@ private:
 	std::vector<MapNode> m_nodes;
 
 	std::vector<Vertex> m_vertices;
-	std::vector<vec3> m_rtxVertices;
+	std::vector<IndexType> m_indices;
 
 	size_t m_zonePortalNum;
 

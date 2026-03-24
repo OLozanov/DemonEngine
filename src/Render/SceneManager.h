@@ -119,7 +119,7 @@ public:
     void removeFogVolume(FogVolume* volume);
 
     void initStaticGeometry();
-    void addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData);
+    void addStaticGeometry(const VertexData* vertexBuffer, const IndexData* indexBuffer, const std::vector<GeometryData>& geometryData);
     void addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos);
     void addStaticGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos);
     void addStaticGeometry(const VertexBuffer& vertexBuffer, const mat4& mat);

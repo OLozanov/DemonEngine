@@ -95,6 +95,7 @@ class World
     mat4 m_mat;
 
     VertexBuffer m_vertexBuffer;
+    IndexBuffer m_indexBuffer;
 
     std::vector<Leaf> m_leafs;
     std::vector<Node> m_nodes;
@@ -109,6 +110,7 @@ class World
 
 public:
     void setData(const std::vector<Render::Vertex>& vertices,
+                 const std::vector<Render::IndexType>& indices,
                  std::vector<Leaf>& leafs, 
                  std::vector<Node>& nodes, 
                  std::vector<Zone>& zones,
@@ -129,6 +131,7 @@ public:
     }
   
     const VertexData* vertexData() const { return m_vertexBuffer; }
+    const IndexData* indexData() const { return m_indexBuffer; }
 
     const std::vector<Leaf>& leafs() const { return m_leafs; }
     const std::vector<Node>& nodes() const { return m_nodes; }

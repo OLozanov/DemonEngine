@@ -80,9 +80,7 @@ void Editor::buildMap()
 {
     PolygonList polygons;
 
-    for (const Block* block : m_blocks) block->collectPolygons(polygons);
-
-    m_map.build(polygons);
+    m_map.build(m_blocks);
     onUpdate();
 }
 

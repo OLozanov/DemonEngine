@@ -18,6 +18,8 @@ using Microsoft::WRL::ComPtr;
 #ifdef RENDER_D3D
 using VertexData = D3D12_VERTEX_BUFFER_VIEW;
 using IndexData = D3D12_INDEX_BUFFER_VIEW;
+
+constexpr DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
 #endif
 
 struct SpriteData
@@ -37,6 +39,8 @@ struct Vertex
     vec3 tangent;
     vec3 binormal;
 };
+
+using IndexType = uint16_t;
 
 struct TexturedVertex
 {

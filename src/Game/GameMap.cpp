@@ -110,6 +110,7 @@ bool Game::loadMap(const std::string& name)
     fseek(file, head.eoffset, SEEK_SET);
 
     std::vector<Render::Vertex> verts;
+    std::vector<Render::IndexType> indices;
     std::vector<Render::Leaf> leafs;
     std::vector<Render::Node> nodes;
     std::vector<Render::Zone> zones;
@@ -139,7 +140,11 @@ bool Game::loadMap(const std::string& name)
             verts.resize(vnum);
             fread(verts.data(), sizeof(Render::Vertex), vnum, file);
 
-            fread(&vnum, sizeof(uint32_t), 1, file);
+            uint32_t inum;
+            fread(&inum, sizeof(uint32_t), 1, file);
+
+            indices.resize(inum);
+            fread(indices.data(), sizeof(Render::IndexType), inum, file);
         }
         break;
 
@@ -193,8 +198,8 @@ bool Game::loadMap(const std::string& name)
         geometryData.push_back({ leaf.raytraceGeometry.offset, leaf.raytraceGeometry.count });
     }
 
-    m_world.setData(verts, leafs, nodes, zones, portals);
-    m_sceneManager.addStaticGeometry(m_world.vertexData(), geometryData);
+    m_world.setData(verts, indices, leafs, nodes, zones, portals);
+    m_sceneManager.addStaticGeometry(m_world.vertexData(), m_world.indexData(), geometryData);
 
     fclose(file);
 

@@ -15,7 +15,7 @@ SceneManager::SceneManager()
 , m_wireframe(false)
 , m_enableGI(true)
 , m_frontBuffer(0)
-, m_mainView(m_world)
+, m_mainView(m_world, View::ViewLeafs | View::ViewStatic | View::ViewDynamic | View::ViewInstanced)
 , m_dirLightView(m_world)
 , m_dirLightActive(false)
 , m_width(1280)
@@ -301,9 +301,9 @@ void SceneManager::initStaticGeometry()
     m_raytraceScene.addInstance(id, {});
 }
 
-void SceneManager::addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData)
+void SceneManager::addStaticGeometry(const VertexData* vertexBuffer, const IndexData* indexBuffer, const std::vector<GeometryData>& geometryData)
 {
-    m_raytraceScene.addStaticGeometry(vertexBuffer, geometryData);
+    m_raytraceScene.addStaticGeometry(vertexBuffer, indexBuffer, geometryData);
 }
 
 void SceneManager::addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos)

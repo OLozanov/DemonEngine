@@ -23,7 +23,7 @@ float RayIntersect(const vec3& origin1, const vec3& origin2, const vec3& ray1, c
     return diff.length();
 }
 
-inline PointType ClassifyPoint(const vec4& plane, const vec3& vert)
+PointType ClassifyPoint(const vec4& plane, const vec3& vert)
 {
     float dist = vert * plane.xyz + plane.w;
 

@@ -37,11 +37,15 @@ private:
 
 public:
     RaytraceGeometry() {}
-    RaytraceGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData);
+    RaytraceGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
+                     const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                     const std::vector<GeometryData>& geometryData);
     RaytraceGeometry(const VertexBuffer& vertexBuffer);
     RaytraceGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
 
-    void addGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData);
+    void addGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
+                     const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                     const std::vector<GeometryData>& geometryData);
     void addGeometry(const VertexBuffer& vertexBuffer);
     void addGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
 
@@ -96,7 +100,9 @@ public:
 
     RaytraceScene() {}
 
-    void addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData);
+    void addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
+                           const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                           const std::vector<GeometryData>& geometryData);
     void addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos);
     void addStaticGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos);
     void addStaticGeometry(const VertexBuffer& vertexBuffer, const mat4& mat);

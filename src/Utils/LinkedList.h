@@ -196,7 +196,7 @@ public:
 	    m_tail = 0;
 	}
 
-	bool empty() { return (m_head == nullptr); }
+	bool empty() const { return (m_head == nullptr); }
 };
 
 template <class T>

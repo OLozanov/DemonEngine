@@ -9,9 +9,11 @@
 namespace Render
 {
 
-RaytraceGeometry::RaytraceGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData)
+RaytraceGeometry::RaytraceGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer,
+                                   const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                                   const std::vector<GeometryData>& geometryData)
 {
-    addGeometry(vertexBuffer, geometryData);
+    addGeometry(vertexBuffer, indexBuffer, geometryData);
 }
 
 RaytraceGeometry::RaytraceGeometry(const VertexBuffer& vertexBuffer)
@@ -24,20 +26,22 @@ RaytraceGeometry::RaytraceGeometry(const VertexBuffer& vertexBuffer, const Index
     addGeometry(vertexBuffer, indexBuffer);
 }
 
-void RaytraceGeometry::addGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData)
+void RaytraceGeometry::addGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer,
+                                   const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                                   const std::vector<GeometryData>& geometryData)
 {
     for (const GeometryData& data : geometryData)
     {
         D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
         geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
         geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-        geometryDesc.Triangles.IndexBuffer = 0;
-        geometryDesc.Triangles.IndexCount = 0;
-        geometryDesc.Triangles.IndexFormat = DXGI_FORMAT_UNKNOWN;
+        geometryDesc.Triangles.IndexBuffer = indexBuffer->BufferLocation + data.offset * sizeof(IndexType);
+        geometryDesc.Triangles.IndexCount = data.count;
+        geometryDesc.Triangles.IndexFormat = IndexFormat;
         geometryDesc.Triangles.Transform3x4 = 0;
         geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
         geometryDesc.Triangles.VertexCount = data.count;
-        geometryDesc.Triangles.VertexBuffer.StartAddress = vertexBuffer->BufferLocation + data.offset * vertexBuffer->StrideInBytes;
+        geometryDesc.Triangles.VertexBuffer.StartAddress = vertexBuffer->BufferLocation;
         geometryDesc.Triangles.VertexBuffer.StrideInBytes = vertexBuffer->StrideInBytes;
 
         m_geometryDesc.push_back(geometryDesc);
@@ -73,7 +77,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const Index
     geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
     geometryDesc.Triangles.IndexBuffer = indexView->BufferLocation;
     geometryDesc.Triangles.IndexCount = indexBuffer.size();
-    geometryDesc.Triangles.IndexFormat = DXGI_FORMAT_R16_UINT;
+    geometryDesc.Triangles.IndexFormat = IndexFormat;
     geometryDesc.Triangles.Transform3x4 = 0;
     geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
     geometryDesc.Triangles.VertexCount = vertexBuffer.size();
@@ -118,7 +122,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const Index
     geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
     geometryDesc.Triangles.IndexBuffer = indexView->BufferLocation;
     geometryDesc.Triangles.IndexCount = indexBuffer.size();
-    geometryDesc.Triangles.IndexFormat = DXGI_FORMAT_R16_UINT;
+    geometryDesc.Triangles.IndexFormat = IndexFormat;
     geometryDesc.Triangles.Transform3x4 = 0;
     geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
     geometryDesc.Triangles.VertexCount = vertexBuffer.size();
@@ -227,9 +231,11 @@ void RaytraceGeometry::init(ID3D12Device5* dxrDevice)
     buildTransformInfo(dxrDevice);
 }
 
-void RaytraceScene::addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, const std::vector<GeometryData>& geometryData)
+void RaytraceScene::addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
+                                      const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                                      const std::vector<GeometryData>& geometryData)
 {
-    m_geometry[0].addGeometry(vertexBuffer, geometryData);
+    m_geometry[0].addGeometry(vertexBuffer, indexBuffer, geometryData);
 }
 
 void RaytraceScene::addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos)

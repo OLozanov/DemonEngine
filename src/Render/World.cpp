@@ -5,12 +5,14 @@ namespace Render
 {
 
 void World::setData(const std::vector<Render::Vertex>& vertices,
+                    const std::vector<Render::IndexType>& indices,
                     std::vector<Leaf>& leafs,
                     std::vector<Node>& nodes,
                     std::vector<Zone>& zones,
                     std::vector<Portal>& portals)
 {
     m_vertexBuffer.setData(vertices.data(), vertices.size());
+    m_indexBuffer.setData(indices.data(), indices.size());
 
     m_leafs = std::move(leafs);
     m_nodes = std::move(nodes);
@@ -21,6 +23,7 @@ void World::setData(const std::vector<Render::Vertex>& vertices,
 void World::reset()
 {
     m_vertexBuffer.reset();
+    m_indexBuffer.reset();
 
     m_leafs.clear();
     m_nodes.clear();
