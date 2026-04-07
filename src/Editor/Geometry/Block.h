@@ -67,6 +67,9 @@ public:
     static void Hemisphere(float radius, int sides, bool smooth, Block& block);
     static void Sphere(float radius, int sides, bool smooth, Block& block);
 
+    static float PixelWidth(const BlockPolygon* polygon);
+    static float PixelHeight(const BlockPolygon* polygon);
+
 public:
     Block();
     Block(const std::vector<vec3>& vertices, const std::vector<uint16_t>& indices, const std::vector<BlockPolygon>& polygons, BlockType type = BlockType::Edit);
@@ -92,6 +95,8 @@ public:
 
     size_t polygonsNum() const { return m_polygons.size(); }
     BlockPolygon& polygon(size_t ind) { return m_polygons[ind]; }
+    const BlockPolygon& polygon(size_t ind) const { return m_polygons[ind]; }
+    std::vector<vec3> polygonVertices(size_t polyInd) const;
 
     const BBox& bbox() const { return m_bbox; }
     void updateBBox();

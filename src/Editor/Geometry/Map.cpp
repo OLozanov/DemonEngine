@@ -73,11 +73,11 @@ void Map::addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons
                 m_vertices.push_back({ poly.vertices[i].position,
                                        poly.vertices[i].tcoord,
                                        poly.vertices[i].normal,
-                                       poly.vertices[i].tangent,
-                                       poly.vertices[i].binormal });
+                                       -poly.vertices[i].tangent,
+                                       -poly.vertices[i].binormal });
             }
 
-            bool splitter = poly.splitter && ((poly.flags & PolyZonePortal) == 0);
+            bool splitter = (poly.flags & PolyZonePortal) == 0;
 
             polygons.push_back({ -poly.plane, splitter, poly.flags, poly.material, std::move(verts) });
 
@@ -93,10 +93,10 @@ void Map::addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons
                                        poly.vertices[i].tcoord,
                                        poly.vertices[i].normal,
                                        poly.vertices[i].tangent,
-                                       poly.vertices[i].binormal });
+                                       -poly.vertices[i].binormal });
             }
 
-            bool splitter = poly.splitter && ((poly.flags & PolyZonePortal) == 0);
+            bool splitter = (block->type() == BlockType::Solid) && ((poly.flags & PolyZonePortal) == 0);
 
             polygons.push_back({ poly.plane, splitter, poly.flags, poly.material, verts });
         }

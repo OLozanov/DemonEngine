@@ -561,13 +561,17 @@ void Editor::movePolyU(float val)
 {
     for (PolygonSelection* poly : m_selectedPolys)
     {
+        float scale = Block::PixelWidth(poly->origin);
+
         if (poly->origin->surface)
         {
-            poly->origin->surface->moveTexCoordS(val);
+            poly->origin->surface->moveTexCoordS(val * scale);
         }
         else
         {
-            poly->origin->tcoord.x += val;
+            if (poly->owner->type() == BlockType::Subtruct) scale *= -1.0;
+
+            poly->origin->tcoord.x += val * scale;
             poly->owner->generateUV(poly->origin);
         }
     }
@@ -579,13 +583,15 @@ void Editor::movePolyV(float val)
 {
     for (PolygonSelection* poly : m_selectedPolys)
     {
+        float scale = Block::PixelHeight(poly->origin);
+
         if (poly->origin->surface)
         {
-            poly->origin->surface->moveTexCoordT(val);
+            poly->origin->surface->moveTexCoordT(val * scale);
         }
         else
         {
-            poly->origin->tcoord.y += val;
+            poly->origin->tcoord.y += val * scale;
             poly->owner->generateUV(poly->origin);
         }
     }
@@ -645,8 +651,8 @@ void Editor::rotatePolyUV(float ang)
             vec3 s = poly->origin->s;
             vec3 t = poly->origin->t;
 
-            poly->origin->s = s * Cos - t * Sin;
-            poly->origin->t = s * Sin + t * Cos;
+            poly->origin->s = s * Cos + t * Sin;
+            poly->origin->t = -s * Sin + t * Cos;
 
             poly->owner->generateUV(poly->origin);
         }

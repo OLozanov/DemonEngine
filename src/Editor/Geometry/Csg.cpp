@@ -1,16 +1,40 @@
 #include "Csg.h"
+#include "Geometry/Block.h"
 
 bool CsgTree::empty()
 {
     return m_nodes.empty();
 }
 
-void CsgTree::build(const PolygonList& polygons)
+void CsgTree::build(const Block& block)
 {
-    if (polygons.empty()) return;
+    size_t pnum = block.polygonsNum();
+
+    if (!pnum) return;
 
     m_nodes.clear();
-    m_nodes.reserve(polygons.size());
+    m_nodes.reserve(pnum);
+
+    std::vector<CsgPolygon> polygons(pnum);
+
+    for (size_t i = 0; i < pnum; i++)
+    {
+        std::vector<vec3> verts = block.polygonVertices(i);
+
+        vec3 v1 = verts[0];
+        vec3 v2 = verts[1];
+        vec3 v3 = verts[2];
+
+        vec3 a = v2 - v1;
+        vec3 b = v3 - v1;
+
+        vec3 norm = a ^ b;
+        norm.normalize();
+        float dist = -(v1 * norm);
+
+        polygons[i].plane = { norm, dist };
+        polygons[i].vertices = std::move(verts);
+    }
 
     NodeIndex root = allocateNode();
     buildTree(root, polygons);
@@ -21,9 +45,9 @@ void CsgTree::reset()
     m_nodes.clear();
 }
 
-void CsgTree::buildTree(NodeIndex nodeId, const PolygonList& polygons) 
+void CsgTree::buildTree(NodeIndex nodeId, const std::vector<CsgPolygon>& polygons)
 {
-    const EditPolygon& splitter = polygons[0];
+    const CsgPolygon& splitter = polygons[0];
 
     CsgNode& node = m_nodes[nodeId];
     node.plane = splitter.plane;
@@ -31,8 +55,8 @@ void CsgTree::buildTree(NodeIndex nodeId, const PolygonList& polygons)
     node.left = InvalidIndex;
     node.right = InvalidIndex;
 
-    PolygonList left;
-    PolygonList right;
+    std::vector<CsgPolygon> left;
+    std::vector<CsgPolygon> right;
 
     for (int i = 0; i < polygons.size(); i++)
     {
@@ -53,13 +77,13 @@ void CsgTree::buildTree(NodeIndex nodeId, const PolygonList& polygons)
 
         case PolyType::Split:
         {
-            VertexList vleft;
-            VertexList vright;
+            std::vector<vec3> vleft;
+            std::vector<vec3> vright;
 
             SplitPoly(splitter.plane, polygons[i].vertices, vleft, vright);
 
-            left.push_back({polygons[i].origin, polygons[i].plane, {}, polygons[i].splitter, false, polygons[i].flags, {}, std::move(vleft) });
-            right.push_back({ polygons[i].origin, polygons[i].plane, {}, polygons[i].splitter, false, polygons[i].flags, {}, std::move(vright) });
+            left.push_back({polygons[i].plane, std::move(vleft)});
+            right.push_back({polygons[i].plane, std::move(vright)});
         }
         break;
         }

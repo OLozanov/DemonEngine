@@ -190,12 +190,12 @@ void PolyDlgImpl::onTwosideBox(wxCommandEvent& event)
 
 void PolyDlgImpl::onUMoveDown(wxSpinEvent& event)
 {
-    m_editor.movePolyU(-m_umoveRate);
+    m_editor.movePolyU(m_umoveRate);
 }
 
 void PolyDlgImpl::onUMoveUp(wxSpinEvent& event)
 {
-    m_editor.movePolyU(m_umoveRate);
+    m_editor.movePolyU(-m_umoveRate);
 }
 
 void PolyDlgImpl::onUScaleDown(wxSpinEvent& event)
@@ -210,12 +210,12 @@ void PolyDlgImpl::onUScaleUp(wxSpinEvent& event)
 
 void PolyDlgImpl::onVMoveDown(wxSpinEvent& event)
 {
-    m_editor.movePolyV(-m_vmoveRate);
+    m_editor.movePolyV(m_vmoveRate);
 }
 
 void PolyDlgImpl::onVMoveUp(wxSpinEvent& event)
 {
-    m_editor.movePolyV(m_vmoveRate);
+    m_editor.movePolyV(-m_vmoveRate);
 }
 
 void PolyDlgImpl::onVScaleDown(wxSpinEvent& event)

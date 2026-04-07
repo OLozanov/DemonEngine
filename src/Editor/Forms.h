@@ -425,18 +425,21 @@ class PolyDlg : public wxDialog
 		wxStaticText* m_staticText1;
 		wxSpinButton* m_umoveBtn;
 		wxTextCtrl* m_umoveEdit;
+		wxStaticText* m_staticText58;
 		wxStaticText* m_staticText2;
 		wxSpinButton* m_uscaleBtn;
 		wxTextCtrl* m_uscaleEdit;
 		wxStaticText* m_staticText3;
 		wxSpinButton* m_vmoveBtn;
 		wxTextCtrl* m_vmoveEdit;
+		wxStaticText* m_staticText59;
 		wxStaticText* m_staticText4;
 		wxSpinButton* m_vscaleBtn;
 		wxTextCtrl* m_vscaleEdit;
 		wxStaticText* m_staticText5;
 		wxSpinButton* m_rotateBtn;
 		wxTextCtrl* m_rotateEdit;
+		wxStaticText* m_staticText60;
 		wxStaticText* m_layersCaption;
 		wxListBox* m_layerList;
 		wxButton* m_addLayerBtn;
@@ -476,7 +479,7 @@ class PolyDlg : public wxDialog
 
 	public:
 
-		PolyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Polygon Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 510,249 ), long style = wxDEFAULT_DIALOG_STYLE );
+		PolyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Polygon Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 541,249 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~PolyDlg();
 

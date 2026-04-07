@@ -99,7 +99,7 @@ void Block::Plane(float width, float height, PlaneType ptype, Block& block)
         vertices[2] = vec3(0, width, height);
         vertices[3] = vec3(0, width, -height);
 
-        polygons[0].s = vec3(0, 0, dts);
+        polygons[0].s = vec3(0, 0, -dts);
         polygons[0].t = vec3(0, dts, 0);
     break;
     }
@@ -147,8 +147,8 @@ void Block::Box(float width, float length, float height, Block& block)
     polygons[0].offset = 0;
     polygons[0].vertnum = 4;
 
-    polygons[0].s = vec3(0, 0, dts);
-    polygons[0].t = vec3(dts, 0, 0);
+    polygons[0].s = vec3(dts, 0, 0);
+    polygons[0].t = vec3(0, 0, -dts);
 
     polygons[0].tcoord.x = 0;
     polygons[0].tcoord.y = 0;
@@ -157,8 +157,8 @@ void Block::Box(float width, float length, float height, Block& block)
     polygons[1].offset = 4;
     polygons[1].vertnum = 4;
 
-    polygons[1].s = vec3(0, 0, dts);
-    polygons[1].t = vec3(dts, 0, 0);
+    polygons[1].s = vec3(dts, 0, 0);
+    polygons[1].t = vec3(0, 0, dts);
 
     polygons[1].tcoord.x = 0;
     polygons[1].tcoord.y = 0;
@@ -177,7 +177,7 @@ void Block::Box(float width, float length, float height, Block& block)
     polygons[3].offset = 12;
     polygons[3].vertnum = 4;
 
-    polygons[3].s = vec3(dts, 0, 0);
+    polygons[3].s = vec3(-dts, 0, 0);
     polygons[3].t = vec3(0, dts, 0);
 
     polygons[3].tcoord.x = 0;
@@ -187,7 +187,7 @@ void Block::Box(float width, float length, float height, Block& block)
     polygons[4].offset = 16;
     polygons[4].vertnum = 4;
 
-    polygons[4].s = vec3(0, 0, dts);
+    polygons[4].s = vec3(0, 0, -dts);
     polygons[4].t = vec3(0, dts, 0);
 
     polygons[4].tcoord.x = 0;
@@ -254,7 +254,7 @@ void Block::Cylinder(float height, float radius, int n, bool smooth, bool half, 
     polygons[1].vertnum = n;
 
     polygons[1].s = vec3(dts, 0, 0);
-    polygons[1].t = vec3(0, 0, dts);
+    polygons[1].t = vec3(0, 0, -dts);
 
     polygons[1].tcoord.x = 0;
     polygons[1].tcoord.y = 0;
@@ -337,7 +337,7 @@ void Block::Cone(float height, float radius, int n, bool smooth, Block& block)
     polygons[0].vertnum = n;
 
     polygons[0].s = vec3(dts, 0, 0);
-    polygons[0].t = vec3(0, 0, dts);
+    polygons[0].t = vec3(0, 0, -dts);
 
     polygons[0].tcoord.x = 0;
     polygons[0].tcoord.y = 0;
@@ -411,7 +411,7 @@ void Block::Hemisphere(float radius, int n, bool smooth, Block& block)
 
         for (int k = 0; k < n; k++, angb += dangb)
         {
-            float b = angb / 180.0 * math::pi;
+            float b = angb / 180.0f * math::pi;
 
             float x = cos(b) * r;
             float z = sin(b) * r;
@@ -518,7 +518,7 @@ void Block::Hemisphere(float radius, int n, bool smooth, Block& block)
     polygons[pind].vertnum = n;
 
     polygons[pind].s = vec3(dts, 0, 0);
-    polygons[pind].t = vec3(0, 0, dts);
+    polygons[pind].t = vec3(0, 0, -dts);
 
     polygons[pind].tcoord.x = 0;
     polygons[pind].tcoord.y = 0;
@@ -640,7 +640,7 @@ void Block::Sphere(float radius, int n, bool smooth, Block& block)
         mid = mid + vertices[i];
 
         polygons[pind].s = edge * (dang / len / 2);
-        polygons[pind].t = vertices[bottomInd] - mid;
+        polygons[pind].t = mid - vertices[bottomInd];
         polygons[pind].t.normalize();
 
         polygons[pind].tcoord.x = ang;
@@ -685,6 +685,21 @@ void Block::Sphere(float radius, int n, bool smooth, Block& block)
     }
 
     block.reset(vertices, indices, polygons);
+}
+
+float Block::PixelWidth(const BlockPolygon* polygon)
+{
+    Image* img = polygon->material->img[Material::map_diffuse].get();
+    float width = img ? img->width : 256.0f;
+
+    return 1.0f / width;
+}
+float Block::PixelHeight(const BlockPolygon* polygon)
+{
+    Image* img = polygon->material->img[Material::map_diffuse].get();
+    float height = img ? img->height : 256.0f;
+
+    return 1.0f / height;
 }
 
 Block::Block()
@@ -765,6 +780,21 @@ void Block::reset(std::vector<vec3>& vertices, std::vector<uint16_t>& indices, s
 void Block::setMaterial(Material* material)
 {
     for (BlockPolygon& poly : m_polygons) poly.material = material;
+}
+
+std::vector<vec3> Block::polygonVertices(size_t polyInd) const
+{
+    std::vector<vec3> verts;
+
+    const BlockPolygon& poly = m_polygons[polyInd];
+
+    for (size_t v = 0; v < poly.vertnum; v++)
+    {
+        uint16_t index = poly.offset + v;
+        verts.push_back(m_vertices[m_indices[index]] + m_pos);
+    }
+
+    return verts;
 }
 
 void Block::updateBBox()
@@ -1296,8 +1326,16 @@ void Block::generatePolygons()
 
             vert.position = m_vertices[m_indices[index]] + m_pos;
 
-            vert.tcoord.x = m_vertices[m_indices[index]] * poly.s + poly.tcoord.x;
-            vert.tcoord.y = m_vertices[m_indices[index]] * -poly.t + poly.tcoord.y;
+            if (m_type == BlockType::Subtruct)
+            {
+                vert.tcoord.x = m_vertices[m_indices[index]] * -poly.s - poly.tcoord.x;
+                vert.tcoord.y = m_vertices[m_indices[index]] * poly.t + poly.tcoord.y;
+            }
+            else
+            {
+                vert.tcoord.x = m_vertices[m_indices[index]] * poly.s + poly.tcoord.x;
+                vert.tcoord.y = m_vertices[m_indices[index]] * poly.t + poly.tcoord.y;
+            }
 
             vert.normal = (m_type == BlockType::Subtruct) ? -norm : norm;
 
@@ -1315,7 +1353,7 @@ void Block::generatePolygons()
 
     for (uint8_t smgroop : smgroops) smoothPolygons(smgroop);
 
-    m_csgTree.build(m_editPolygons);
+    m_csgTree.build(*this);
 }
 
 void Block::buildGeometry()
@@ -1440,8 +1478,17 @@ void Block::generateUV(const BlockPolygon* poly)
             size_t vind = elem.offset + i;
 
             const vec3& position = m_geometry[vind].position - m_pos;
-            m_geometry[vind].tcoord.x = position * poly->s + poly->tcoord.x;
-            m_geometry[vind].tcoord.y = position * -poly->t + poly->tcoord.y;
+
+            if (m_type == BlockType::Subtruct)
+            {
+                m_geometry[vind].tcoord.x = position * -poly->s - poly->tcoord.x;
+                m_geometry[vind].tcoord.y = position * poly->t + poly->tcoord.y;
+            }
+            else
+            {
+                m_geometry[vind].tcoord.x = position * poly->s + poly->tcoord.x;
+                m_geometry[vind].tcoord.y = position * poly->t + poly->tcoord.y;
+            }
         }
     }
 
@@ -1450,8 +1497,17 @@ void Block::generateUV(const BlockPolygon* poly)
         for (int i = 0; i < edpoly->vertices.size(); i++)
         {
             const vec3& position = edpoly->vertices[i].position;
-            edpoly->vertices[i].tcoord.x = position * poly->s + poly->tcoord.x;
-            edpoly->vertices[i].tcoord.y = position * -poly->t + poly->tcoord.y;
+
+            if (m_type == BlockType::Subtruct)
+            {
+                edpoly->vertices[i].tcoord.x = position * -poly->s - poly->tcoord.x;
+                edpoly->vertices[i].tcoord.y = position * poly->t + poly->tcoord.y;
+            }
+            else
+            {
+                edpoly->vertices[i].tcoord.x = position * poly->s + poly->tcoord.x;
+                edpoly->vertices[i].tcoord.y = position * poly->t + poly->tcoord.y;
+            }
         }
     }
 }

@@ -7,13 +7,19 @@
 #include "math/math3d.h"
 #include "stdint.h"
 
+class Block;
+
 using NodeIndex = size_t;
+
+struct CsgPolygon
+{
+    vec4 plane;
+    std::vector<vec3> vertices;
+};
 
 struct CsgNode
 {
     vec4 plane;
-
-    EditPolygon leaf;
 
     NodeIndex left;
     NodeIndex right;
@@ -25,7 +31,7 @@ public:
 
     bool empty();
 
-    void build(const PolygonList& polygons);
+    void build(const Block& block);
     void reset();
  
     void clipPolygons(bool negative, bool addativeBlock, const PolygonList& in, PolygonList& out) const;
@@ -33,7 +39,7 @@ public:
 
 private:
 
-    void buildTree(NodeIndex nodeId, const PolygonList& polygons);
+    void buildTree(NodeIndex nodeId, const std::vector<CsgPolygon>& polygons);
     void clipPolygons(NodeIndex nodeId, bool negative, bool addativeBlock, const PolygonList& in, PolygonList& out) const;
     void categorizePolygons(NodeIndex nodeId, bool negative, bool addativeBlock, const PolygonList& in, PolygonList& out) const;
 

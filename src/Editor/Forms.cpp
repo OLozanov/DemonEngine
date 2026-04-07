@@ -1258,10 +1258,14 @@ PolyDlg::PolyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_umoveBtn = new wxSpinButton( this, wxID_ANY, wxDefaultPosition, wxSize( -1,23 ), wxSP_WRAP );
 	bSizer6->Add( m_umoveBtn, 0, wxALL, 5 );
 
-	m_umoveEdit = new wxTextCtrl( this, wxID_ANY, wxT("0.1"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_umoveEdit = new wxTextCtrl( this, wxID_ANY, wxT("16"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_umoveEdit->SetMaxSize( wxSize( 50,-1 ) );
 
 	bSizer6->Add( m_umoveEdit, 0, wxALL, 5 );
+
+	m_staticText58 = new wxStaticText( this, wxID_ANY, wxT("px"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText58->Wrap( -1 );
+	bSizer6->Add( m_staticText58, 0, wxALL, 5 );
 
 
 	gSizer1->Add( bSizer6, 1, wxEXPAND, 5 );
@@ -1294,10 +1298,14 @@ PolyDlg::PolyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_vmoveBtn = new wxSpinButton( this, wxID_ANY, wxDefaultPosition, wxSize( -1,23 ), wxSP_WRAP );
 	bSizer8->Add( m_vmoveBtn, 0, wxALL, 5 );
 
-	m_vmoveEdit = new wxTextCtrl( this, wxID_ANY, wxT("0.1"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_vmoveEdit = new wxTextCtrl( this, wxID_ANY, wxT("16"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_vmoveEdit->SetMaxSize( wxSize( 50,-1 ) );
 
 	bSizer8->Add( m_vmoveEdit, 0, wxALL, 5 );
+
+	m_staticText59 = new wxStaticText( this, wxID_ANY, wxT("px"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText59->Wrap( -1 );
+	bSizer8->Add( m_staticText59, 0, wxALL, 5 );
 
 
 	gSizer1->Add( bSizer8, 1, wxEXPAND, 5 );
@@ -1334,6 +1342,10 @@ PolyDlg::PolyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_rotateEdit->SetMaxSize( wxSize( 50,-1 ) );
 
 	bSizer10->Add( m_rotateEdit, 0, wxALL, 5 );
+
+	m_staticText60 = new wxStaticText( this, wxID_ANY, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText60->Wrap( -1 );
+	bSizer10->Add( m_staticText60, 0, wxALL, 5 );
 
 
 	gSizer1->Add( bSizer10, 1, wxEXPAND, 5 );
