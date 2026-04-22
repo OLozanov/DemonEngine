@@ -172,7 +172,7 @@ private:
 
     void drawOverlay();
     void geometryPass();
-    void emissivePass();
+    void forwardPass();
     void shadowPass();
     void lightPassSimple();
     void lightPass();

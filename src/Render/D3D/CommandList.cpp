@@ -514,7 +514,7 @@ void CommandList::drawRefract(const DisplayList& displayList)
 
     for (const DisplayBlock* block : displayList)
     {
-        m_commandList->SetGraphicsRoot32BitConstants(1, 16, block->mat, 0);
+        m_commandList->SetGraphicsRoot32BitConstants(3, 16, block->mat, 0);
         m_commandList->IASetVertexBuffers(0, 1, block->vertexData);
         if (block->indexData) m_commandList->IASetIndexBuffer(block->indexData);
 
@@ -524,10 +524,12 @@ void CommandList::drawRefract(const DisplayList& displayList)
             {
                 material = data->material;
 
+                m_commandList->SetGraphicsRoot32BitConstants(5, 8, &material->color, 0);
+
                 UINT diffuse = material->maps[Material::map_diffuse];
                 UINT normal = material->maps[Material::map_normal];
-                m_commandList->SetGraphicsRootDescriptorTable(3, d3dInstance.GpuDescriptor(diffuse));
-                m_commandList->SetGraphicsRootDescriptorTable(4, d3dInstance.GpuDescriptor(normal));
+                m_commandList->SetGraphicsRootDescriptorTable(9, d3dInstance.GpuDescriptor(diffuse));
+                m_commandList->SetGraphicsRootDescriptorTable(10, d3dInstance.GpuDescriptor(normal));
             }
 
             if (block->indexData)

@@ -600,12 +600,13 @@ void SceneManager::geometryPass()
     m_gpuInstance.execute(m_geometryCommandList);
 }
 
-void SceneManager::emissivePass()
+void SceneManager::forwardPass()
 {
     if (!m_emissiveOverlay && 
         m_mainView.displayList(View::DisplayTransparent).empty() && 
         m_mainView.displayList(View::DisplayEmissive).empty()) return;
 
+    // Emissive
     m_commandList.setRenderMode(RenderingPipeline::rm_emissive);
     m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
     m_commandList.setDefaultViewport();
@@ -637,6 +638,7 @@ void SceneManager::emissivePass()
         }
     }
 
+    // Transparent refractive surfaces
     if (!m_mainView.displayList(View::DisplayTransparent).empty())
     {
         m_commandList.barrier({ Barrier(m_hdrBuffer, STATE_RENDER, STATE_COPY_SOURCE),
@@ -648,8 +650,21 @@ void SceneManager::emissivePass()
                                 Barrier(m_hdrBuffer, STATE_COPY_SOURCE, STATE_RENDER) });
 
         m_commandList.setRenderMode(RenderingPipeline::rm_transparent);
-        m_commandList.setConstant(2, std::make_pair<uint32_t, uint32_t>(m_width - 1, m_height - 1));
-        m_commandList.bind(5, m_background);
+        m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
+        m_commandList.bindConstantBuffer(1, m_lightingConstantBuffer);
+        m_commandList.bindConstantBuffer(2, m_dirLight.shadowMatrices());
+
+        m_commandList.setConstant(4, std::make_pair<uint32_t, uint32_t>(m_width - 1, m_height - 1));
+
+        m_commandList.bind(6, m_lightGrid);
+        m_commandList.bind(7, m_omniLightData);
+        m_commandList.bind(8, m_spotLightData);
+
+        m_commandList.bind(13, m_shadowBuffer);
+        m_commandList.bind(14, m_cubemapBuffers[0]);
+        m_commandList.bind(15, m_shadowBuffers[0]);
+
+        m_commandList.bind(12, m_background);
         m_commandList.drawRefract(m_mainView.displayList(View::DisplayTransparent));
     }
 }
@@ -1504,7 +1519,7 @@ void SceneManager::display()
         }
 
         skyPass();
-        emissivePass();
+        forwardPass();
         spritePass();
         fogPass();
 

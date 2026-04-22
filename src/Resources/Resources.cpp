@@ -301,6 +301,8 @@ Material* ResourceManager::GetMaterial(const std::string& name)
             std::cout << "Fail to parse material file " << filename << std::endl;
         }
 
+        if (material->type == Material::material_transparent) material->alpha = std::min(material->alpha, 0.5f);
+
         m_materials.add(name, material);
     }
 

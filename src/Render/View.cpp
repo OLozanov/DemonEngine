@@ -473,9 +473,11 @@ void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t fr
     m_skyGeometry.displayData.clear();
 
     m_emissiveGeometry.vertexData = m_world.vertexData();
+    m_emissiveGeometry.indexData = m_world.indexData();
     m_emissiveGeometry.displayData.clear();
 
     m_transparentGeometry.vertexData = m_world.vertexData();
+    m_transparentGeometry.indexData = m_world.indexData();
     m_transparentGeometry.displayData.clear();
 
     m_displayList[DisplayRegular].push_back(&m_global);

@@ -73,3 +73,28 @@ float3 BRDF(float3 n,               // surface normal
     
     return (kD*diffuse/pi*ltCos + kS*specular)*radiance;
 }
+
+// Specular only for transparent objects (like glass)
+float3 BRDFSpec(float3 n,               // surface normal
+				float3 l,               // light direction
+				float3 v,               // view direction
+				float3 radiance,
+				float roughness)
+{
+	float3 h = normalize(l + v); // half vector
+
+    float ltCos = max(0.0, dot(l, n));
+
+	n = CorrectNormal(n, v);
+
+    float ndf = NormalDistribution(n, h, roughness);
+    float geom = GeometryFunction(n, v, l, roughness);
+    
+    float3 f0 = 0.04;
+    float3 fresnel = FresnelSchlick(max(0.0, dot(h, v)), f0);
+    
+    float specDenom = 4.0*max(0.0, dot(v, n));
+    float3 specular = ndf*geom/max(specDenom, 0.01);
+   
+    return fresnel*specular*radiance;
+}
