@@ -57,6 +57,7 @@ void CubemapBuffer::createDepthBuffer(UINT size)
     depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
     depthOptimizedClearValue.DepthStencil.Stencil = 0;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
     if (m_uavHandle != 0) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
@@ -75,7 +76,7 @@ void CubemapBuffer::createDepthBuffer(UINT size)
         flags);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -105,6 +106,7 @@ void CubemapBuffer::createColorBuffer(UINT size)
     RTVDesc.Texture2DArray.FirstArraySlice = 0;
     RTVDesc.Texture2DArray.ArraySize = CubeFaces;
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
     if (m_uavHandle != 0) flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
@@ -123,7 +125,7 @@ void CubemapBuffer::createColorBuffer(UINT size)
         flags);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,

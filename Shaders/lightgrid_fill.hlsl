@@ -1,8 +1,5 @@
 #include "Light.hlsl"
 
-#define blocksize 8
-#define maxlights 128
-
 cbuffer SceneConstantBuffer : register(b0)
 {
     float4x4 projViewMat;
@@ -81,14 +78,24 @@ void CSMain(uint3 groupId : SV_GroupID, uint3 DTid : SV_DispatchThreadID, uint3 
     {
         uint idx = view_lights_spot[i];
         
+		float width = spot_lights[idx].width;
         float radius = spot_lights[idx].radius + spot_lights[idx].falloff;
         float3 pos = spot_lights[idx].pos;
         
+		float3 boxpos = pos + spot_lights[idx].dir * radius * 0.5;
+		float3 sidedir2 = -cross(spot_lights[idx].sidedir, spot_lights[idx].dir);
+		
         bool intersect = true;
         for (uint f = 0; f < 6; f++)
         {       
-            float d = dot(pos, frustum[f].xyz) + frustum[f].w;
-            if (d < -radius) intersect = false;
+            //float d = dot(pos, frustum[f].xyz) + frustum[f].w;
+            //if (d < -radius) intersect = false;
+			
+			float r = abs(dot(frustum[f].xyz, spot_lights[idx].dir)) * radius * 0.5 + 
+					  abs(dot(frustum[f].xyz, spot_lights[idx].sidedir)) * width + 
+					  abs(dot(frustum[f].xyz, sidedir2)) * width;
+			float d = dot(boxpos, frustum[f].xyz) + frustum[f].w;
+			if (d < -r) intersect = false;
         }
         
         if (intersect)

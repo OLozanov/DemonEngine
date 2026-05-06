@@ -39,6 +39,8 @@ struct SpotLightData
     vec3 flux;
     float falloff;
     vec3 dir;
+    float width;
+    vec3 sidedir;
     float outerAngle;
     float innerAngle;
     uint32_t shadowIdx;

@@ -294,7 +294,6 @@ Material* ResourceManager::GetMaterial(const std::string& name)
                     break;
                 }
             }
-
         }
         catch (...)
         {

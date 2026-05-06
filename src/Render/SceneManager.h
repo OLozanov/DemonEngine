@@ -174,13 +174,11 @@ private:
     void geometryPass();
     void forwardPass();
     void shadowPass();
-    void lightPassSimple();
     void lightPass();
     void skyPass();
     void raytracePass(RaytraceContext& rc);
     void denoisePass(ComputeContext& context);
     void giPass();
-    void ambientPass();
     void spritePass();
     void fogPass();
 

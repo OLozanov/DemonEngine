@@ -806,114 +806,6 @@ void SceneManager::shadowPass()
     m_gpuInstance.execute(m_shadowCommandList);
 }
 
-void SceneManager::lightPassSimple()
-{
-    RenderingPipeline::StartRender(m_commandList, RenderingPipeline::rm_omnilight);
-    m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
-    m_commandList.setDefaultViewport();
-
-    m_barriers.transit(m_colorBuffer, STATE_PIXEL_SHADER_READ);
-    m_barriers.transit(m_normalsBuffer, STATE_PIXEL_SHADER_READ);
-    m_barriers.transit(m_paramsBuffer, STATE_PIXEL_SHADER_READ);
-    m_barriers.transit(m_depthBuffer[m_frontBuffer], STATE_PIXEL_SHADER_READ);
-    m_barriers.transit(m_hdrBuffer, STATE_PIXEL_SHADER_READ, STATE_RENDER);
-    
-    for (Light* light : m_omniLights)
-    {
-        if (light->shadowType() == LightShadow::None) continue;
-
-        if (light->shadowType() == LightShadow::Dynamic)
-        {
-            m_barriers.transit(m_cubemapBuffers[light->shadowIndex()], STATE_PIXEL_SHADER_READ);
-            m_omniLightData[light->id()].shadowIdx = light->shadowIndex();
-        }
-        else
-        {
-            m_barriers.transit(m_cubemapCache[light->cacheIndex()], STATE_PIXEL_SHADER_READ);
-            m_omniLightData[light->id()].shadowIdx = ShadowMapNum + light->cacheIndex();
-        }
-    }
-    
-    m_commandList.barrier(m_barriers);
-
-    m_commandList.bindFrameBuffer(m_hdrBuffer);
-    m_commandList.clearBuffer(m_hdrBuffer, { 0.0f, 0.0f, 0.0f, 1.0f });
-
-    m_commandList.setRenderMode(RenderingPipeline::rm_omnilight);
-    m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
-    m_commandList.bind(2, m_omniLightData);
-    m_commandList.bind(3, m_colorBuffer);
-    m_commandList.bind(4, m_normalsBuffer);
-    m_commandList.bind(5, m_paramsBuffer);
-    m_commandList.bind(6, m_depthBuffer[m_frontBuffer]);
-
-    m_commandList.bind(7, m_cubemapBuffers[0]);
-
-    for (Light* light : m_omniLights)
-    {
-        m_commandList.setConstant(1, light->id());
-        m_commandList.setTopology(topology_trianglestrip);
-        m_commandList.draw(4);
-    }
-
-    if (!m_spotLights.empty())
-    {
-        m_commandList.setRenderMode(RenderingPipeline::rm_spotlight);
-        m_commandList.setTopology(topology_trianglestrip);
-
-        for (Light* light : m_spotLights)
-        {
-            if (light->shadowType() == LightShadow::None) continue;
-
-            if (light->shadowType() == LightShadow::Dynamic)
-            {
-                m_barriers.transit(m_shadowBuffers[light->shadowIndex()], STATE_PIXEL_SHADER_READ);
-                m_spotLightData[light->id()].shadowIdx = light->shadowIndex();
-            }
-            else
-            {
-                m_barriers.transit(m_shadowCache[light->cacheIndex()], STATE_PIXEL_SHADER_READ);
-                m_spotLightData[light->id()].shadowIdx = ShadowMapNum + light->cacheIndex();
-            }
-        }
-
-        m_commandList.barrier(m_barriers);
-
-        m_commandList.bind(2, m_spotLightData);
-        m_commandList.bind(7, m_shadowBuffers[0]);
-        //m_commandList.bind(3, m_colorBuffer);
-        //m_commandList.bind(4, m_normalsBuffer);
-        //m_commandList.bind(5, m_paramsBuffer);
-        //m_commandList.bind(6, m_depthBuffer[m_frontBuffer]);
-
-        for (Light* light : m_spotLights)
-        {
-            m_commandList.setConstant(1, light->id());
-            m_commandList.draw(4);
-        }
-    }
-
-    if (m_dirLightActive && m_mainView.isGlobalLit())
-    {
-        m_commandList.barrier(m_shadowBuffer, STATE_PIXEL_SHADER_READ);
-        m_commandList.setRenderMode(RenderingPipeline::rm_dirlight);
-        m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
-
-        m_commandList.bindFrameBuffer(m_hdrBuffer);
-
-        m_commandList.bind(3, m_colorBuffer);
-        m_commandList.bind(4, m_normalsBuffer);
-        m_commandList.bind(5, m_paramsBuffer);
-        m_commandList.bind(6, m_depthBuffer[m_frontBuffer]);
-        m_commandList.bind(7, m_shadowBuffer);
-
-        m_commandList.setConstant(1, m_dirLight);
-        m_commandList.bindConstantBuffer(2, m_dirLight.shadowMatrices());
-        m_commandList.setTopology(topology_trianglestrip);
-        m_commandList.draw(4);
-    }
-}
-
 void SceneManager::lightPass()
 {
     m_lightingConstantBuffer->ambient_color = { 0.05f, 0.05f, 0.05f };
@@ -1106,29 +998,6 @@ void SceneManager::giPass()
     denoisePass(context);
 
     context.finish();
-}
-
-void SceneManager::ambientPass()
-{
-    AmbientParams ambientParams = { vec3{ 0.05f, 0.05f, 0.05f },
-                                    vec3{ 0.0f, 0.0f, 0.0f} };
-
-    AmbientParams giParams = { vec3{ 2.0f, 2.0f, 2.0f },
-                               vec3{ 0.005f, 0.005f, 0.005f} };
-
-    ComputeContext context(m_commandList);
-    
-    context.setComputeMode(RenderingPipeline::cm_ambient);
-    context.barrier(Barrier(m_hdrBuffer, STATE_RENDER, STATE_WRITE));
-
-    context.setConstant(0, m_giActive ? giParams : ambientParams);
-    context.bind(1, m_hdrBuffer.writeHandle());
-    context.bind(2, (m_giActive && m_enableGI) ? m_ambientBuffer[1] : 1);
-    context.bind(3, m_colorBuffer);
-    context.bind(4, m_paramsBuffer);
-    context.dispatch(m_xtiles, m_ytiles, 1);
-
-    context.barrier(Barrier(m_hdrBuffer, STATE_WRITE, STATE_RENDER));
 }
 
 void SceneManager::spritePass()
@@ -1507,17 +1376,9 @@ void SceneManager::display()
         if (!m_omniLights.empty() || !m_spotLights.empty() || dirLightActive) shadowPass();
         if (m_giActive && m_enableGI) giPass();
 
-        if (false)
-        {
-            lightPassSimple();
-            ambientPass();
-        }
-        else
-        {
-            m_commandList.start();
-            lightPass();
-        }
+        m_commandList.start();
 
+        lightPass();
         skyPass();
         forwardPass();
         spritePass();

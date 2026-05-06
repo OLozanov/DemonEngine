@@ -1,9 +1,6 @@
 #include "Light.hlsl"
 #include "ShadingModel.hlsl"
 
-#define blocksize 16
-#define maxlights 128
-
 cbuffer LightingConstantBuffer : register(b0)
 {
     float3 topleft;

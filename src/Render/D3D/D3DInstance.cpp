@@ -261,6 +261,8 @@ void D3DInstance::createDefaultTextures()
     blackDesc.Texture2D.MipLevels = 1;
     m_device->CreateShaderResourceView(nullptr, &blackDesc, blackHandle);
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+
     // Describe and create a Texture2D.
     D3D12_RESOURCE_DESC textureDesc = {};
     textureDesc.MipLevels = 1;
@@ -276,7 +278,7 @@ void D3DInstance::createDefaultTextures()
     textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
     ThrowIfFailed(m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &textureDesc,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -303,6 +305,9 @@ void D3DInstance::createTexture(Image* image)
     ComPtr<ID3D12Resource> textureUploadHeap;
     ID3D12Resource* texture;
 
+    CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
+    CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
+
     // Describe and create a Texture2D.
     D3D12_RESOURCE_DESC textureDesc = {};
     textureDesc.MipLevels = image->mipmaps;
@@ -317,8 +322,8 @@ void D3DInstance::createTexture(Image* image)
     textureDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-    ThrowIfFailed(m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+     ThrowIfFailed(m_device->CreateCommittedResource(
+        &defaultHeap,
         D3D12_HEAP_FLAG_NONE,
         &textureDesc,
         D3D12_RESOURCE_STATE_COPY_DEST,
@@ -327,11 +332,13 @@ void D3DInstance::createTexture(Image* image)
 
     const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texture, 0, image->mipmaps);
 
+    CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+
     // Create the GPU upload buffer.
     ThrowIfFailed(m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+        &uploadHeap,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
+        &bufferDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&textureUploadHeap)));
@@ -361,8 +368,10 @@ void D3DInstance::createTexture(Image* image)
         if (height == 0) height = 1;
     }
 
+    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(texture, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
     UpdateSubresources(m_commandList.Get(), texture, textureUploadHeap.Get(), 0, 0, image->mipmaps, textureData.data());
-    m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+    m_commandList->ResourceBarrier(1, &barrier);
 
     // Describe and create a SRV for the texture.
     image->buffer = texture;
@@ -395,18 +404,23 @@ ID3D12Resource* D3DInstance::createBuffer(const void* data, UINT size)
     ComPtr<ID3D12Resource> vertexUploadHeap;
     ID3D12Resource* vertexBuffer;
 
+    CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
+    CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
+
+    CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
     ThrowIfFailed(m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &defaultHeap,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(size),
+        &bufferDesc,
         D3D12_RESOURCE_STATE_COPY_DEST,
         nullptr,
         IID_PPV_ARGS(&vertexBuffer)));
 
     ThrowIfFailed(m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+        &uploadHeap,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(size),
+        &bufferDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&vertexUploadHeap)));
@@ -416,8 +430,10 @@ ID3D12Resource* D3DInstance::createBuffer(const void* data, UINT size)
     vertexSubresourceData.RowPitch = size;
     vertexSubresourceData.SlicePitch = size;
 
+    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
     UpdateSubresources(m_commandList.Get(), vertexBuffer, vertexUploadHeap.Get(), 0, 0, 1, &vertexSubresourceData);
-    m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+    m_commandList->ResourceBarrier(1, &barrier);
 
     m_commandList->Close();
     ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };

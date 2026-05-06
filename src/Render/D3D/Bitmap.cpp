@@ -114,12 +114,14 @@ void Bitmap::reset(UINT width, UINT height)
 {
     D3DInstance& d3dInstance = D3DInstance::GetInstance();
 
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
     D3D12_RESOURCE_FLAGS flags = (m_uavHandle != 0) ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
+    CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(m_format, width, height, 1, 0, 1, 0, flags);
 
     d3dInstance.device()->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Tex2D(m_format, width, height, 1, 0, 1, 0, flags),
+        &resourceDesc,
         D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
         nullptr,
         IID_PPV_ARGS(&m_buffer));

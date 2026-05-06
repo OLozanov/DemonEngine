@@ -2,9 +2,6 @@
 #include "Light.hlsl"
 #include "ShadingModel.hlsl"
 
-#define blocksize 16
-#define maxlights 128
-
 cbuffer SceneConstantBuffer : register(b0)
 {
     float4x4 projViewMat;

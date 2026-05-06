@@ -38,13 +38,10 @@ public:
         rm_gbuffer_overlay = 15,
         rm_gbuffer_instanced = 16,
         rm_gbuffer_layered = 17,
-        rm_omnilight = 18,
-        rm_spotlight = 19,
-        rm_dirlight = 20,
-        rm_emissive = 21,
-        rm_transparent = 22,
-        rm_fog = 23,
-        rm_tone_mapping = 24,
+        rm_emissive = 18,
+        rm_transparent = 19,
+        rm_fog = 20,
+        rm_tone_mapping = 21,
         rm_count
     };
 
@@ -53,9 +50,8 @@ public:
         cm_skin = 0,
         cm_denoise_spatial = 1,
         cm_disocclusion_blur = 2,
-        cm_ambient = 3,
-        cm_lightgrid = 4,
-        cm_lighting = 5,
+        cm_lightgrid = 3,
+        cm_lighting = 4,
         cm_count
     };
 
@@ -85,9 +81,6 @@ private:
     static void SetupCascadedShadowShader();
     static void SetupShadowCubeShader();
     static void SetupGBufferShader();
-    static void SetupOmniLightShader();
-    static void SetupSpotLightShader();
-    static void SetupDirectionalLightShader();
     static void SetupEmissiveShader();
     static void SetupTransparentShader();
     static void SetupFogShader();
@@ -97,7 +90,6 @@ private:
     static void SetupSkinShader();
     static void SetupDenoiseShader();
     static void SetupDisocclusionShader();
-    static void SetupAmbientShader();
     static void SetupLightGridShader();
     static void SetupLightingShader();
 

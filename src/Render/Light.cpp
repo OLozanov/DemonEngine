@@ -34,8 +34,13 @@ Light::Light(const vec3& pos, const vec3& dir, const vec3& color,
 , m_shadowType(shadow)
 , m_view(SceneManager::GetInstance().getWorld(), View::ViewLeafs | View::ViewObjects | View::ViewRestrictDist)
 {
+    vec3 sidedir = vec3::Orthogonal(dir);
+    float length = radius + falloff;
+
     m_spotData.pos = pos;
     m_spotData.dir = dir;
+    m_spotData.width = tanf(outerAngle * 0.5f / 180.0f * math::pi) * length;
+    m_spotData.sidedir = sidedir;
     m_spotData.flux = color;
     m_spotData.radius = radius;
     m_spotData.falloff = falloff;
@@ -45,7 +50,7 @@ Light::Light(const vec3& pos, const vec3& dir, const vec3& color,
 
     mat3 mat;
     mat[2] = dir;
-    mat[0] = vec3::Orthogonal(dir);
+    mat[0] = sidedir;
     mat[1] = mat[0] ^ mat[2];
 
     m_spotData.projMat = mat4::Projection(outerAngle, 1.0f, 0.1f, radius + falloff) * mat.transpose() * mat4::Translate(-pos);

@@ -5,6 +5,8 @@ struct SpotLightData
     float3 flux;
     float falloff;
     float3 dir;
+	float width;
+	float3 sidedir;
     float angle_outer;
     float angle_inner;
     uint shadow_idx;
@@ -26,3 +28,6 @@ struct LightGridEntry
     uint offset;
     uint num;
 };
+
+#define blocksize 16
+#define maxlights 128
