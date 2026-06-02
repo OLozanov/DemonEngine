@@ -16,8 +16,13 @@ Image* ResourceManager::m_flatNormal = nullptr;
 
 std::vector<AnimatedMap> ResourceManager::m_animatedMaps;
 
+Render::StreamBuffer<MaterialData> ResourceManager::m_materialHeap(512);
+std::vector<uint32_t> ResourceManager::m_freeMaterials;
+uint32_t ResourceManager::m_matHeapOffset = 0;
+
 Material::~Material()
 {
+    ResourceManager::FreeMaterial(id);
 }
 
 inline std::string GetFullPath()
@@ -41,6 +46,26 @@ inline std::string GetFullPath()
     }
 
     return std::string(pathBuffer);
+}
+
+MaterialId ResourceManager::AllocateMaterial()
+{
+    if (!m_freeMaterials.empty())
+    {
+        uint32_t matid = m_freeMaterials.back();
+        m_freeMaterials.pop_back();
+
+        return matid;
+    }
+
+    if (m_matHeapOffset == m_materialHeap.size()) m_materialHeap.expand();
+
+    return m_matHeapOffset++;
+}
+
+void ResourceManager::FreeMaterial(MaterialId matid)
+{
+    m_freeMaterials.push_back(matid);
 }
 
 void ResourceManager::AnimateMaps(float dt)
@@ -174,40 +199,6 @@ bool ResourceManager::ReadType(Lexer& lexer, Material::MaterialType& type)
     return true;
 }
 
-/*bool ResourceManager::ReadDetail(Lexer& lexer, Material::MaterialDetail& detail)
-{
-    if (!lexer.match(Lexer::lex_blopen)) return false;
-
-    while(true)
-    {  
-        Lexer::Token tk = lexer.read();
-
-        if (tk == Lexer::lex_id)
-        {
-            const std::string value = lexer.tokenValue();
-
-            if (value == "model")
-            {
-                std::string model;
-
-                if (!ReadString(lexer, model)) return false;
-
-                detail.model = GetModel(model);
-            }
-                
-            if (value == "density") if (!ReadParam(lexer, detail.density)) return false;
-
-            continue;
-        }
-
-        if (tk == Lexer::lex_blclose) break;
-
-        return false;
-    }
-
-    return true;
-}*/
-
 Material* ResourceManager::GetMaterial(const std::string& name)
 {
     Material* material = m_materials[name];
@@ -216,12 +207,15 @@ Material* ResourceManager::GetMaterial(const std::string& name)
     {
         material = new Material();
 
-        material->maps[Material::map_diffuse] = 1;
-        material->maps[Material::map_normal] = 1;
-        material->maps[Material::map_roughness] = 1;
-        material->maps[Material::map_metalness] = 1;
-        material->maps[Material::map_luminosity] = 1;
-        material->maps[Material::map_height] = 1;
+        material->id = AllocateMaterial();
+
+        material->maps[Material::map_diffuse] = InvalidImage;
+        material->maps[Material::map_normal] = InvalidImage;
+        material->maps[Material::map_roughness] = InvalidImage;
+        material->maps[Material::map_metalness] = InvalidImage;
+        material->maps[Material::map_luminosity] = InvalidImage;
+        material->maps[Material::map_height] = InvalidImage;
+        material->maps[Material::map_ao] = InvalidImage;
 
         std::string filename = "Textures\\";
         filename += name;
@@ -290,7 +284,7 @@ Material* ResourceManager::GetMaterial(const std::string& name)
 
                 if (tk == Lexer::lex_blclose)
                 {
-                    if (!lexer.match(Lexer::lex_eof)) return nullptr;
+                    if (!lexer.match(Lexer::lex_eof)) throw(std::exception());
                     break;
                 }
             }
@@ -301,6 +295,15 @@ Material* ResourceManager::GetMaterial(const std::string& name)
         }
 
         if (material->type == Material::material_transparent) material->alpha = std::min(material->alpha, 0.5f);
+
+        m_materialHeap[material->id].color = material->color;
+        m_materialHeap[material->id].alpha = material->alpha;
+        m_materialHeap[material->id].metalness = material->metalness;
+        m_materialHeap[material->id].roughness = material->roughness;
+        m_materialHeap[material->id].luminosity = material->luminosity;
+        m_materialHeap[material->id].flags = material->flags;
+
+        for (size_t i = 0; i < Material::map_count; i++) m_materialHeap[material->id].maps[i] = material->maps[i];
 
         m_materials.add(name, material);
     }

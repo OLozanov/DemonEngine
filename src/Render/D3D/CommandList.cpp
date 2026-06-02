@@ -111,6 +111,11 @@ void CommandList::bindConstantBuffer(UINT index, D3D12_GPU_VIRTUAL_ADDRESS buffe
     m_commandList->SetGraphicsRootConstantBufferView(index, buffer);
 }
 
+void CommandList::bindBuffer(UINT index, D3D12_GPU_VIRTUAL_ADDRESS buffer)
+{
+    m_commandList->SetGraphicsRootShaderResourceView(index, buffer);
+}
+
 void CommandList::bindFrameBuffer(const FrameBuffer& frameBuffer)
 {
     m_commandList->OMSetRenderTargets(frameBuffer.size(), frameBuffer.renderTargets(), FALSE, frameBuffer.depthStencil());

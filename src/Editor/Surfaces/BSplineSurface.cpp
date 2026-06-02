@@ -136,6 +136,8 @@ void BSplineSurface::update()
 
     if (m_mapMode == TextureMapping::TSpace)
         for (BezierPatch& patch : m_patches) patch.calcTexCoords(m_s, m_t, m_uv);
+
+    updateBBox();
 }
 
 void BSplineSurface::reconfig()
@@ -421,7 +423,9 @@ void BSplineSurface::applyScaleInternal()
 
 void BSplineSurface::display(Render::CommandList& commandList) const
 {
-    commandList.bind(3, m_material->maps[Material::map_diffuse]);
+    uint32_t params[4] = { m_material->id, 0, 0, 0 };
+
+    commandList.setConstant(3, params, 4);
     commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale));
 
     int xpatches = (m_flags & surf_cyclic_x) ? m_xpatches + m_xpower : m_xpatches;
@@ -873,5 +877,24 @@ void BSplineSurface::setupTCoords()
 
             patch.calcTexCoords(t1, t2, t3, t4);
         }
+    }
+}
+
+void BSplineSurface::updateBBox()
+{
+    m_bbox.min = m_cp[0].xyz;
+    m_bbox.max = m_cp[0].xyz;
+
+    for (int i = 1; i < m_cp.size(); i++)
+    {
+        const vec3& vert = m_cp[i].xyz;
+
+        m_bbox.min.x = std::min(m_bbox.min.x, vert.x);
+        m_bbox.min.y = std::min(m_bbox.min.y, vert.y);
+        m_bbox.min.z = std::min(m_bbox.min.z, vert.z);
+
+        m_bbox.max.x = std::max(m_bbox.max.x, vert.x);
+        m_bbox.max.y = std::max(m_bbox.max.y, vert.y);
+        m_bbox.max.z = std::max(m_bbox.max.z, vert.z);
     }
 }

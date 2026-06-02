@@ -14,6 +14,11 @@
 
 #include <vector>
 
+namespace Render
+{
+    class Frustum;
+}
+
 enum class BlockType : uint8_t
 {
     Edit = 0,
@@ -165,8 +170,7 @@ public:
     void displayVertices(Render::CommandList& commandList) const;
     void displayGeometry(Render::CommandList& commandList) const;
     void displayGeometry(Render::CommandList& commandList, const std::vector<size_t>& displayList) const;
-    void displaySurfaces(Render::CommandList& commandList) const;
-    void displaySurfaceLayers(Render::CommandList& commandList) const;
+    void displaySurfaces(Render::CommandList& commandList, const Render::Frustum& frustum) const;
 
     void write(FILE* file) const;
     void writeSurfaces(FILE* file) const;
@@ -197,6 +201,7 @@ private:
     //std::vector<Vertex> m_editVertices;
     std::vector<EditPolygon> m_editPolygons;
     Render::PushBuffer<Vertex> m_geometry;
+    Render::StreamBuffer<MaterialId> m_faces;
 
     std::vector<Render::DisplayData> m_displayData;
 

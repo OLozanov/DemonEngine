@@ -98,14 +98,18 @@ Object* OmniLight::clone() const
     return new OmniLight(*this);
 }
 
-void OmniLight::display(RenderContext& rc) const
+DisplayType OmniLight::displayType() const
+{ 
+    return m_selected ? DisplayType::Line | DisplayType::Sprite : DisplayType::Sprite; 
+}
+
+void OmniLight::display(Render::CommandList& commandList, DisplayType displayType) const
 {
-    SpriteObject::display(rc);
+    if (displayType == DisplayType::Sprite)
+        SpriteObject::display(commandList, displayType);
 
-    if (m_selected)
+    if (displayType == DisplayType::Line)
     {
-        Render::CommandList& commandList = rc.commandList(rc_line);
-
         float size = m_radius + m_falloff;
 
         commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Scale(size));
@@ -208,14 +212,18 @@ Object* SpotLight::clone() const
     return new SpotLight(*this);
 }
 
-void SpotLight::display(RenderContext& rc) const
+DisplayType SpotLight::displayType() const
 {
-    SpriteObject::display(rc);
+    return m_selected ? DisplayType::Line | DisplayType::Sprite : DisplayType::Sprite;
+}
 
-    if (m_selected)
+void SpotLight::display(Render::CommandList& commandList, DisplayType displayType) const
+{
+    if (displayType == DisplayType::Sprite)
+        SpriteObject::display(commandList, displayType);
+
+    if (displayType == DisplayType::Line)
     {
-        Render::CommandList& commandList = rc.commandList(rc_line);
-
         float length = m_radius + m_falloff;
         float width = tan(m_outerAngle * 0.5f / 180.0f * math::pi) * length;
         vec3 size = { width, width, length };

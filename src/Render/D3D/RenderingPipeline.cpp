@@ -3,6 +3,7 @@
 #include "Render/D3D/D3DInstance.h"
 #include "System/ErrorMsg.h"
 #include <D3Dcompiler.h>
+#include <dxcapi.h>
 
 #ifndef EDITOR
 
@@ -98,6 +99,7 @@ void RenderingPipeline::Init()
     SetupColorLineShader();
     SetupColorRangeShader();
     SetupSimpleShader();
+    SetupSimpleSurfaceShader();
     SetupSimpleSpriteShader();
 
 #ifndef EDITOR
@@ -131,6 +133,60 @@ void RenderingPipeline::Init()
 #endif
 
     InitResources();
+}
+
+HRESULT CompileShader(LPCWSTR fileName, LPCWSTR entryPoint, LPCWSTR target, IDxcBlob** code)
+{
+    ComPtr<IDxcUtils> dxcUtils;
+    ComPtr<IDxcCompiler3> compiler;
+    DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
+    DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
+
+    ComPtr<IDxcIncludeHandler> includeHandler;
+    dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
+
+    uint32_t codePage = DXC_CP_ACP;
+    ComPtr<IDxcBlobEncoding> sourceBlob;
+    dxcUtils->LoadFile(fileName, &codePage, &sourceBlob);
+
+    DxcBuffer sourceBuffer;
+    sourceBuffer.Ptr = sourceBlob->GetBufferPointer();
+    sourceBuffer.Size = sourceBlob->GetBufferSize();
+    sourceBuffer.Encoding = DXC_CP_ACP;
+
+    std::vector<LPCWSTR> arguments = {
+        L"-I", L"Shaders\\",
+        L"-E", entryPoint,
+        L"-T", target,
+#if defined(_DEBUG)
+        L"-Zi",           // Enable debug info
+        L"-Qstrip_debug"  // Strip debug info from the final binary
+#else
+        L"-O2"
+#endif
+    };
+
+    ComPtr<IDxcResult> dxcResult;
+    compiler->Compile(&sourceBuffer, arguments.data(), (uint32_t)arguments.size(), includeHandler.Get(), IID_PPV_ARGS(&dxcResult));
+
+#if defined(_DEBUG)
+    ComPtr<IDxcBlobUtf8> errors;
+    dxcResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
+    if (errors != nullptr && errors->GetStringLength() > 0)
+    {
+        OutputDebugString(L"Compiling ");
+        OutputDebugString(fileName);
+        OutputDebugString(L":\n");
+        OutputDebugStringA(errors->GetStringPointer());
+    }
+#endif
+
+    dxcResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(code), nullptr);
+
+    HRESULT hresult;
+    dxcResult->GetStatus(&hresult);
+
+    return hresult;
 }
 
 void RenderingPipeline::SetupColorShader()
@@ -201,7 +257,7 @@ void RenderingPipeline::SetupColorShader()
     // Describe and create the graphics pipeline state object (PSO).
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
-    psoDesc.pRootSignature = m_rootSignature[rm_color_wire].Get();
+    psoDesc.pRootSignature = m_rootSignature[rm_color].Get();
     psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
     psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
@@ -220,7 +276,7 @@ void RenderingPipeline::SetupColorShader()
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    psoDesc.DSVFormat = EditorDepthFormat;
     psoDesc.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_color])));
@@ -239,7 +295,7 @@ void RenderingPipeline::SetupColorShader()
     psoDescWire.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDescWire.NumRenderTargets = 1;
     psoDescWire.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDescWire.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    psoDescWire.DSVFormat = EditorDepthFormat;
     psoDescWire.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDescWire, IID_PPV_ARGS(&m_pipelineState[rm_color_wire])));
@@ -335,7 +391,7 @@ void RenderingPipeline::SetupColorPointShader()
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
     psoDesc.NumRenderTargets = 1;
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    psoDesc.DSVFormat = EditorDepthFormat;
     psoDesc.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_color_point])));
@@ -435,7 +491,7 @@ void RenderingPipeline::SetupColorLineShader()
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
     psoDesc.NumRenderTargets = 1;
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    psoDesc.DSVFormat = EditorDepthFormat;
     psoDesc.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_color_line])));
@@ -526,7 +582,7 @@ void RenderingPipeline::SetupColorRangeShader()
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    psoDesc.DSVFormat = EditorDepthFormat;
     psoDesc.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_color_range])));
@@ -547,16 +603,20 @@ void RenderingPipeline::SetupSimpleShader()
         featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
     }
 
-    CD3DX12_DESCRIPTOR_RANGE1 ranges[2];
-    CD3DX12_ROOT_PARAMETER1 rootParameters[4];
+    CD3DX12_DESCRIPTOR_RANGE1 ranges[3];
+    CD3DX12_ROOT_PARAMETER1 rootParameters[6];
 
     ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
     ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+    ranges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 2, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 
     rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
     rootParameters[1].InitAsConstants(16, 1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
     rootParameters[2].InitAsConstants(4, 2, 0, D3D12_SHADER_VISIBILITY_PIXEL);
     rootParameters[3].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[4].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_PIXEL);
+    //rootParameters[4].InitAsShaderResourceView(1, 1, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[5].InitAsDescriptorTable(1, &ranges[2], D3D12_SHADER_VISIBILITY_PIXEL);
 
     D3D12_STATIC_SAMPLER_DESC sampler = {};
     sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
@@ -590,7 +650,6 @@ void RenderingPipeline::SetupSimpleShader()
     ThrowIfFailed(d3dInstance.device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature[rm_simple])));
 
     m_rootSignature[rm_simple_decal] = m_rootSignature[rm_simple];
-    m_rootSignature[rm_simple_layered] = m_rootSignature[rm_simple];
 
     // Create the pipeline state, which includes compiling and loading shaders.
     ComPtr<ID3DBlob> vertexShader;
@@ -598,15 +657,15 @@ void RenderingPipeline::SetupSimpleShader()
 
 #if defined(_DEBUG)
     // Enable better shader debugging with the graphics debugging tools.
-    UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+    UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES;
 #else
-    UINT compileFlags = 0;
+    UINT compileFlags = D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES;
 #endif
 
     std::wstring shaderPath = GetFullPath() + L"Shaders\\simple.hlsl";
 
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
+    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VSMain", "vs_5_1", compileFlags, 0, &vertexShader, nullptr));
+    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PSMain", "ps_5_1", compileFlags, 0, &pixelShader, nullptr));
 
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -647,54 +706,109 @@ void RenderingPipeline::SetupSimpleShader()
     psoDescDecal.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDescDecal.NumRenderTargets = 1;
     psoDescDecal.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDescDecal.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    psoDescDecal.DSVFormat = EditorDepthFormat;
     psoDescDecal.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDescDecal, IID_PPV_ARGS(&m_pipelineState[rm_simple_decal])));
+}
 
-    // Layered rendering
-    ComPtr<ID3DBlob> vertexShaderLayered;
-    ComPtr<ID3DBlob> pixelShaderLayered;
+void RenderingPipeline::SetupSimpleSurfaceShader()
+{
+    D3DInstance& d3dInstance = D3DInstance::GetInstance();
 
-    shaderPath = GetFullPath() + L"Shaders\\simple_layered.hlsl";
+    // Create root signature
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShaderLayered, nullptr));
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShaderLayered, nullptr));
+    // This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+    featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+    if (FAILED(d3dInstance.device()->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+    {
+        featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+    }
+
+    CD3DX12_DESCRIPTOR_RANGE1 ranges[4];
+    CD3DX12_ROOT_PARAMETER1 rootParameters[8];
+
+    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+    ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+    ranges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+    ranges[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 3, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+
+    rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
+    rootParameters[1].InitAsConstants(16, 1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+    rootParameters[2].InitAsConstants(4, 2, 0, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[3].InitAsConstants(4, 3, 0, D3D12_SHADER_VISIBILITY_ALL);
+    rootParameters[4].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[5].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[6].InitAsDescriptorTable(1, &ranges[2], D3D12_SHADER_VISIBILITY_PIXEL);
+    //rootParameters[5].InitAsShaderResourceView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+    //rootParameters[6].InitAsShaderResourceView(2, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[7].InitAsDescriptorTable(1, &ranges[3], D3D12_SHADER_VISIBILITY_PIXEL);
+
+    D3D12_STATIC_SAMPLER_DESC sampler = {};
+    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.MipLODBias = 0;
+    sampler.MaxAnisotropy = 0;
+    sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+    sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+    sampler.MinLOD = 0.0f;
+    sampler.MaxLOD = D3D12_FLOAT32_MAX;
+    sampler.ShaderRegister = 0;
+    sampler.RegisterSpace = 0;
+    sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+    // Allow input layout and deny uneccessary access to certain pipeline stages.
+    D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+
+    CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+    rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
+    ThrowIfFailed(d3dInstance.device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature[rm_simple_surface])));
+
+    ComPtr<IDxcBlob> vertexShader;
+    ComPtr<IDxcBlob> pixelShader;
+
+    std::wstring shaderPath = GetFullPath() + L"Shaders\\simple_surface.hlsl";
+
+    ThrowIfFailed(CompileShader(shaderPath.c_str(), L"VSMain", L"vs_6_0", &vertexShader));
+    ThrowIfFailed(CompileShader(shaderPath.c_str(), L"PSMain", L"ps_6_0", &pixelShader));
 
     // Define the vertex input layout.
-    D3D12_INPUT_ELEMENT_DESC inputElementLayeredDescs[] =
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "ALPHA", 0, DXGI_FORMAT_R32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDescLayered = {};
-    psoDescLayered.InputLayout = { inputElementLayeredDescs, _countof(inputElementLayeredDescs) };
-    psoDescLayered.pRootSignature = m_rootSignature[rm_simple_layered].Get();
-    psoDescLayered.VS = CD3DX12_SHADER_BYTECODE(vertexShaderLayered.Get());
-    psoDescLayered.PS = CD3DX12_SHADER_BYTECODE(pixelShaderLayered.Get());
-    psoDescLayered.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDescLayered.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDescLayered.BlendState.RenderTarget[0] =
-    {
-        TRUE, FALSE,
-        D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
-        D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-        D3D12_LOGIC_OP_NOOP,
-        D3D12_COLOR_WRITE_ENABLE_ALL,
-    };
-    psoDescLayered.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    psoDescLayered.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-    psoDescLayered.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-    psoDescLayered.SampleMask = UINT_MAX;
-    psoDescLayered.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDescLayered.NumRenderTargets = 1;
-    psoDescLayered.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDescLayered.DSVFormat = DXGI_FORMAT_UNKNOWN;
-    psoDescLayered.SampleDesc.Count = 1;
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
+    psoDesc.pRootSignature = m_rootSignature[rm_simple_surface].Get();
+    psoDesc.VS = { vertexShader->GetBufferPointer(), vertexShader->GetBufferSize() };
+    psoDesc.PS = { pixelShader->GetBufferPointer(), pixelShader->GetBufferSize() };
+    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+    psoDesc.SampleMask = UINT_MAX;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.NumRenderTargets = 1;
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.DSVFormat = EditorDepthFormat;
+    psoDesc.SampleDesc.Count = 1;
 
-    ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDescLayered, IID_PPV_ARGS(&m_pipelineState[rm_simple_layered])));
+    ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_simple_surface])));
 }
 
 void RenderingPipeline::SetupSimpleSpriteShader()

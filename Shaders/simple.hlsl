@@ -1,3 +1,5 @@
+#include "material.hlsl"
+
 cbuffer SceneConstantBuffer : register(b0)
 {
     float4x4 projViewMat;
@@ -20,7 +22,10 @@ struct PSInput
     float2 tcoord : TEXCOORD;
 };
 
-Texture2D image : register(t0);
+StructuredBuffer<Material> materials : register(t0);
+StructuredBuffer<uint> faces : register(t1);
+
+Texture2D image[] : register(t2);
 SamplerState g_sampler : register(s0);
 
 PSInput VSMain(float4 position : POSITION, float2 tcoord : TEXCOORD)
@@ -33,11 +38,15 @@ PSInput VSMain(float4 position : POSITION, float2 tcoord : TEXCOORD)
     return result;
 }
 
-float4 PSMain(PSInput input) : SV_TARGET
+float4 PSMain(PSInput input, uint face : SV_PrimitiveID) : SV_TARGET
 {
-    float4 color = image.Sample(g_sampler, input.tcoord) * colorAlpha; //pow(image.Sample(g_sampler, input.tcoord), 2.2);
+	uint matid = faces[face];
+	uint diffuse = materials[matid].diffuse_map;
+    float4 color = colorAlpha;
+
+	if (diffuse != InvalidImage) color *= image[diffuse].Sample(g_sampler, input.tcoord);
     
-    if (color.w < 0.01) discard;
-    
+    if (color.w < 0.01) discard; 
+	
     return float4(color.xyz, 1.0);
 }

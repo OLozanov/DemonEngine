@@ -28,7 +28,7 @@ void DisplayList::reset(ID3D12RootSignature * rootSignature)
     
     m_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP; 
     m_offset = 0;
-    m_imageHandle = 0;
+    m_imageHandle = 0xFFFFFFFF;
 
     m_commandList->IASetPrimitiveTopology(m_topology);
     //m_commandList->SetGraphicsRootDescriptorTable(1, Win32App::GetD3DInstance().GpuDescriptor(m_imageHandle));

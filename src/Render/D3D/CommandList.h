@@ -76,6 +76,7 @@ public:
 
     void bind(UINT index, UINT handle);
     void bindConstantBuffer(UINT index, D3D12_GPU_VIRTUAL_ADDRESS buffer);
+    void bindBuffer(UINT index, D3D12_GPU_VIRTUAL_ADDRESS buffer);
     void bindFrameBuffer(const FrameBuffer& frameBuffer);
     void bindFrameBuffer(const Bitmap& colorBuffer);
     void bindFrameBuffer(const Bitmap& colorBuffer, const Bitmap& depthBuffer);

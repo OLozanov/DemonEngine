@@ -133,6 +133,8 @@ public:
 
     operator bool() const { return static_cast<bool>(m_buffer); }
     operator UINT() const { return m_srvHandle; }
+
+    //operator D3D12_GPU_VIRTUAL_ADDRESS() const { return m_buffer->GetGPUVirtualAddress(); }
 };
 
 template<class T>
@@ -170,10 +172,11 @@ public:
 
     void resize(UINT size)
     {
-        m_size = size;
-
         CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
         CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size * sizeof(T));
+
+        ID3D12Resource* buffer;
+        T* data;
 
         D3DInstance& d3dInstance = D3DInstance::GetInstance();
         d3dInstance.device()->CreateCommittedResource(
@@ -182,11 +185,17 @@ public:
             &resourceDesc,
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
-            IID_PPV_ARGS(&m_buffer));
+            IID_PPV_ARGS(&buffer));
 
         CD3DX12_RANGE readRange(0, 0);
 
-        m_buffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedData));
+        buffer->Map(0, &readRange, reinterpret_cast<void**>(&data));
+
+        if (m_size != 0) memcpy(data, m_mappedData, min(m_size, size) * sizeof(T));
+
+        m_size = size;
+        m_buffer = buffer;
+        m_mappedData = data;
 
         if (m_srvHandle == 0) m_srvHandle = d3dInstance.AllocateDescriptor();
 
@@ -201,6 +210,8 @@ public:
         d3dInstance.device()->CreateShaderResourceView(m_buffer.Get(), &srvDesc, d3dInstance.CpuDescriptor(m_srvHandle));
     }
 
+    void expand() { resize(m_size * 2); }
+
     void setData(const T* data, UINT size)
     {
         memcpy(m_mappedData, data, size * sizeof(T));
@@ -213,6 +224,8 @@ public:
 
     operator bool() const { return static_cast<bool>(m_buffer); }
     operator UINT() const { return m_srvHandle; }
+
+    operator D3D12_GPU_VIRTUAL_ADDRESS() const { return m_buffer->GetGPUVirtualAddress(); }
 };
 
 } //namespace render

@@ -226,7 +226,7 @@ void UiRenderer::beginDraw()
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     m_commandList->SetGraphicsRootDescriptorTable(2, m_d3dInstance.GpuDescriptor(BlankImage));
 
-    m_imageHandle = 1;
+    m_imageHandle = 0;
     m_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
     m_flags = 0;
     m_param = 0;

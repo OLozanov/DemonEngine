@@ -1,5 +1,6 @@
 #include "Block.h"
 #include "Geometry/Geometry.h"
+#include "Render/Frustum.h"
 
 #include "stdio.h"
 #include <set>
@@ -1169,7 +1170,7 @@ void Block::applyRotation()
 
     for (EditSurface* surface : m_surfaces) surface->applyTransform(rotMat);
 
-    m_rot = { 0, 0, 0 };
+    m_rot = { 0.0f, 0.0f, 0.0f };
 }
 
 void Block::applyScale()
@@ -1183,7 +1184,7 @@ void Block::applyScale()
 
     for (EditSurface* surface : m_surfaces) surface->scale(m_scale);
 
-    m_scale = { 1, 1, 1 };
+    m_scale = { 1.0f, 1.0f, 1.0f };
 }
 
 bool Block::hasSubdivision()
@@ -1368,6 +1369,10 @@ void Block::buildGeometry()
     uint32_t offset = 0;
     size_t displayId = 0;
 
+    std::vector<MaterialId> faces;
+
+    if (m_editPolygons.empty()) return;
+
     for (const EditPolygon& poly : m_editPolygons)
     {
         if (m_type != BlockType::Subtruct && poly.status != VolumeStatus::Outside) continue;
@@ -1375,20 +1380,44 @@ void Block::buildGeometry()
 
         poly.origin->editPolygons.push_back(const_cast<EditPolygon*>(&poly));
 
-        m_displayData.push_back({poly.material, offset, (uint32_t)poly.vertices.size()});
+        uint32_t triangles = poly.vertices.size() - 2;
+        uint32_t vertnum = triangles * 3;
+
+        m_displayData.push_back({poly.material, offset, vertnum});
         poly.origin->displayList.push_back(displayId);
-        offset += poly.vertices.size();
+        offset += vertnum;
         displayId++;
 
-        for (int i = 0; i < poly.vertices.size(); i++)
+        /*for (int i = 0; i < poly.vertices.size(); i++)
         {
             size_t v = (m_type == BlockType::Subtruct) ? 
                        ((i % 2 == 0) ? i / 2 : poly.vertices.size() - 1 - i / 2) :
                        ((i % 2 == 0) ? poly.vertices.size() - 1 - i / 2 : i / 2);
+
                        
             m_geometry.push(poly.vertices[v]);
-        }
+        }*/
+
+        if (m_type == BlockType::Subtruct)
+            for (int i = 0; i < triangles; i++)
+            {
+                m_geometry.push(poly.vertices[0]);
+                m_geometry.push(poly.vertices[triangles - i + 1]);
+                m_geometry.push(poly.vertices[triangles - i]);
+            }
+        else
+            for (int i = 0; i < triangles; i++)
+            {
+                m_geometry.push(poly.vertices[0]);
+                m_geometry.push(poly.vertices[i + 1]);
+                m_geometry.push(poly.vertices[i + 2]);
+            }
+
+        for (int i = 0; i < triangles; i++) faces.push_back(poly.material->id);
     }
+
+    m_faces.resize(faces.size());
+    m_faces.setData(faces.data(), faces.size());
 
     m_needUpdate = false;
 }
@@ -1464,6 +1493,11 @@ void Block::setMaterial(Material* mat, std::vector<size_t>& displayList)
     {
         Render::DisplayData& elem = m_displayData[index];
         elem.material = mat;
+
+        size_t offset = elem.offset / 3;
+        size_t num = elem.vertexnum / 3;
+
+        for (size_t f = 0; f < num; f++) m_faces[f + offset] = mat->id;
     }
 }
 
@@ -1551,12 +1585,14 @@ void Block::displayVertices(Render::CommandList& commandList) const
 void Block::displayGeometry(Render::CommandList& commandList) const
 {
     commandList.bindVertexBuffer(m_geometry);
+    commandList.bind(4, m_faces);
+    commandList.draw(m_geometry.size());
 
-    for (const Render::DisplayData& elem : m_displayData)
-    {
-        commandList.bind(3, elem.material->maps[Material::map_diffuse]);
-        commandList.draw(elem.vertexnum, elem.offset);
-    }
+    //for (const Render::DisplayData& elem : m_displayData)
+    //{
+    //    //commandList.bind(3, elem.material->maps[Material::map_diffuse]);
+    //    commandList.draw(elem.vertexnum, elem.offset);
+    //}
 }
 
 void Block::displayGeometry(Render::CommandList& commandList, const std::vector<size_t>& displayList) const
@@ -1570,27 +1606,26 @@ void Block::displayGeometry(Render::CommandList& commandList, const std::vector<
     }
 }
 
-void Block::displaySurfaces(Render::CommandList& commandList) const
+void Block::displaySurfaces(Render::CommandList& commandList, const Render::Frustum& frustum) const
 {
     if (m_surfaces.empty()) return;
 
-    commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale));
+    mat4 transform = mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale);
+
+    commandList.setConstant(1, transform);
 
     for (const EditSurface* surface : m_surfaces)
     {
+        if (!frustum.test(surface->bbox(), transform)) continue;
+
         const Material* material = surface->material();
-        commandList.bind(3, material->maps[Material::map_diffuse]);
+
+        uint32_t params[4] = { surface->material()->id, surface->layerNum(), surface->xsize(), surface->ysize()};
+        commandList.setConstant(3, params, 4);
+        commandList.bind(5, surface->maskBuffer());
+        commandList.bind(6, surface->layersBuffer());
         surface->display(commandList);
     }
-}
-
-void Block::displaySurfaceLayers(Render::CommandList& commandList) const
-{
-    if (m_surfaces.empty()) return;
-
-    commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale));
-
-    for (const EditSurface* surface : m_surfaces) surface->displayLayers(commandList);
 }
 
 void Block::write(FILE* file) const

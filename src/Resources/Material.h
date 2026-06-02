@@ -9,6 +9,19 @@
 
 class Model;
 
+struct MaterialData
+{
+    vec3 color;
+    float alpha;
+    float metalness;
+    float roughness;
+    float luminosity;
+    uint32_t flags;
+    ImageHandle maps[7];
+};
+
+using MaterialId = uint32_t;
+
 struct Material : public Resource
 {
     enum MapId
@@ -19,6 +32,7 @@ struct Material : public Resource
         map_metalness = 3,
         map_luminosity = 4,
         map_height = 5,
+        map_ao = 6,
         map_count
     };
     
@@ -40,11 +54,12 @@ struct Material : public Resource
     };
 
     std::string name;
+    MaterialId id;
     MaterialType type;
     
     //Maps
     ResourcePtr<Image> img[map_count];
-    UINT maps[map_count];
+    ImageHandle maps[map_count];
     
     //parameters
     vec3 color;

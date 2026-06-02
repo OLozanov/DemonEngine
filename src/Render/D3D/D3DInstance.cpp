@@ -160,7 +160,7 @@ void D3DInstance::init()
     m_srvHeapCpuPtr = m_srvHeap->GetCPUDescriptorHandleForHeapStart().ptr;
     m_rtvHeapOffset = FrameCount;
     m_dsvHeapOffset = 0;
-    m_srvHeapOffset = 2;
+    m_srvHeapOffset = 1;
 
     ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
     ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
@@ -252,21 +252,12 @@ void D3DInstance::OnDeviceRemoved(PVOID context, BOOLEAN)
 
 void D3DInstance::createDefaultTextures()
 {
-    D3D12_CPU_DESCRIPTOR_HANDLE blackHandle = CpuDescriptor(0);
-
-    D3D12_SHADER_RESOURCE_VIEW_DESC blackDesc = {};
-    blackDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(4, 4, 4, 4);
-    blackDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-    blackDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    blackDesc.Texture2D.MipLevels = 1;
-    m_device->CreateShaderResourceView(nullptr, &blackDesc, blackHandle);
-
     CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
 
     // Describe and create a Texture2D.
     D3D12_RESOURCE_DESC textureDesc = {};
     textureDesc.MipLevels = 1;
-    textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     textureDesc.Width = 1;
     textureDesc.Height = 1;
     textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -285,14 +276,22 @@ void D3DInstance::createDefaultTextures()
         nullptr,
         IID_PPV_ARGS(&m_blankTexture)));
 
-    D3D12_CPU_DESCRIPTOR_HANDLE whiteHandle = CpuDescriptor(1);
+    D3D12_CPU_DESCRIPTOR_HANDLE whiteHandle = CpuDescriptor(0);
 
     D3D12_SHADER_RESOURCE_VIEW_DESC whiteDesc = {};
     whiteDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(5, 5, 5, 5);
-    whiteDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    whiteDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     whiteDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     whiteDesc.Texture2D.MipLevels = 1;
     m_device->CreateShaderResourceView(m_blankTexture.Get(), &whiteDesc, whiteHandle);
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC nullDesc = {};
+    nullDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(5, 5, 5, 5);
+    nullDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    nullDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    nullDesc.Texture2D.MipLevels = 1;
+
+    for (UINT i = 1; i < 512; i++) m_device->CreateShaderResourceView(nullptr, &nullDesc, CpuDescriptor(i));
 }
 
 void D3DInstance::createTexture(Image* image)

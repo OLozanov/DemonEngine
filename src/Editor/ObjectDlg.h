@@ -145,13 +145,15 @@ class ObjectDlgImpl : public ObjectDlg
     {
         ResourceDlgImpl* m_dialog;
 
+        Object* m_object;
         std::string* m_str;
         Model** m_mdl;
 
     public:
-        ObjModelProperty(const char* name, std::string* str, Model** mdl, ResourceDlgImpl* dlg)
+        ObjModelProperty(const char* name, Object* object, std::string* str, Model** mdl, ResourceDlgImpl* dlg)
         : wxLongStringProperty(name, name, str->c_str())
         , m_dialog(dlg)
+        , m_object(object)
         , m_str(str)
         , m_mdl(mdl)
         {
@@ -163,6 +165,8 @@ class ObjectDlgImpl : public ObjectDlg
 
             *m_str = path.char_str();
             *m_mdl = ResourceManager::GetModel(*m_str);
+
+            m_object->update();
         }
 
         bool DisplayEditorDialog(wxPropertyGrid* propGrid, wxVariant& value) override

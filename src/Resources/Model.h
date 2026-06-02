@@ -11,6 +11,8 @@
 #include <vector>
 #include "stdint.h"
 
+using FaceBuffer = Render::Buffer<MaterialId>;
+
 struct MshHeader
 {
     uint32_t signature;
@@ -91,17 +93,19 @@ public:
     static Model* LoadModel(const char* name);
 
     const std::vector<Render::Vertex>& vertices() const { return m_vertices; }
-    const std::vector<uint16_t>& indices() const { return m_indices; }
+    const std::vector<Render::IndexType>& indices() const { return m_indices; }
     const std::vector<Render::DisplayData>& meshes() const { return m_meshes; }
     const std::vector<uint16_t>& objectMeshes() const { return m_objmeshes; }
     const BBox& bbox() const { return m_bbox; }
     const BBox& corebbox() const { return m_corebbox; }
     const Render::VertexBuffer& vertexBuffer() const { return m_vertexBuffer; }
     const Render::IndexBuffer& indexBuffer() const { return m_indexBuffer; }
+    const FaceBuffer& faceBuffer() const { return m_faceBuffer; }
 
     void prepareSkeletalData();
 
-    uint16_t vertexnum() const { return m_vertices.size(); }
+    uint32_t vertexnum() const { return m_vertices.size(); }
+    uint32_t indexnum() const { return m_indices.size(); }
     uint16_t meshnum() const { return m_meshnum; }
     uint16_t objnum() const { return m_objnum; }
     uint16_t rbonenum() const { return m_rbonenum; }
@@ -158,7 +162,8 @@ private:
 
     // Geometry
     std::vector<Render::Vertex> m_vertices;
-    std::vector<uint16_t> m_indices;
+    std::vector<Render::IndexType> m_indices;
+    std::vector<MaterialId> m_facemat;
     std::vector<uint16_t> m_objmeshes;
 
     // Bones
@@ -190,4 +195,5 @@ private:
     
     Render::VertexBuffer m_vertexBuffer;
     Render::IndexBuffer m_indexBuffer;
+    FaceBuffer m_faceBuffer;                // faces material id
 };

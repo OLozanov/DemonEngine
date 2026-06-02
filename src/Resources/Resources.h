@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef RENDER_D3D
+
+#include "Render/D3D/Buffer.h"
+
+#endif
+
 #include "Resources/Image.h"
 #include "Resources/Material.h"
 #include "Resources/Model.h"
@@ -29,6 +35,14 @@ private:
 
     static std::vector<AnimatedMap> m_animatedMaps;
 
+    // Material management
+    static Render::StreamBuffer<MaterialData> m_materialHeap;
+    static std::vector<MaterialId> m_freeMaterials;
+    static uint32_t m_matHeapOffset;
+
+    static MaterialId AllocateMaterial();
+    static void FreeMaterial(MaterialId matid);
+
     static bool LoadMaterialMap(Lexer& lexer, Material* material, uint32_t mapn);
     static bool ReadParam(Lexer& lexer, float& param);
     static bool ReadString(Lexer& lexer, std::string& str);
@@ -36,6 +50,8 @@ private:
     static bool ReadType(Lexer& lexer, Material::MaterialType& type);
 
     static void CleanupAnimatedMaps();
+
+    friend Material::~Material();
 
 public:
 
@@ -48,6 +64,8 @@ public:
 
     static bool MaterialExist(const std::string& name);
     static bool ModelExist(const std::string& name);
+
+    static UINT MaterialHeap() { return m_materialHeap; }
 
     static void Cleanup();
 };

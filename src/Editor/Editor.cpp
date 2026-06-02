@@ -3038,47 +3038,42 @@ void Editor::initGridGeometry()
 
 void Editor::drawGrid(float x, float y)
 {
-    Render::CommandList& commandList = m_renderContext.commandList(rc_regular);
-
     vec3 gridPos = { floorf(x / GridMoveStep) * GridMoveStep, 0, floorf(y / GridMoveStep) * GridMoveStep };
 
-    commandList.setConstant(1, mat4::Translate(gridPos));
-    commandList.setTopology(Render::topology_linelist);
+    m_commandList.setConstant(1, mat4::Translate(gridPos));
+    m_commandList.setTopology(Render::topology_linelist);
 
-    commandList.setConstant(2, vec4(0.4, 0.4, 0.4, 1.0));
-    commandList.setConstant(3, 1.0f);
-    commandList.bindVertexBuffer(m_fineGridBuffer);
-    commandList.draw(m_fineGridBuffer.size());
+    m_commandList.setConstant(2, vec4(0.4, 0.4, 0.4, 1.0));
+    m_commandList.setConstant(3, 1.0f);
+    m_commandList.bindVertexBuffer(m_fineGridBuffer);
+    m_commandList.draw(m_fineGridBuffer.size());
 
-    commandList.setConstant(2, vec4(0.6, 0.6, 0.6, 1.0));
-    commandList.setConstant(3, 2.0f);
-    commandList.bindVertexBuffer(m_gridBuffer);
-    commandList.draw(m_gridBuffer.size());
+    m_commandList.setConstant(2, vec4(0.6, 0.6, 0.6, 1.0));
+    m_commandList.setConstant(3, 2.0f);
+    m_commandList.bindVertexBuffer(m_gridBuffer);
+    m_commandList.draw(m_gridBuffer.size());
 }
 
 void Editor::drawGridOrtho(const mat4& gridMat, float x, float y)
 {
-    Render::CommandList& commandList = m_renderContext.commandList(rc_regular);
-
     vec3 gridPos = { floorf(x / GridMoveStep) * GridMoveStep, 0, floorf(y / GridMoveStep) * GridMoveStep };
 
-    commandList.setConstant(1, gridMat);
-    commandList.setTopology(Render::topology_linelist);
+    m_commandList.setConstant(1, gridMat);
+    m_commandList.setTopology(Render::topology_linelist);
 
-    commandList.setConstant(2, vec4(0.4, 0.4, 0.4, 1.0));
-    commandList.setConstant(3, 1.0f);
-    commandList.bindVertexBuffer(m_fineGridBuffer);
-    commandList.draw(m_fineGridBuffer.size());
+    m_commandList.setConstant(2, vec4(0.4, 0.4, 0.4, 1.0));
+    m_commandList.setConstant(3, 1.0f);
+    m_commandList.bindVertexBuffer(m_fineGridBuffer);
+    m_commandList.draw(m_fineGridBuffer.size());
 
-    commandList.setConstant(2, vec4(0.6, 0.6, 0.6, 1.0));
-    commandList.setConstant(3, 2.0f);
-    commandList.bindVertexBuffer(m_gridBuffer);
-    commandList.draw(m_gridBuffer.size());
+    m_commandList.setConstant(2, vec4(0.6, 0.6, 0.6, 1.0));
+    m_commandList.setConstant(3, 2.0f);
+    m_commandList.bindVertexBuffer(m_gridBuffer);
+    m_commandList.draw(m_gridBuffer.size());
 }
 
 void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera, const mat4& projMat, int width, int height)
 {
-    //vec3 frustum[4];
     Render::Frustum frustum;
 
     //calculateFrustrum(camera, projMat, frustum);
@@ -3089,10 +3084,6 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
 
     vec4 screenPlane = vec4(camdir, -camdist);
 
-    Render::CommandList& commandList = m_renderContext.commandList(rc_regular);
-    Render::CommandList& colorCM = m_renderContext.commandList(rc_color);
-    Render::CommandList& lineCM = m_renderContext.commandList(rc_line);
-
     mat4 projViewMat = projMat * camera.viewMat();
 
     m_sceneConstantBuffer->projViewMat = projViewMat;
@@ -3102,100 +3093,88 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
 
     frustum.update(projViewMat);
 
-    Render::RenderingPipeline::StartRender(commandList, Render::RenderingPipeline::rm_color_line);
-    commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
-    commandList.setViewport(width, height);
+    Render::RenderingPipeline::StartRender(m_commandList, Render::RenderingPipeline::rm_color_line);
+    m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
+    m_commandList.setViewport(width, height);
 
-    commandList.barrier(frameBuffer.writeBarriers());
-    commandList.bindFrameBuffer(frameBuffer);
-    commandList.clearDepth(frameBuffer, 1.0f);
-    commandList.clearBuffer(frameBuffer, { 0.2f, 0.2f, 0.2f, 1.0f });
-
-    Render::RenderingPipeline::StartRender(colorCM, Render::RenderingPipeline::rm_color);
-    colorCM.bindConstantBuffer(0, m_sceneConstantBuffer);
-    colorCM.setViewport(width, height);
-    colorCM.bindFrameBuffer(frameBuffer);
-    colorCM.setTopology(Render::topology_trianglelist);
-
-    Render::RenderingPipeline::StartRender(lineCM, Render::RenderingPipeline::rm_color_line);
-    lineCM.bindConstantBuffer(0, m_sceneConstantBuffer);
-    lineCM.setViewport(width, height);
-    lineCM.bindFrameBuffer(frameBuffer);
-    lineCM.setTopology(Render::topology_linelist);
+    m_commandList.barrier(frameBuffer.writeBarriers());
+    m_commandList.bindFrameBuffer(frameBuffer);
+    m_commandList.clearDepth(frameBuffer, 1.0f);
+    m_commandList.clearBuffer(frameBuffer, { 0.2f, 0.2f, 0.2f, 1.0f });
 
     const vec3& viewpos = camera.pos();
     drawGrid(viewpos.x, viewpos.z);
 
-    commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
-    commandList.setTopology(Render::topology_trianglestrip);
-    commandList.setConstant(1, mat4());
-    commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
-    
+    m_displayBlocks.clear();
+
     for (const Block* block : m_blocks)
     {
-        if (block->type() == BlockType::Edit) continue;
-
         const vec3& blockPos = block->pos();
         const BBox& blockBox = block->bbox();
 
         BBox bbox = { blockBox.min + blockPos, blockBox.max + blockPos };
 
-        if (!frustum.test(bbox)) continue;
-
-        block->displayGeometry(commandList);
+        if (frustum.test(bbox)) m_displayBlocks.push_back(block);
     }
 
-    commandList.setRenderMode(Render::RenderingPipeline::rm_simple_decal);
-    commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
-    for (const Decal* decal : m_decals) decal->display(commandList);
-
-    commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
-    commandList.setTopology(Render::topology_linelist);
-    commandList.setConstant(3, 1.0f);
-
-    for (const Block* block : m_blocks)
+    if (!m_displayBlocks.empty())
     {
-        if (block->isSelected()) continue;
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
+        m_commandList.setTopology(Render::topology_trianglelist);
+        m_commandList.setConstant(1, mat4());
+        m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
+        m_commandList.bind(5, 0);
+        m_commandList.bind(3, ResourceManager::MaterialHeap());
 
-        const vec3& blockPos = block->pos();
-        const BBox& blockBox = block->bbox();
-
-        BBox bbox = { blockBox.min + blockPos, blockBox.max + blockPos };
-
-        if (!frustum.test(bbox)) continue;
-
-        block->display(commandList);
+        for (const Block* block : m_displayBlocks)
+        {
+            if (block->type() == BlockType::Edit) continue;
+            block->displayGeometry(m_commandList);
+        }
     }
 
-    commandList.setConstant(3, 2.0f);
-
-    for (const Block* block : m_blocks)
+    if (!m_decals.empty())
     {
-        if (!block->isSelected()) continue;
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple_decal);
+        m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
 
-        const vec3& blockPos = block->pos();
-        const BBox& blockBox = block->bbox();
+        for (const Decal* decal : m_decals) decal->display(m_commandList);
+    }
 
-        BBox bbox = { blockBox.min + blockPos, blockBox.max + blockPos };
+    if (!m_displayBlocks.empty())
+    {
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
+        m_commandList.setTopology(Render::topology_linelist);
+        m_commandList.setConstant(3, 1.0f);
 
-        if (!frustum.test(bbox)) continue;
+        for (const Block* block : m_displayBlocks)
+        {
+            if (block->isSelected()) continue;
+            block->display(m_commandList);
+        }
 
-        block->display(commandList);
+        m_commandList.setConstant(3, 2.0f);
+
+        for (const Block* block : m_displayBlocks)
+        {
+            if (!block->isSelected()) continue;
+            block->display(m_commandList);
+        }
     }
 
     if (m_editType == EditType::Decals)
     {
-        commandList.setConstant(3, 1.0f);
+        m_commandList.setConstant(3, 1.0f);
 
-        for (const Decal* decal : m_decals) decal->displayWire(commandList);
+        for (const Decal* decal : m_decals) decal->displayWire(m_commandList);
     }
 
     if (m_editType == EditType::Polygons && !m_selectedPolys.empty())
     {
-        commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color);
-        commandList.setTopology(Render::topology_trianglestrip);
-        commandList.setConstant(1, mat4());
-        commandList.setConstant(2, vec4(0.0, 1.0, 0.0, 0.5));
+        m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color);
+        m_commandList.setTopology(Render::topology_trianglelist);
+        m_commandList.setConstant(1, mat4());
+        m_commandList.setConstant(2, vec4(0.0, 1.0, 0.0, 0.5));
 
         const Block* curblock = nullptr;
 
@@ -3208,72 +3187,129 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
             if (block != curblock)
             {
                 curblock = block;
-                block->bindVertexBuffer(commandList);
+                block->bindVertexBuffer(m_commandList);
             }
 
-            block->displayGeometry(commandList, poly->origin->displayList);
+            block->displayGeometry(m_commandList, poly->origin->displayList);
         }
     }
 
     if (m_showPortals && m_map.hasPortals())
     {
-        commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color);
-        commandList.setTopology(Render::topology_trianglestrip);
-        commandList.setConstant(1, mat4());
+        m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color);
+        m_commandList.setTopology(Render::topology_trianglestrip);
+        m_commandList.setConstant(1, mat4());
 
-        m_map.displayPortals(commandList);
+        m_map.displayPortals(m_commandList);
     }
 
-    Object::ResetObjects();
+    m_displayRegular.clear();
+    m_displayColor.clear();
+    m_displayLine.clear();
+    m_displaySprite.clear();
 
-    commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
-    commandList.setTopology(Render::topology_trianglelist);
+    for (Object* object : m_objects)
+    {
+        const vec3& pos = object->pos();
+        const BBox& bbox = object->bbox();
+        const mat3& mat = object->mat();
 
-    for (Object* object : m_objects) object->display(m_renderContext);
+        vec3 mid = (bbox.min + bbox.max) * 0.5f;
+        vec3 bpos = pos + mat * mid;
+        vec3 extent = bbox.max - mid;
 
-    Object::DisplayObjects(commandList);
+        if (frustum.test(bpos, extent, mat))
+        {
+            DisplayType displayType = object->displayType();
+
+            if (displayType & DisplayType::Regular) m_displayRegular.push_back(object);
+            if (displayType & DisplayType::Color) m_displayColor.push_back(object);
+            if (displayType & DisplayType::Line) m_displayLine.push_back(object);
+            if (displayType & DisplayType::Sprite) m_displaySprite.push_back(object);
+        }
+    }
+
+    if (!m_displayRegular.empty())
+    {
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
+        m_commandList.setTopology(Render::topology_trianglelist);
+        m_commandList.bind(5, 0);
+        m_commandList.bind(3, ResourceManager::MaterialHeap());
+
+        for (Object* object : m_displayRegular) object->display(m_commandList, DisplayType::Regular);
+    }
+
+    if (!m_displaySprite.empty())
+    {
+        m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_sprite_simple);
+        m_commandList.setTopology(Render::topology_trianglestrip);
+
+        for (Object* object : m_displaySprite) object->display(m_commandList, DisplayType::Sprite);
+    }
 
     // Parametric surfaces
-    commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
-    commandList.setTopology(Render::topology_trianglelist);
+    m_displaySurfaces.clear();
 
     for (Surface* surface : m_surfaces)
     {
-        if (surface->isSelected()) commandList.setConstant(2, vec4(0.0, 0.8, 0.0, 1.0));
-        else commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
+        const BBox& bbox = surface->bbox();
+        const vec3& pos = surface->pos();
 
-        surface->display(commandList);
+        vec3 mid = (bbox.min + bbox.max) * 0.5f;
+        vec3 sz = bbox.max - mid;
+        vec3 bpos = pos + mid;
+
+        if (frustum.test(bpos, sz)) m_displaySurfaces.push_back(surface);
     }
 
-    commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
-    commandList.setTopology(Render::topology_linelist);
-
-    for (Surface* surface : m_surfaces)
+    if (!m_displaySurfaces.empty())
     {
-        if (surface->isSelected())
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple_surface);
+        m_commandList.setTopology(Render::topology_trianglelist);
+        m_commandList.bind(7, 0);
+        m_commandList.bind(4, ResourceManager::MaterialHeap());
+        m_commandList.bind(5, 0);
+        m_commandList.bind(6, 0);
+
+        for (Surface* surface : m_displaySurfaces)
         {
-            commandList.setConstant(2, vec4(0.0, 0.0, 0.8, 1.0));
-            commandList.setConstant(3, 2.0f);
-        }
-        else
-        {
-            commandList.setConstant(2, vec4(0.0, 0.0, 0.5, 1.0));
-            commandList.setConstant(3, 1.0f);
+            if (surface->isSelected()) m_commandList.setConstant(2, vec4(0.0, 0.8, 0.0, 1.0));
+            else m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
+
+            surface->display(m_commandList);
         }
 
-        surface->displayControlMesh(commandList);
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
+        m_commandList.setTopology(Render::topology_linelist);
+
+        for (Surface* surface : m_displaySurfaces)
+        {
+            if (surface->isSelected())
+            {
+                m_commandList.setConstant(2, vec4(0.0, 0.0, 0.8, 1.0));
+                m_commandList.setConstant(3, 2.0f);
+            }
+            else
+            {
+                m_commandList.setConstant(2, vec4(0.0, 0.0, 0.5, 1.0));
+                m_commandList.setConstant(3, 1.0f);
+            }
+
+            surface->displayControlMesh(m_commandList);
+        }
     }
 
     // Subdivision surfaces
-    commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
-    commandList.setTopology(Render::topology_trianglelist);
-    commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
+    m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple_surface);
+    m_commandList.setTopology(Render::topology_trianglelist);
+    m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
+    m_commandList.bind(7, 0);
+    m_commandList.bind(4, ResourceManager::MaterialHeap());
 
-    for (const Block* block : m_blocks) block->displaySurfaces(commandList);
-
-    commandList.setRenderMode(Render::RenderingPipeline::rm_simple_layered);
-
-    for (const Block* block : m_blocks) block->displaySurfaceLayers(commandList);
+    for (const Block* block : m_blocks)
+    {
+        block->displaySurfaces(m_commandList, frustum);
+    }
 
     if ((m_editType == EditType::Polygons || m_editType == EditType::Displace) && !m_selectedPolys.empty())
     {
@@ -3281,11 +3317,11 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
 
         bool surfaceRange = m_editType == EditType::Displace && m_pointSurface;
 
-        commandList.setRenderMode(surfaceRange ? 
+        m_commandList.setRenderMode(surfaceRange ? 
                                   Render::RenderingPipeline::RenderMode::rm_color_range :
                                   Render::RenderingPipeline::RenderMode::rm_color);
 
-        commandList.setTopology(Render::topology_trianglelist);
+        m_commandList.setTopology(Render::topology_trianglelist);
 
         if (surfaceRange)
         {
@@ -3295,10 +3331,10 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
                                       m_surfaceIntersect,
                                       0 };
 
-            commandList.setConstant(2, param);
+            m_commandList.setConstant(2, param);
         } 
         else
-            commandList.setConstant(2, vec4(0.0, 1.0, 0.0, alpha));
+            m_commandList.setConstant(2, vec4(0.0, 1.0, 0.0, alpha));
 
         for (PolygonSelection* poly : m_selectedPolys)
         {
@@ -3306,8 +3342,8 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
 
             const Block* block = poly->owner;
 
-            commandList.setConstant(1, mat4::Translate(block->pos()));
-            poly->origin->surface->display(commandList);
+            m_commandList.setConstant(1, mat4::Translate(block->pos()));
+            poly->origin->surface->display(m_commandList);
         }
     }
 
@@ -3316,20 +3352,20 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
     {
         if (!m_selectedSurfaces.empty())
         {
-            commandList.clearDepth(frameBuffer, 1.0f);
-            commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
-            commandList.setTopology(Render::topology_pointlist);
-            commandList.setConstant(2, vec4(0.0, 1.0, 1.0, 1.0));
+            m_commandList.clearDepth(frameBuffer, 1.0f);
+            m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
+            m_commandList.setTopology(Render::topology_pointlist);
+            m_commandList.setConstant(2, vec4(0.0, 1.0, 1.0, 1.0));
 
-            for (const Surface* surface : m_selectedSurfaces) surface->displayControlPoints(commandList);
+            for (const Surface* surface : m_selectedSurfaces) surface->displayControlPoints(m_commandList);
         }
 
         if (!m_selectedCps.empty())
         {
-            commandList.setConstant(1, mat4());
-            commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
-            commandList.bindVertexBuffer(m_controlPoints);
-            commandList.draw(m_controlPoints.size());
+            m_commandList.setConstant(1, mat4());
+            m_commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
+            m_commandList.bindVertexBuffer(m_controlPoints);
+            m_commandList.draw(m_controlPoints.size());
         }
     }
 
@@ -3337,37 +3373,43 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
     {
         if (!m_selectedBlocks.empty())
         {
-            commandList.clearDepth(frameBuffer, 1.0f);
-            commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
-            commandList.setTopology(Render::topology_pointlist);
-            commandList.setConstant(2, vec4(1.0, 1.0, 0.0, 1.0));
+            m_commandList.clearDepth(frameBuffer, 1.0f);
+            m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
+            m_commandList.setTopology(Render::topology_pointlist);
+            m_commandList.setConstant(2, vec4(1.0, 1.0, 0.0, 1.0));
 
-            for (const Block* block : m_selectedBlocks) block->displayVertices(commandList);
+            for (const Block* block : m_selectedBlocks) block->displayVertices(m_commandList);
         }
 
         if (!m_selectedVerts.empty())
         {
-            commandList.setConstant(1, mat4());
-            commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
-            commandList.bindVertexBuffer(m_blockVerts);
-            commandList.draw(m_blockVerts.size());
+            m_commandList.setConstant(1, mat4());
+            m_commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
+            m_commandList.bindVertexBuffer(m_blockVerts);
+            m_commandList.draw(m_blockVerts.size());
         }
     }
 
-    //commandList.barrier(frameBuffer.readBarriers());
+    if (!m_displayColor.empty())
+    {
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_color);
+        m_commandList.setTopology(Render::topology_trianglelist);
 
-    commandList.finish();
-    Render::D3DInstance::GetInstance().execute(commandList);
+        for (Object* object : m_displayColor) object->display(m_commandList, DisplayType::Color);
+    }
 
-    //lineCM.barrier(frameBuffer.readBarriers());
+    if (!m_displayLine.empty())
+    {
+        m_commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
+        m_commandList.setTopology(Render::topology_linelist);
 
-    //lineCM.finish();
-    //Render::D3DInstance::GetInstance().execute(lineCM);
+        for (Object* object : m_displayLine) object->display(m_commandList, DisplayType::Line);
+    }
 
-    colorCM.barrier(frameBuffer.readBarriers());
+    m_commandList.barrier(frameBuffer.readBarriers());
 
-    colorCM.finish();
-    Render::D3DInstance::GetInstance().execute(colorCM);
+    m_commandList.finish();
+    Render::D3DInstance::GetInstance().execute(m_commandList);
 }
 
 void Editor::displayOrtho(Render::FrameBuffer& frameBuffer, 
@@ -3379,113 +3421,111 @@ void Editor::displayOrtho(Render::FrameBuffer& frameBuffer,
                           int width, 
                           int height)
 {
-    Render::CommandList& commandList = m_renderContext.commandList(rc_regular);
-
     mat4 viewPojMat = viewProj * mat4::Scale(scale) * mat4::Translate(viewpos);
 
     m_sceneConstantBuffer->projViewMat = viewPojMat;
     m_sceneConstantBuffer->worldMat = viewMat;
 
-    Render::RenderingPipeline::StartRender(commandList, Render::RenderingPipeline::rm_color_line);
-    commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
-    commandList.setViewport(width, height);
+    Render::RenderingPipeline::StartRender(m_commandList, Render::RenderingPipeline::rm_color_line);
+    m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
+    m_commandList.setViewport(width, height);
 
-    commandList.barrier(frameBuffer.writeBarriers());
-    commandList.bindFrameBuffer(frameBuffer);
-    commandList.clearBuffer(frameBuffer, { 0.2f, 0.2f, 0.2f, 1.0f });
+    m_commandList.barrier(frameBuffer.writeBarriers());
+    m_commandList.bindFrameBuffer(frameBuffer);
+    m_commandList.clearBuffer(frameBuffer, { 0.2f, 0.2f, 0.2f, 1.0f });
 
     drawGridOrtho(gridMat, viewpos.x, viewpos.y);
 
-    commandList.setConstant(3, 1.0f);
+    m_commandList.setConstant(3, 1.0f);
 
     for (const Block* block : m_blocks)
     {
         if (block->isSelected()) continue;
-        block->display(commandList);
+        block->display(m_commandList);
     }
 
-    commandList.setConstant(3, 2.0f);
+    m_commandList.setConstant(3, 2.0f);
 
     for (const Block* block : m_blocks)
     {
         if (!block->isSelected()) continue;
-        block->display(commandList);
+        block->display(m_commandList);
     }
 
     if (m_editType == EditType::Vertices)
     {
-        commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
+        m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
 
         if (!m_selectedBlocks.empty())
         {
-            commandList.setTopology(Render::topology_pointlist);
-            commandList.setConstant(2, vec4(1.0, 1.0, 0.0, 1.0));
+            m_commandList.setTopology(Render::topology_pointlist);
+            m_commandList.setConstant(2, vec4(1.0, 1.0, 0.0, 1.0));
 
-            for (const Block* block : m_selectedBlocks) block->displayVertices(commandList);
+            for (const Block* block : m_selectedBlocks) block->displayVertices(m_commandList);
         }
 
         if (!m_selectedVerts.empty())
         {
-            commandList.setConstant(1, mat4());
-            commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
-            commandList.bindVertexBuffer(m_blockVerts);
-            commandList.draw(m_blockVerts.size());
+            m_commandList.setConstant(1, mat4());
+            m_commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
+            m_commandList.bindVertexBuffer(m_blockVerts);
+            m_commandList.draw(m_blockVerts.size());
         }
     }
 
     Object::ResetObjects();
 
-    commandList.setRenderMode(Render::RenderingPipeline::rm_color_wire);
-    commandList.setTopology(Render::topology_trianglelist);
+    m_commandList.setRenderMode(Render::RenderingPipeline::rm_color_wire);
+    m_commandList.setTopology(Render::topology_trianglelist);
 
-    for (Object* object : m_objects) object->displayOrtho(commandList);
+    for (Object* object : m_objects) object->displayOrtho(m_commandList);
 
-    Object::DisplayObjects(commandList);
+    Object::DisplayObjects(m_commandList);
 
     // Parametric surfaces
-    commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
-    commandList.setTopology(Render::topology_linelist);
-    commandList.setConstant(3, 1.0f);
+    m_commandList.setRenderMode(Render::RenderingPipeline::rm_color_line);
+    m_commandList.setTopology(Render::topology_linelist);
+    m_commandList.setConstant(3, 1.0f);
 
     for (Surface* surface : m_surfaces)
     {
         if (surface->isSelected())
         {
-            commandList.setConstant(2, vec4(0.0, 0.0, 0.8, 1.0));
-            commandList.setConstant(3, 2.0f);
+            m_commandList.setConstant(2, vec4(0.0, 0.0, 0.8, 1.0));
+            m_commandList.setConstant(3, 2.0f);
         }
         else
         {
-            commandList.setConstant(2, vec4(0.0, 0.0, 0.5, 1.0));
-            commandList.setConstant(3, 1.0f);
+            m_commandList.setConstant(2, vec4(0.0, 0.0, 0.5, 1.0));
+            m_commandList.setConstant(3, 1.0f);
         }
 
-        surface->displayControlMesh(commandList);
+        surface->displayControlMesh(m_commandList);
     }
 
     if (m_editType == EditType::ControlPoints)
     {
-        commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
+        m_commandList.setRenderMode(Render::RenderingPipeline::RenderMode::rm_color_point);
 
         if (!m_selectedSurfaces.empty())
         {
-            commandList.setTopology(Render::topology_pointlist);
-            commandList.setConstant(2, vec4(0.0, 1.0, 1.0, 1.0));
+            m_commandList.setTopology(Render::topology_pointlist);
+            m_commandList.setConstant(2, vec4(0.0, 1.0, 1.0, 1.0));
 
-            for (const Surface* surface : m_selectedSurfaces) surface->displayControlPoints(commandList);
+            for (const Surface* surface : m_selectedSurfaces) surface->displayControlPoints(m_commandList);
         }
 
         if (!m_selectedCps.empty())
         {
-            commandList.setConstant(1, mat4());
-            commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
-            commandList.bindVertexBuffer(m_controlPoints);
-            commandList.draw(m_controlPoints.size());
+            m_commandList.setConstant(1, mat4());
+            m_commandList.setConstant(2, vec4(1.0, 0.0, 0.0, 1.0));
+            m_commandList.bindVertexBuffer(m_controlPoints);
+            m_commandList.draw(m_controlPoints.size());
         }
     }
 
-    commandList.barrier(frameBuffer.readBarriers());
+    m_commandList.barrier(frameBuffer.readBarriers());
 
-    commandList.finish();
-    Render::D3DInstance::GetInstance().execute(commandList);
+    m_commandList.finish();
+    Render::D3DInstance::GetInstance().execute(m_commandList);
 }

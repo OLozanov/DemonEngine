@@ -80,6 +80,8 @@ private:
 
     void buildVertices(const BezierPatch& patch, std::vector<Vertex>& verices) const;
 
+    void updateBBox();
+
 private:
     uint32_t m_xpower;
     uint32_t m_ypower;

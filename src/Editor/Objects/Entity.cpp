@@ -136,6 +136,7 @@ void Entity::init(EntityClass entityClass)
             {
                 std::string* string = reinterpret_cast<std::string*>((uint8_t*)this + member.offset);
                 m_model = ResourceManager::GetModel(*string);
+                m_bbox = m_model->bbox();
             }
         }
         else
@@ -163,7 +164,11 @@ void Entity::restore(FILE* file)
                 fread(string->data(), 1, size, file);
             }
 
-            if (member.type == TypeInfoMember::Type::Model) m_model = ResourceManager::GetModel(*string);
+            if (member.type == TypeInfoMember::Type::Model)
+            {
+                m_model = ResourceManager::GetModel(*string);
+                m_bbox = m_model->bbox();
+            }
         }
         else
             fread((uint8_t*)this + member.offset, TypeInfoMember::SizeOf(member.type), 1, file);
@@ -228,4 +233,9 @@ void Entity::write(FILE* file) const
                 fwrite((uint8_t*)this + member.offset, TypeInfoMember::SizeOf(member.type), 1, file);
         }
     }
+}
+
+void Entity::update()
+{
+    m_bbox = m_model->bbox();
 }

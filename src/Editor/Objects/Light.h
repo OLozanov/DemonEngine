@@ -29,7 +29,9 @@ public:
 
     Object* clone() const override;
 
-    void display(RenderContext& rc) const override;
+    DisplayType displayType() const override;
+
+    void display(Render::CommandList& commandList, DisplayType displayType) const override;
 
     void write(FILE* file) const override;
 
@@ -65,7 +67,9 @@ public:
 
     Object* clone() const override;
 
-    void display(RenderContext& rc) const override;
+    DisplayType displayType() const override;
+
+    void display(Render::CommandList& commandList, DisplayType displayType) const override;
 
     void write(FILE* file) const override;
 

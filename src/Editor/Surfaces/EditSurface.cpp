@@ -182,12 +182,29 @@ void EditSurface::scale(const vec3& scale)
 
 void EditSurface::addLayer(Material* material)
 {
-    m_layers.emplace_back(material, m_xsize * m_ysize);
+    size_t size = m_xsize * m_ysize;
+
+    m_layers.emplace_back(material, size);
+
+    m_maskBuffer.resize(size * m_layers.size());
+    m_layersBuffer.resize(m_layers.size() * 2);
+
+    for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
 }
 
 void EditSurface::addLayer(Material* material, LayerOrientation orientation, const std::vector<float>& layerMask)
 {
+    size_t size = m_xsize * m_ysize;
+    size_t base = m_layers.size() * size;
+
     m_layers.emplace_back(material, orientation, layerMask);
+
+    m_maskBuffer.resize(size * m_layers.size());
+    m_layersBuffer.resize(m_layers.size() * 2);
+
+    for (size_t i = 0; i < size; i++) m_maskBuffer[base + i] = layerMask[i];
+
+    for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
 }
 
 void EditSurface::deleteLayer(size_t n)
@@ -233,6 +250,7 @@ void EditSurface::paintLayer(const vec3& point, float radius, size_t lid)
     if (m_layers.size() <= lid) return;
 
     SurfaceLayer& layer = m_layers[lid];
+    size_t baseptr = m_xsize * m_ysize * lid;
 
     for (int i = 0; i < m_vertexBuffer.size(); i++)
     {
@@ -246,9 +264,9 @@ void EditSurface::paintLayer(const vec3& point, float radius, size_t lid)
 
             float rdst = std::max(0.0f, radius - dist);
             float value = rdst > falloff ? 1.0 : rdst / falloff;
-            float alpha = std::min(1.0f, layer.vertexBuffer[i] + value * 0.2f);
+            float alpha = std::min(1.0f, m_maskBuffer[baseptr + i] + value * 0.2f);
 
-            layer.vertexBuffer[i] = alpha;
+            m_maskBuffer[baseptr + i] = alpha;
         }
     }
 }
@@ -358,7 +376,7 @@ void EditSurface::buildVertices()
 
 void EditSurface::displayLayers(Render::CommandList& commandList) const
 {
-    if (m_layers.empty()) return;
+    /*if (m_layers.empty()) return;
 
     commandList.bindVertexBuffer(m_vertexBuffer);
     commandList.bindIndexBuffer(m_indexBuffer);
@@ -369,7 +387,7 @@ void EditSurface::displayLayers(Render::CommandList& commandList) const
 
         commandList.bindVertexBuffer(m_layers[i].vertexBuffer, 1);
         commandList.drawIndexed(m_indexNum);
-    }
+    }*/
 }
 
 void EditSurface::writeLayers(FILE* file) const
@@ -385,7 +403,7 @@ void EditSurface::writeLayers(FILE* file) const
         fwrite(&tlen, 1, sizeof(uint16_t), file);
         fwrite(m_layers[l].material->name.c_str(), 1, tlen, file);
 
-        fwrite(m_layers[l].vertexBuffer.data(), sizeof(float), m_layers[l].vertexBuffer.size(), file);
+        //fwrite(m_layers[l].vertexBuffer.data(), sizeof(float), m_layers[l].vertexBuffer.size(), file);
     }
 }
 

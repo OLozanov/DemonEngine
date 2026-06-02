@@ -45,6 +45,8 @@ public:
     void deselect() { m_selected = false; }
     bool isSelected() { return m_selected; }
 
+    const BBox& bbox() const { return m_bbox; }
+
     const vec3& rot() const { return m_rot; }
     void setXRot(float rot) { m_rot = { rot, 0, 0 }; }
     void setYRot(float rot) { m_rot = { 0, rot, 0 }; }
@@ -118,7 +120,7 @@ protected:
     virtual void updateTCoord() = 0;
 
 protected:
-
+    BBox m_bbox;
     vec3 m_pos;
 
     vec3 m_rot;

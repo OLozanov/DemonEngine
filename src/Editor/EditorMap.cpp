@@ -157,7 +157,7 @@ void Editor::readBlocks(FILE* file)
             
             fread(tname.data(), 1, tlen, file);
 
-            poly.material = loadMaterial(tname);
+            poly.material = tlen ? loadMaterial(tname) : nullptr;
 
             // surface
             uint16_t surfSize;

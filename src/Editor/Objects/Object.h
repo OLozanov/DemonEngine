@@ -2,7 +2,6 @@
 
 #include "math/math3d.h"
 #include "Render/Render.h"
-#include "RenderContext.h"
 #include "Resources/Resources.h"
 
 #include "Utils/LinkedList.h"
@@ -27,13 +26,43 @@ enum class ObjectType : uint8_t
     Invalid = 0xFF
 };
 
+enum class DisplayType : uint32_t
+{
+    None = 0,
+    Regular = 1,
+    Color = 2,
+    Line = 4,
+    Sprite = 8
+};
+
+struct SpriteData
+{
+    vec3 position;
+    ImageHandle image;
+    vec4 color;
+    float size;
+};
+
+inline constexpr DisplayType operator | (DisplayType a, DisplayType b)
+{ 
+    return static_cast<DisplayType>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b)); 
+}
+
+inline bool operator & (DisplayType a, DisplayType b)
+{
+    return static_cast<uint32_t>(a) & static_cast<uint32_t>(b);
+}
+
 class Object : public EditListNode<Object>
 {
 public:
     virtual ~Object() = default;
 
-    const vec3 pos() const { return m_pos; }
+    const vec3& pos() const { return m_pos; }
     void setPos(const vec3& pos) { m_pos = pos; }
+
+    const mat3& mat() const { return m_mat; }
+    const BBox& bbox() const { return m_bbox; }
 
     void setOrientation(const mat3& mat) { m_mat = mat; }
 
@@ -59,14 +88,18 @@ public:
     virtual ObjectType type() const;
     virtual const TypeInfo& getTypeInfo() const;
 
+    virtual DisplayType displayType() const;
+
     virtual Object* clone() const = 0;
 
     virtual void write(FILE* file) const = 0;
 
+    virtual void update() {}
+
     virtual bool pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const = 0;
     virtual bool pick2d(float x, float y, float scale, float& depth, int i, int j, int k) const = 0;
 
-    virtual void display(RenderContext& rc) const = 0;
+    virtual void display(Render::CommandList& commandList, DisplayType displayType) const = 0;
     virtual void displayOrtho(Render::CommandList& commandList) const = 0;
 
     static void ResetObjects();
@@ -79,6 +112,7 @@ protected:
     std::string m_id;
     vec3 m_pos;
     mat3 m_mat;
+    BBox m_bbox;
 
     vec3 m_rot;
     vec3 m_scale;
@@ -101,7 +135,9 @@ public:
     bool pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const override;
     bool pick2d(float x, float y, float scale, float& depth, int i, int j, int k) const override;
 
-    void display(RenderContext& rc) const override;
+    DisplayType displayType() const override { return DisplayType::Regular; }
+
+    void display(Render::CommandList& commandList, DisplayType displayType) const override;
     void displayOrtho(Render::CommandList& commandList) const override;
 
 protected:
@@ -117,7 +153,9 @@ public:
     bool pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const override;
     bool pick2d(float x, float y, float scale, float& depth, int i, int j, int k) const override;
 
-    void display(RenderContext& rc) const override;
+    DisplayType displayType() const override { return DisplayType::Sprite; }
+
+    void display(Render::CommandList& commandList, DisplayType displayType) const override;
     void displayOrtho(Render::CommandList& commandList) const override;
 
 private:
@@ -134,7 +172,9 @@ public:
     bool pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const override;
     bool pick2d(float x, float y, float scale, float& depth, int i, int j, int k) const override;
 
-    void display(RenderContext& rc) const override;
+    DisplayType displayType() const override { return DisplayType::Color | DisplayType::Line; }
+
+    void display(Render::CommandList& commandList, DisplayType displayType) const override;
     void displayOrtho(Render::CommandList& commandList) const override;
 
 protected:
@@ -160,7 +200,9 @@ public:
     bool pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const override;
     bool pick2d(float x, float y, float scale, float& depth, int i, int j, int k) const override;
 
-    void display(RenderContext& rc) const override;
+    DisplayType displayType() const override { return DisplayType::Color; }
+
+    void display(Render::CommandList& commandList, DisplayType displayType) const override;
     void displayOrtho(Render::CommandList& commandList) const override;
 
 private:

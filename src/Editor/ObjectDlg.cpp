@@ -96,6 +96,7 @@ void ObjectDlgImpl::fill(Object* object, const TypeInfo& typeInfo)
         {
             char* mdl_ptr = reinterpret_cast<char*>(object) + member.offset2;
             m_propertyGrid->Append(new ObjModelProperty(member.name,
+                                   object,
                                    reinterpret_cast<std::string*>(ptr),
                                    reinterpret_cast<Model**>(mdl_ptr),
                                    m_resourceDlg));

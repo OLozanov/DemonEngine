@@ -68,6 +68,8 @@ void BezierSurface::update()
     m_bezierPatch.update();
 
     if (m_mapMode == TextureMapping::TSpace) m_bezierPatch.calcTexCoords(m_s, m_t, m_uv);
+
+    updateBBox();
 }
 
 void BezierSurface::updateTCoord()
@@ -201,6 +203,7 @@ void BezierSurface::applyTransform(const mat3& mat)
     }
 
     m_bezierPatch.update();
+    updateBBox();
 }
 
 void BezierSurface::applyScaleInternal()
@@ -216,12 +219,15 @@ void BezierSurface::applyScaleInternal()
     }
 
     m_bezierPatch.update();
+    updateBBox();
 }
 
 void BezierSurface::display(Render::CommandList& commandList) const
 {
+    uint32_t params[4] = { m_material->id, 0, 0, 0 };
+
     commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale));   
-    commandList.bind(3, m_material->maps[Material::map_diffuse]);
+    commandList.setConstant(3, params, 4);
     m_bezierPatch.display(commandList);
 }
 
@@ -499,5 +505,26 @@ void BezierSurface::buildVertices(std::vector<Vertex>& verices) const
 
             ptr++;
         }
+    }
+}
+
+void BezierSurface::updateBBox()
+{
+    size_t size = (m_xpower + 1) * (m_ypower + 1);
+
+    m_bbox.min = m_bezierPatch.cp(0).xyz;
+    m_bbox.max = m_bezierPatch.cp(0).xyz;
+
+    for (int i = 1; i < size; i++)
+    {
+        const vec3& vert = m_bezierPatch.cp(i).xyz;
+
+        m_bbox.min.x = std::min(m_bbox.min.x, vert.x);
+        m_bbox.min.y = std::min(m_bbox.min.y, vert.y);
+        m_bbox.min.z = std::min(m_bbox.min.z, vert.z);
+
+        m_bbox.max.x = std::max(m_bbox.max.x, vert.x);
+        m_bbox.max.y = std::max(m_bbox.max.y, vert.y);
+        m_bbox.max.z = std::max(m_bbox.max.z, vert.z);
     }
 }

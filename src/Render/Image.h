@@ -88,3 +88,5 @@ using ImageHandle = UINT;
 #define FORMAT_BC7_UNORM_SRGB DXGI_FORMAT_BC7_UNORM_SRGB
 
 #endif
+
+#define InvalidImage 0 //0xFFFFFFFF

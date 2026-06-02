@@ -13,7 +13,7 @@ Canvas::Canvas()
 , m_fillcolor(1.0f, 1.0f, 1.0f, 1.0f)
 , m_linecolor(0.0f, 0.0f, 0.0f, 1.0f)
 , m_textcolor(0.0f, 0.0f, 0.0f, 1.0f)
-, m_fillImage(1)
+, m_fillImage(0)
 {
 
 }
@@ -41,7 +41,7 @@ void Canvas::setTextColor(float r, float g, float b, float a)
 
 void Canvas::setFillImage(Image* img)
 {
-    m_fillImage = img ? img->handle : 1;
+    m_fillImage = img ? img->handle : 0;
 
     if (img)
     {

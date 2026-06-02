@@ -131,7 +131,6 @@
     <ClInclude Include="Editor\PlaneDlg.h" />
     <ClInclude Include="Editor\PolyDlg.h" />
     <ClInclude Include="Editor\PreferencesDlg.h" />
-    <ClInclude Include="Editor\RenderContext.h" />
     <ClInclude Include="Editor\ResourceDlg.h" />
     <ClInclude Include="Editor\SphereDlg.h" />
     <ClInclude Include="Editor\SurfaceCpDlg.h" />
@@ -338,7 +337,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -358,7 +357,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31u.lib;wxmsw31u_core.lib;wxmsw31u_aui.lib;wxmsw31u_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxcompiler.lib;dxguid.lib;Winmm.lib;wxbase31u.lib;wxmsw31u_core.lib;wxmsw31u_aui.lib;wxmsw31u_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -374,7 +373,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxcompiler.lib;dxguid.lib;Winmm.lib;wxbase31ud.lib;wxmsw31ud_core.lib;wxmsw31ud_aui.lib;wxmsw31ud_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -394,7 +393,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\wx\3.1.6\Develop\lib\vc14x_x64_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;Winmm.lib;wxbase31u.lib;wxmsw31u_core.lib;wxmsw31u_aui.lib;wxmsw31u_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxcompiler.lib;dxguid.lib;Winmm.lib;wxbase31u.lib;wxmsw31u_core.lib;wxmsw31u_aui.lib;wxmsw31u_adv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

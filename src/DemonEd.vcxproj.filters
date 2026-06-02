@@ -486,9 +486,6 @@
     <ClInclude Include="Editor\Objects\Sound.h">
       <Filter>Source\Editor\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\RenderContext.h">
-      <Filter>Source\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\Objects\PlayerStart.h">
       <Filter>Source\Editor\Objects</Filter>
     </ClInclude>

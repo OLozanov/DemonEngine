@@ -72,6 +72,8 @@ public:
     Object* clone() const override;
     void write(FILE* file) const override;
 
+    void update() override;
+
 private:
     void init(EntityClass entityClass);
     void restore(FILE* file);

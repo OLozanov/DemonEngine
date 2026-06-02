@@ -27,7 +27,7 @@ public:
         rm_color_range = 4,
         rm_simple = 5,
         rm_simple_decal = 6,
-        rm_simple_layered = 7,
+        rm_simple_surface = 7,
         rm_sprite_simple = 8,
         rm_sprite = 9,
         rm_sky = 10,
@@ -74,6 +74,7 @@ private:
     static void SetupColorLineShader();
     static void SetupColorRangeShader();
     static void SetupSimpleShader();
+    static void SetupSimpleSurfaceShader();
     static void SetupSimpleSpriteShader();
     static void SetupSpriteShader();
     static void SetupSkyShader();
@@ -125,6 +126,7 @@ private:
     static ComPtr<ID3D12Resource> m_rayGenShaderTable;
 
     static constexpr DXGI_FORMAT DepthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    static constexpr DXGI_FORMAT EditorDepthFormat = DXGI_FORMAT_D32_FLOAT;
 
     friend class SceneManager;
     friend class CommandList;

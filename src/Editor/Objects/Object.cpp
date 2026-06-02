@@ -68,6 +68,11 @@ const TypeInfo& Object::getTypeInfo() const
     return ObjectTypeInfo;
 }
 
+DisplayType Object::displayType() const
+{
+    return DisplayType::None;
+}
+
 void Object::AddSprite(const vec3& position, ImageHandle id, float size, const vec3& color)
 {
     m_sprites.push_back({ position, id, color, size });
@@ -100,6 +105,7 @@ MeshObject::MeshObject()
 MeshObject::MeshObject(Model* model)
 : m_model(model)
 {
+    m_bbox = m_model->bbox();
 }
 
 bool MeshObject::pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const
@@ -191,24 +197,19 @@ bool MeshObject::pick2d(float x, float y, float scale, float& depth, int i, int 
     return result;
 }
 
-void MeshObject::display(RenderContext& rc) const
+void MeshObject::display(Render::CommandList& commandList, DisplayType displayType) const
 {
-    Render::CommandList& commandList = rc.commandList(rc_regular);
-
     const std::vector<Render::DisplayData>& displayList = m_model->meshes();
 
     commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * m_mat);
     commandList.bindVertexBuffer(m_model->vertexBuffer());
     commandList.bindIndexBuffer(m_model->indexBuffer());
+    commandList.bind(4, m_model->faceBuffer());
 
     if (m_selected) commandList.setConstant(2, vec4(0.0, 0.8, 0.0, 1.0));
     else commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
 
-    for (const Render::DisplayData& elem : displayList)
-    {
-        commandList.bind(3, elem.material->maps[Material::map_diffuse]);
-        commandList.drawIndexed(elem.vertexnum, elem.offset);
-    }
+    commandList.drawIndexed(m_model->indexnum());
 }
 
 void MeshObject::displayOrtho(Render::CommandList& commandList) const
@@ -228,14 +229,20 @@ void MeshObject::displayOrtho(Render::CommandList& commandList) const
 
 SpriteObject::SpriteObject()
 : m_handle(1)
-, m_size(0.2)
+, m_size(0.2f)
 {
+    vec3 min = { -m_size, -m_size, -m_size };
+    vec3 max = { m_size, m_size, m_size };
+    m_bbox = { min, max };
 }
 
 SpriteObject::SpriteObject(ImageHandle image, float size)
 : m_handle(image)
 , m_size(size)
 {
+    vec3 min = { -m_size, -m_size, -m_size };
+    vec3 max = { m_size, m_size, m_size };
+    m_bbox = { min, max };
 }
 
 bool SpriteObject::pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const
@@ -273,12 +280,16 @@ bool SpriteObject::pick2d(float x, float y, float scale, float& depth, int i, in
     } else return false;
 }
 
-void SpriteObject::display(RenderContext& rc) const
+void SpriteObject::display(Render::CommandList& commandList, DisplayType displayType) const
 {
     static const vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
     static const vec4 selectedColor = vec4(0.0, 0.8, 0.0, 1.0);
 
-    AddSprite(m_pos, m_handle, m_size, m_selected ? selectedColor : color);
+    SpriteData data = { m_pos, m_handle, m_selected ? selectedColor : color, m_size };
+
+    commandList.setConstant(1, data);
+    commandList.bind(2, m_handle);
+    commandList.draw(4);
 }
 
 void SpriteObject::displayOrtho(Render::CommandList& commandList) const
@@ -297,6 +308,8 @@ BoxObject::BoxObject()
 : m_size(1.0f, 1.0f, 1.0f)
 , m_color(1.0f, 1.0f, 1.0f)
 {
+    m_bbox = { -m_size, m_size };
+
     InitGeometry();
 }
 
@@ -304,6 +317,8 @@ BoxObject::BoxObject(const vec3& size, const vec3& color)
 : m_size(size)
 , m_color(color)
 {
+    m_bbox = { -m_size, m_size };
+
     InitGeometry();
 }
 
@@ -359,12 +374,11 @@ bool BoxObject::pick2d(float x, float y, float scale, float& depth, int i, int j
     return true;
 }
 
-void BoxObject::display(RenderContext& rc) const
+void BoxObject::display(Render::CommandList& commandList, DisplayType displayType) const
 {
     // Color
+    if (displayType == DisplayType::Color)
     {
-        Render::CommandList& commandList = rc.commandList(rc_color);
-
         commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Scale(m_size));
         commandList.bindVertexBuffer(m_vbuffer);
         commandList.bindIndexBuffer(m_ibuffer);
@@ -376,9 +390,8 @@ void BoxObject::display(RenderContext& rc) const
     }
 
     // Wire
+    if (displayType == DisplayType::Line)
     {
-        Render::CommandList& commandList = rc.commandList(rc_line);
-
         commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Scale(m_size));
         commandList.bindVertexBuffer(m_vbuffer);
         commandList.bindIndexBuffer(m_wireibuffer);
@@ -452,26 +465,22 @@ bool OrientedBoxObject::pick2d(float x, float y, float scale, float& depth, int 
     return true;
 }
 
-void OrientedBoxObject::display(RenderContext& rc) const
+void OrientedBoxObject::display(Render::CommandList& commandList, DisplayType displayType) const
 {
-    // Color
-    {
-        Render::CommandList& commandList = rc.commandList(rc_color);
 
-        commandList.setConstant(1, mat4::Translate(m_pos) * mat4::RotateY(m_rot.y + m_ang) * mat4::Scale(m_size));
-        commandList.bindVertexBuffer(m_vbuffer);
-        commandList.bindIndexBuffer(m_ibuffer);
-
-        if (m_selected) commandList.setConstant(2, vec4(0.0, 0.8, 0.0, 1.0));
-        else commandList.setConstant(2, vec4(m_color, 1.0));
-
-        commandList.drawIndexed(5 * 3 * 2);
-
-        if (m_selected) commandList.setConstant(2, vec4(0.5, 0.8, 0.5, 1.0));
-        else commandList.setConstant(2, vec4(m_frontColor, 1.0));
-
-        commandList.drawIndexed(3 * 2, 5 * 3 * 2);
-    }
+    commandList.setConstant(1, mat4::Translate(m_pos) * mat4::RotateY(m_rot.y + m_ang) * mat4::Scale(m_size));
+    commandList.bindVertexBuffer(m_vbuffer);
+    commandList.bindIndexBuffer(m_ibuffer);
+    
+    if (m_selected) commandList.setConstant(2, vec4(0.0, 0.8, 0.0, 1.0));
+    else commandList.setConstant(2, vec4(m_color, 1.0));
+    
+    commandList.drawIndexed(5 * 3 * 2);
+    
+    if (m_selected) commandList.setConstant(2, vec4(0.5, 0.8, 0.5, 1.0));
+    else commandList.setConstant(2, vec4(m_frontColor, 1.0));
+    
+    commandList.drawIndexed(3 * 2, 5 * 3 * 2);
 }
 
 void OrientedBoxObject::displayOrtho(Render::CommandList& commandList) const

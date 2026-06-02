@@ -27,21 +27,21 @@ struct SurfaceLayer
 {
     LayerOrientation orientation;
     ResourcePtr<Material> material;
-    Render::VertexArray<float> vertexBuffer;
+    //Render::VertexArray<float> vertexBuffer;
 
     SurfaceLayer(Material* mat, size_t size)
     : material(mat)
     , orientation(LayerOrientation::Normal)
     {
-        vertexBuffer.resize(size);
+        //vertexBuffer.resize(size);
 
-        for (size_t i = 0; i < size; i++) vertexBuffer[i] = 0;
+        //for (size_t i = 0; i < size; i++) vertexBuffer[i] = 0;
     }
 
     SurfaceLayer(Material* mat, LayerOrientation orientation, const std::vector<float>& layerMask)
     : material(mat)
     , orientation(orientation)
-    , vertexBuffer(layerMask)
+    //, vertexBuffer(layerMask)
     {
     }
 };
@@ -65,7 +65,9 @@ struct SurfaceLayerDetails
 class EditSurface : public SurfaceMesh
 {
 public:
+    using MaskBuffer = Render::StreamBuffer<float>;
 
+public:
     EditSurface(Block* block, BlockPolygon* polygon, size_t size);
     EditSurface(BlockPolygon* polygon, size_t size,
                 const std::vector<TexturedVertex>& vertices,
@@ -96,6 +98,11 @@ public:
     void addLayer(Material* material, LayerOrientation orientation, const std::vector<float>& layerMask);
     void deleteLayer(size_t n);
     const std::vector<SurfaceLayer>& layers() { return m_layers; }
+
+    size_t layerNum() const { return m_layers.size(); }
+
+    const MaskBuffer& maskBuffer() const { return m_maskBuffer; }
+    const Render::StreamBuffer<uint32_t>& layersBuffer() const { return m_layersBuffer; }
 
     void addDetails(size_t layer, const std::string& model, const std::string& material, float density);
     void removeDetails(size_t n);
@@ -141,6 +148,9 @@ private:
 
     std::vector<SurfaceLayer> m_layers;
     std::vector<SurfaceLayerDetails> m_layerDetails;
+
+    MaskBuffer m_maskBuffer;
+    Render::StreamBuffer<uint32_t> m_layersBuffer;
 
     SurfaceGraphPtr m_surfaceGraph;
 };

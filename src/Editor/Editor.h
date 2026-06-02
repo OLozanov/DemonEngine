@@ -5,8 +5,6 @@
 
 #include "Render/SceneConstantBuffer.h"
 
-#include "RenderContext.h"
-
 #include "EditPoint.h"
 #include "Geometry/Block.h"
 #include "Objects/Object.h"
@@ -361,14 +359,21 @@ private:
     void readSurfaces(FILE* file);
 
 private:
-    //render::CommandList m_commandList;
-    RenderContext m_renderContext;
+    Render::CommandList m_commandList;
 
     Render::ConstantBuffer<Render::SceneConstantBuffer> m_sceneConstantBuffer;
 
     Render::VertexBuffer m_gridBuffer;
     Render::VertexBuffer m_fineGridBuffer;
     Render::PushBuffer<vec3> m_vertexBuffer;
+
+    std::vector<const Block*> m_displayBlocks;
+    std::vector<Object*> m_displayRegular;
+    std::vector<Object*> m_displayColor;
+    std::vector<Object*> m_displayLine;
+    std::vector<Object*> m_displaySprite;
+
+    std::vector<Surface*> m_displaySurfaces;
 
     EditMode m_editMode;
     EditType m_editType;

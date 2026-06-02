@@ -113,6 +113,10 @@ Model* Model::LoadModel(const char* name)
             fread(matname.data(), 1, len, file);
             model->m_meshes[i].material = ResourceManager::GetMaterial(matname);
         }
+
+        Material* mat = model->m_meshes[i].material;
+
+        for (uint32_t f = 0; f < vertexnum; f++) model->m_facemat.push_back(mat->id);
     }
 
     model->m_objmeshes.resize(header.objnum);
@@ -200,6 +204,7 @@ Model* Model::LoadModel(const char* name)
 
     model->m_vertexBuffer.setData(model->m_vertices.data(), model->m_vertices.size());
     model->m_indexBuffer.setData(model->m_indices.data(), model->m_indices.size());
+    model->m_faceBuffer.setData(model->m_facemat.data(), model->m_facemat.size());
 
     return model;
 }
