@@ -258,7 +258,6 @@
     <ClCompile Include="System\Win32App.cpp" />
     <ClCompile Include="UI\Animation.cpp" />
     <ClCompile Include="UI\Canvas.cpp" />
-    <ClCompile Include="UI\D3D\DisplayList.cpp" />
     <ClCompile Include="UI\D3D\UiRenderer.cpp" />
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="UI\Text.cpp" />
@@ -388,7 +387,6 @@
     <ClInclude Include="System\Win32App.h" />
     <ClInclude Include="UI\Animation.h" />
     <ClInclude Include="UI\Canvas.h" />
-    <ClInclude Include="UI\D3D\DisplayList.h" />
     <ClInclude Include="UI\D3D\UiRenderer.h" />
     <ClInclude Include="UI\Font.h" />
     <ClInclude Include="UI\Render.h" />

@@ -18,6 +18,7 @@ using Microsoft::WRL::ComPtr;
 #ifdef RENDER_D3D
 using VertexData = D3D12_VERTEX_BUFFER_VIEW;
 using IndexData = D3D12_INDEX_BUFFER_VIEW;
+using BufferAddress = D3D12_GPU_VIRTUAL_ADDRESS;
 
 constexpr DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
 #endif
@@ -47,6 +48,8 @@ struct TexturedVertex
     vec3 position;
     vec2 tcoord;
 };
+
+//enum DisplayType
 
 struct GeometryData
 {
@@ -96,7 +99,8 @@ struct DisplayBlock
     const VertexData* vertexData = nullptr;
     const IndexData* indexData = nullptr;
     std::vector<const DisplayData*> displayData;
-    const VertexData* layersData = nullptr;
+    BufferAddress layersData;
+    uint32_t* parameters;
 
     DisplayBlock() = default;
 

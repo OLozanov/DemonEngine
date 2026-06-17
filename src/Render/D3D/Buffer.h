@@ -3,6 +3,9 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+#undef min
+#undef max
+
 #include "Render/D3D/D3DInstance.h"
 
 namespace Render
@@ -134,7 +137,7 @@ public:
     operator bool() const { return static_cast<bool>(m_buffer); }
     operator UINT() const { return m_srvHandle; }
 
-    //operator D3D12_GPU_VIRTUAL_ADDRESS() const { return m_buffer->GetGPUVirtualAddress(); }
+    operator D3D12_GPU_VIRTUAL_ADDRESS() const { return m_buffer->GetGPUVirtualAddress(); }
 };
 
 template<class T>
@@ -191,7 +194,7 @@ public:
 
         buffer->Map(0, &readRange, reinterpret_cast<void**>(&data));
 
-        if (m_size != 0) memcpy(data, m_mappedData, min(m_size, size) * sizeof(T));
+        if (m_size != 0) memcpy(data, m_mappedData, std::min<size_t>(m_size, size) * sizeof(T));
 
         m_size = size;
         m_buffer = buffer;

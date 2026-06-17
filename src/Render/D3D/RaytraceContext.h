@@ -48,7 +48,7 @@ public:
         m_commandList->SetComputeRootDescriptorTable(index, d3dInstance.GpuDescriptor(handle));
     }
 
-    void bind(UINT index, D3D12_GPU_VIRTUAL_ADDRESS address)
+    void bindBuffer(UINT index, D3D12_GPU_VIRTUAL_ADDRESS address)
     {
         m_commandList->SetComputeRootShaderResourceView(index, address);
     }

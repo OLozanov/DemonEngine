@@ -3124,7 +3124,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
         m_commandList.setConstant(1, mat4());
         m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
         m_commandList.bind(5, 0);
-        m_commandList.bind(3, ResourceManager::MaterialHeap());
+        m_commandList.bind(3, ResourceManager::MaterialHeapHandle());
 
         for (const Block* block : m_displayBlocks)
         {
@@ -3234,7 +3234,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
         m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
         m_commandList.setTopology(Render::topology_trianglelist);
         m_commandList.bind(5, 0);
-        m_commandList.bind(3, ResourceManager::MaterialHeap());
+        m_commandList.bind(3, ResourceManager::MaterialHeapHandle());
 
         for (Object* object : m_displayRegular) object->display(m_commandList, DisplayType::Regular);
     }
@@ -3267,7 +3267,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
         m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple_surface);
         m_commandList.setTopology(Render::topology_trianglelist);
         m_commandList.bind(7, 0);
-        m_commandList.bind(4, ResourceManager::MaterialHeap());
+        m_commandList.bind(4, ResourceManager::MaterialHeapHandle());
         m_commandList.bind(5, 0);
         m_commandList.bind(6, 0);
 
@@ -3304,7 +3304,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
     m_commandList.setTopology(Render::topology_trianglelist);
     m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
     m_commandList.bind(7, 0);
-    m_commandList.bind(4, ResourceManager::MaterialHeap());
+    m_commandList.bind(4, ResourceManager::MaterialHeapHandle());
 
     for (const Block* block : m_blocks)
     {

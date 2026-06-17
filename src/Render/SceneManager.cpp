@@ -237,7 +237,11 @@ void SceneManager::setSkybox(const std::string& name)
     img_name[4] = fname + "_up.dds";
     img_name[5] = fname + "_dn.dds";
 
-    for (int f = 0; f < 6; f++) m_skyboxFace[f] = ResourceManager::GetImage(img_name[f]);
+    for (int f = 0; f < 6; f++)
+    {
+        m_skyboxImages[f] = ResourceManager::GetImage(img_name[f]);
+        m_skyboxFaces[f] = m_skyboxImages[f]->handle;
+    }
 }
 
 void SceneManager::setDirectionalLight(const vec3& dir, const vec3& color)
@@ -458,7 +462,15 @@ void SceneManager::initResources()
         {{1.0, -1.0, 1.0}, {1.0, 1.0}}, {{1.0, -1.0, -1.0}, {0.0, 1.0}}, {{-1.0, -1.0, 1.0 }, {1.0, 0.0}}, {{-1.0, -1.0, -1.0}, {0.0, 0.0}}
     };
 
-    m_skyboxBuffer.setData(skyboxVerts, sizeof(skyboxVerts) / sizeof(SimpleVertex));
+    static IndexType skyboxIndices[] = { 0, 1, 2, 1, 3, 2,
+                                         4, 5, 6, 5, 7, 6,
+                                         8, 9, 10, 9, 11, 10,
+                                         12, 13, 14, 13, 15, 14,
+                                         16, 17, 18, 17, 19, 18,
+                                         20, 21, 22, 21, 23, 22 };
+
+    m_skyboxVertexBuffer.setData(skyboxVerts, _countof(skyboxVerts));
+    m_skyboxIndexBuffer.setData(skyboxIndices, _countof(skyboxIndices));
 
     static const vec3 volumeVertices[] = { {1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
                                            {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, -1.0f} };
@@ -563,6 +575,8 @@ void SceneManager::geometryPass()
     //Prepare gbuffer
     m_geometryCommandList.start(RenderingPipeline::rm_gbuffer_overlay);
     m_geometryCommandList.bindConstantBuffer(0, m_sceneConstantBuffer);
+    m_geometryCommandList.bindBuffer(3, ResourceManager::MaterialHeap());
+    m_geometryCommandList.bind(4, 0);
     m_geometryCommandList.setDefaultViewport();
 
     m_barriers.transit(m_colorBuffer, STATE_RENDER);
@@ -582,6 +596,8 @@ void SceneManager::geometryPass()
     drawOverlay();
 
     m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer);
+    m_geometryCommandList.bindBuffer(3, ResourceManager::MaterialHeap());
+    m_geometryCommandList.bind(4, 0);
     m_geometryCommandList.draw(m_mainView.displayList(View::DisplayRegular));
 
     if (!m_mainView.instancedList().empty())
@@ -592,7 +608,9 @@ void SceneManager::geometryPass()
 
     if (!m_mainView.displayList(View::DisplayLayered).empty())
     {
-        m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer_layered);
+        m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer_surface);
+        m_geometryCommandList.bindBuffer(3, ResourceManager::MaterialHeap());
+        m_geometryCommandList.bind(5, 0);
         m_geometryCommandList.drawLayered(m_mainView.displayList(View::DisplayLayered));
     }
    
@@ -913,16 +931,15 @@ void SceneManager::skyPass()
 
     m_commandList.bindFrameBuffer(m_hdrBuffer);
 
-    m_commandList.setTopology(topology_trianglestrip);
-    m_commandList.bindVertexBuffer(m_skyboxBuffer);
+    m_commandList.setTopology(topology_trianglelist);
+    m_commandList.bindVertexBuffer(m_skyboxVertexBuffer);
+    m_commandList.bindIndexBuffer(m_skyboxIndexBuffer);
 
-    m_commandList.bind(4, m_depthBuffer[m_frontBuffer]);
+    m_commandList.setConstant(1, m_skyboxFaces, 6);
+    m_commandList.bind(2, m_depthBuffer[m_frontBuffer]);
+    m_commandList.bind(3, 0);
 
-    for (int i = 0; i < 6; i++)
-    {
-        m_commandList.bind(3, m_skyboxFace[i]->handle);
-        m_commandList.draw(4, 4*i);
-    }
+    m_commandList.drawIndexed(36);
 }
 
 void SceneManager::raytracePass(RaytraceContext& rc)
@@ -937,7 +954,7 @@ void SceneManager::raytracePass(RaytraceContext& rc)
     m_barriers.transit(m_flatNormalsBuffer[m_frontBuffer], STATE_SHADER_READ);
     rc.barrier(m_barriers);
 
-    rc.bind(0, m_raytraceScene);
+    rc.bindBuffer(0, m_raytraceScene);
 
     rc.bindConstantBuffer(1, m_raytraceContantBuffer);
     rc.bindConstantBuffer(2, m_dirLight.shadowMatrices());

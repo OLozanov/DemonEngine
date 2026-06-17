@@ -67,26 +67,30 @@ float4 PSMain(PSInput input) : SV_TARGET
 	float3 color = float3(0, 0, 0);
 	float ralpha = 1.0;
 	    
+	uint x1 = input.maskcoord.x;
+	uint y1 = input.maskcoord.y;
+	
+	uint x2 = min(x1 + 1, width);
+	uint y2 = min(y1 + 1, height);
+	
+	float fx = input.maskcoord.x - x1;
+	float fy = input.maskcoord.y - y1;
+	
+	float rfx = 1.0 - fx;
+	float rfy = 1.0 - fy;
+	
+	float4 weights = float4(rfx * rfy, fx * rfy, rfx * fy, fx * fy);
+		
 	for (int i = layernum - 1; i >= 0; i--)
-	{		
-		uint x1 = input.maskcoord.x;
-		uint y1 = input.maskcoord.y;
-		
-		float fx = input.maskcoord.x - x1;
-		float fy = input.maskcoord.y - y1;
-		
-		float rfx = 1.0 - fx;
-		float rfy = 1.0 - fy;
-		
-		uint x2 = min(x1 + 1, width);
-		uint y2 = min(y1 + 1, height);
-		
+	{				
 		uint baseptr = width * height * i;
 		
-		float alpha = layer_masks[baseptr + y1 * width + x1] * rfx * rfy +
-				      layer_masks[baseptr + y1 * width + x2] * fx * rfy +
-				      layer_masks[baseptr + y2 * width + x1] * rfx * fy +
-				      layer_masks[baseptr + y2 * width + x2] * fx * fy;
+		float4 values = float4(layer_masks[baseptr + y1 * width + x1],
+		                       layer_masks[baseptr + y1 * width + x2],
+		                       layer_masks[baseptr + y2 * width + x1],
+		                       layer_masks[baseptr + y2 * width + x2]);
+		
+		float alpha = dot(values, weights);
 					  
 		if (WaveActiveAllTrue(alpha < 0.001)) continue;
 					

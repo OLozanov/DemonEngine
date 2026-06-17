@@ -90,10 +90,10 @@ void UiRenderer::setupShader()
     CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
     CD3DX12_ROOT_PARAMETER1 rootParameters[3];
 
-    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 
     rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_VERTEX);
-    rootParameters[1].InitAsConstants(4, 1, 0, D3D12_SHADER_VISIBILITY_ALL);
+    rootParameters[1].InitAsConstants(5, 1, 0, D3D12_SHADER_VISIBILITY_ALL);
     rootParameters[2].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
     D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -133,15 +133,15 @@ void UiRenderer::setupShader()
 
 #if defined(_DEBUG)
     // Enable better shader debugging with the graphics debugging tools.
-    UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+    UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES;
 #else
-    UINT compileFlags = 0;
+    UINT compileFlags = D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES;
 #endif
 
     std::wstring shaderPath = L".\\Shaders\\uilayer.hlsl";
 
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
-    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
+    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_1", compileFlags, 0, &vertexShader, nullptr));
+    ThrowIfFailed(D3DCompileFromFile(shaderPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_1", compileFlags, 0, &pixelShader, nullptr));
 
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -224,9 +224,9 @@ void UiRenderer::beginDraw()
     m_commandList->OMSetRenderTargets(1, rtvHandle, FALSE, nullptr);
 
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    m_commandList->SetGraphicsRootDescriptorTable(2, m_d3dInstance.GpuDescriptor(BlankImage));
+    m_commandList->SetGraphicsRootDescriptorTable(2, m_d3dInstance.GpuDescriptor(0));
 
-    m_imageHandle = 0;
+    m_imageHandle = BlankImage;
     m_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
     m_flags = 0;
     m_param = 0;
@@ -268,7 +268,7 @@ void UiRenderer::draw(const D3D12_VERTEX_BUFFER_VIEW* vertexBufferView, const st
         if (m_imageHandle != cmd.imgHandle)
         {
             m_imageHandle = cmd.imgHandle;
-            m_commandList->SetGraphicsRootDescriptorTable(2, m_d3dInstance.GpuDescriptor(cmd.imgHandle));
+            m_commandList->SetGraphicsRoot32BitConstants(1, 1, &m_imageHandle, 4);
         }
 
         if (m_topology != cmd.topology)
@@ -309,7 +309,7 @@ void UiRenderer::drawCursor(UINT image)
         m_commandList->SetGraphicsRoot32BitConstants(1, 1, &m_flags, 2);
     }
 
-    m_commandList->SetGraphicsRootDescriptorTable(2, m_d3dInstance.GpuDescriptor(image));
+    m_commandList->SetGraphicsRoot32BitConstants(1, 1, &image, 4);
 
     m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_commandList->DrawInstanced(4, 1, 0, 0);

@@ -241,22 +241,7 @@ void CommandList::draw(const DisplayBlock& block, const mat4& mat)
         if (data->material != material)
         {
             material = data->material;
-
-            m_commandList->SetGraphicsRoot32BitConstants(2, 8, &material->color, 0);
-
-            UINT diffuse = material->maps[Material::map_diffuse];
-            UINT normal = material->maps[Material::map_normal];
-            UINT roughness = material->maps[Material::map_roughness];
-            UINT metalness = material->maps[Material::map_metalness];
-            UINT luminosity = material->maps[Material::map_luminosity];
-            UINT height = material->maps[Material::map_height];
-
-            m_commandList->SetGraphicsRootDescriptorTable(3, d3dInstance.GpuDescriptor(diffuse));
-            m_commandList->SetGraphicsRootDescriptorTable(4, d3dInstance.GpuDescriptor(normal));
-            m_commandList->SetGraphicsRootDescriptorTable(5, d3dInstance.GpuDescriptor(roughness));
-            m_commandList->SetGraphicsRootDescriptorTable(6, d3dInstance.GpuDescriptor(metalness));
-            m_commandList->SetGraphicsRootDescriptorTable(7, d3dInstance.GpuDescriptor(luminosity));
-            m_commandList->SetGraphicsRootDescriptorTable(8, d3dInstance.GpuDescriptor(height));
+            m_commandList->SetGraphicsRoot32BitConstants(2, 1, &material->id, 0);
         }
 
         if (block.indexData)
@@ -312,22 +297,7 @@ void CommandList::draw(const DisplayList& displayList)
             if (data->material != material)
             {
                 material = data->material;
-
-                m_commandList->SetGraphicsRoot32BitConstants(2, 8, &material->color, 0);
-
-                UINT diffuse = material->maps[Material::map_diffuse];
-                UINT normal = material->maps[Material::map_normal];
-                UINT roughness = material->maps[Material::map_roughness];
-                UINT metalness = material->maps[Material::map_metalness];
-                UINT luminosity = material->maps[Material::map_luminosity];
-                UINT height = material->maps[Material::map_height];
-
-                m_commandList->SetGraphicsRootDescriptorTable(3, d3dInstance.GpuDescriptor(diffuse));
-                m_commandList->SetGraphicsRootDescriptorTable(4, d3dInstance.GpuDescriptor(normal));
-                m_commandList->SetGraphicsRootDescriptorTable(5, d3dInstance.GpuDescriptor(roughness));
-                m_commandList->SetGraphicsRootDescriptorTable(6, d3dInstance.GpuDescriptor(metalness));
-                m_commandList->SetGraphicsRootDescriptorTable(7, d3dInstance.GpuDescriptor(luminosity));
-                m_commandList->SetGraphicsRootDescriptorTable(8, d3dInstance.GpuDescriptor(height));
+                m_commandList->SetGraphicsRoot32BitConstants(2, 1, &material->id, 0);
             }
 
             if (block->indexData)
@@ -356,22 +326,7 @@ void CommandList::draw(const InstancedList& instnacedList)
         if (data->material != material)
         {
             material = data->material;
-
-            m_commandList->SetGraphicsRoot32BitConstants(2, 8, &material->color, 0);
-
-            UINT diffuse = material->maps[Material::map_diffuse];
-            UINT normal = material->maps[Material::map_normal];
-            UINT roughness = material->maps[Material::map_roughness];
-            UINT metalness = material->maps[Material::map_metalness];
-            UINT luminosity = material->maps[Material::map_luminosity];
-            UINT height = material->maps[Material::map_height];
-
-            m_commandList->SetGraphicsRootDescriptorTable(3, d3dInstance.GpuDescriptor(diffuse));
-            m_commandList->SetGraphicsRootDescriptorTable(4, d3dInstance.GpuDescriptor(normal));
-            m_commandList->SetGraphicsRootDescriptorTable(5, d3dInstance.GpuDescriptor(roughness));
-            m_commandList->SetGraphicsRootDescriptorTable(6, d3dInstance.GpuDescriptor(metalness));
-            m_commandList->SetGraphicsRootDescriptorTable(7, d3dInstance.GpuDescriptor(luminosity));
-            m_commandList->SetGraphicsRootDescriptorTable(8, d3dInstance.GpuDescriptor(height));
+            m_commandList->SetGraphicsRoot32BitConstants(2, 1, &material->id, 0);
         }
 
         if (data->indexData)
@@ -475,33 +430,12 @@ void CommandList::drawLayered(const DisplayList& displayList)
         m_commandList->IASetVertexBuffers(0, 1, block->vertexData);
         if (block->indexData) m_commandList->IASetIndexBuffer(block->indexData);
 
+        m_commandList->SetGraphicsRootShaderResourceView(4, block->layersData);
+        m_commandList->SetGraphicsRoot32BitConstants(2, 20, block->parameters, 0);
+
         for (size_t i = 0; i < block->displayData.size(); i++)
         {
             const DisplayData* data = block->displayData[i];
-
-            if (data->material != material)
-            {
-                material = data->material;
-
-                m_commandList->SetGraphicsRoot32BitConstants(2, 8, &material->color, 0);
-
-                UINT diffuse = material->maps[Material::map_diffuse];
-                UINT normal = material->maps[Material::map_normal];
-                UINT roughness = material->maps[Material::map_roughness];
-                UINT metalness = material->maps[Material::map_metalness];
-                UINT luminosity = material->maps[Material::map_luminosity];
-                UINT height = material->maps[Material::map_height];
-
-                m_commandList->SetGraphicsRootDescriptorTable(3, d3dInstance.GpuDescriptor(diffuse));
-                m_commandList->SetGraphicsRootDescriptorTable(4, d3dInstance.GpuDescriptor(normal));
-                m_commandList->SetGraphicsRootDescriptorTable(5, d3dInstance.GpuDescriptor(roughness));
-                m_commandList->SetGraphicsRootDescriptorTable(6, d3dInstance.GpuDescriptor(metalness));
-                m_commandList->SetGraphicsRootDescriptorTable(7, d3dInstance.GpuDescriptor(luminosity));
-                m_commandList->SetGraphicsRootDescriptorTable(8, d3dInstance.GpuDescriptor(height));
-            }
-
-            // mask buffer
-            m_commandList->IASetVertexBuffers(1, 1, block->layersData + i);
 
             if (block->indexData)
                 m_commandList->DrawIndexedInstanced(data->vertexnum, 1, data->offset, 0, 0);

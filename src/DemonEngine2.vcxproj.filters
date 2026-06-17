@@ -137,9 +137,6 @@
     <ClCompile Include="Collision\Collision.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="UI\D3D\DisplayList.cpp">
-      <Filter>Source\UI\D3D</Filter>
-    </ClCompile>
     <ClCompile Include="UI\Font.cpp">
       <Filter>Source\UI</Filter>
     </ClCompile>
@@ -477,9 +474,6 @@
     </ClInclude>
     <ClInclude Include="Collision\Collision.h">
       <Filter>Source\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="UI\D3D\DisplayList.h">
-      <Filter>Source\UI\D3D</Filter>
     </ClInclude>
     <ClInclude Include="UI\Font.h">
       <Filter>Source\UI</Filter>

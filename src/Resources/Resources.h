@@ -3,6 +3,7 @@
 #ifdef RENDER_D3D
 
 #include "Render/D3D/Buffer.h"
+using BufferAddress = D3D12_GPU_VIRTUAL_ADDRESS;
 
 #endif
 
@@ -65,7 +66,8 @@ public:
     static bool MaterialExist(const std::string& name);
     static bool ModelExist(const std::string& name);
 
-    static UINT MaterialHeap() { return m_materialHeap; }
+    static UINT MaterialHeapHandle() { return m_materialHeap; }
+    static BufferAddress MaterialHeap() { return m_materialHeap; }
 
     static void Cleanup();
 };

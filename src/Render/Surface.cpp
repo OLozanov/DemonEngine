@@ -168,42 +168,6 @@ Surface::Surface(const vec3& pos,
 	DisplayObject::m_mat = mat4::Translate(pos);
 }
 
-void LayeredSurface::buildLayerGeometry(long xsize,
-                                        long ysize,
-                                        std::vector<uint16_t>& indices,
-                                        const std::vector<float>& mask)
-{
-    constexpr float AlphaThreshold = 0.01;
-
-    for (uint16_t k = 0; k < xsize - 1; k++)
-    {
-        for (uint16_t i = 0; i < ysize - 1; i++)
-        {
-            uint16_t v = i * xsize + k;
-
-            //
-            if (mask[v] > AlphaThreshold ||
-                mask[v + 1] > AlphaThreshold ||
-                mask[v + xsize] > AlphaThreshold)
-            {
-                indices.push_back(v);
-                indices.push_back(v + 1);
-                indices.push_back(v + xsize);
-            }
-
-            //
-            if (mask[v + xsize] > AlphaThreshold ||
-                mask[v + 1] > AlphaThreshold ||
-                mask[v + xsize + 1] > AlphaThreshold)
-            {
-                indices.push_back(v + xsize);
-                indices.push_back(v + 1);
-                indices.push_back(v + xsize + 1);
-            }
-        }
-    }
-}
-
 LayeredSurface::LayeredSurface(const vec3& pos,
                                Material* mat,
                                long xsize,
@@ -214,17 +178,33 @@ LayeredSurface::LayeredSurface(const vec3& pos,
 {
     m_material = mat;
 
+    m_parameters.baseMaterial = m_material->id;
+    m_parameters.layernum = layers.size();
+    m_parameters.width = xsize;
+    m_parameters.height = ysize;
+
+    std::vector<float> mask;
+
+    m_layers.resize(layers.size());
+
+    for (size_t i = 0; i < layers.size(); i++)
+    {
+        m_layers[i].reset(layers[i].material);
+
+        m_parameters.layers[i * 2] = layers[i].material->id;
+        m_parameters.layers[i * 2 + 1] = 0;
+
+        mask.insert(mask.end(), layers[i].mask.begin(), layers[i].mask.end());
+    }
+
+    if (!layers.empty()) m_maskBuffer.setData(mask.data(), mask.size());
+
     calculateBBox(vertices);
 
-    m_layerElements.resize(layers.size());
-    m_layerMasks.resize(layers.size());
-    m_layersData.resize(layers.size());
-
-    std::vector<const DisplayData*> layerDisplayList(layers.size());
-
     size_t size = (xsize - 1) * (ysize - 1) * 6;
-    std::vector<uint16_t> indices;
-    indices.reserve(size);
+    std::vector<uint16_t> indices(size);
+
+    int p = 0;
 
     for (uint16_t k = 0; k < xsize - 1; k++)
     {
@@ -232,64 +212,41 @@ LayeredSurface::LayeredSurface(const vec3& pos,
         {
             uint16_t v = i * xsize + k;
 
-            bool triangle1 = true;
-            bool triangle2 = true;
-
-            for (size_t l = 0; l < layers.size(); l++)
+            //
+            //if (!isDegenerateTriangle(vertices[v].position, vertices[v + 1].position, vertices[v + xsize].position))
             {
-                if (layers[l].mask[v] > 0.99 &&
-                    layers[l].mask[v + 1] > 0.99 &&
-                    layers[l].mask[v + xsize] > 0.99) triangle1 = false;
+                indices[p] = v;
+                p++;
 
-                if (layers[l].mask[v + xsize] > 0.99 &&
-                    layers[l].mask[v + 1] > 0.99 &&
-                    layers[l].mask[v + xsize + 1] > 0.99) triangle2 = false;
+                indices[p] = v + 1;
+                p++;
+
+                indices[p] = v + xsize;
+                p++;
             }
 
-            //
-            if (triangle1)
+            //if (!isDegenerateTriangle(vertices[v + xsize].position, vertices[v + 1].position, vertices[v + xsize + 1].position))
             {
-                indices.push_back(v);
-                indices.push_back(v + 1);
-                indices.push_back(v + xsize);
-            }
+                indices[p] = v + xsize;
+                p++;
 
-            //
-            if (triangle2)
-            {
-                indices.push_back(v + xsize);
-                indices.push_back(v + 1);
-                indices.push_back(v + xsize + 1);
+                indices[p] = v + 1;
+                p++;
+
+                indices[p] = v + xsize + 1;
+                p++;
             }
         }
     }
 
+    m_vertexBuffer.setData(vertices.data(), vertices.size());
+    m_indexBuffer.setData(indices.data(), size);
+
     m_displayElement.material = mat;
     m_displayElement.offset = 0;
-    m_displayElement.vertexnum = indices.size();
+    m_displayElement.vertexnum = size;
 
-    for (size_t l = 0; l < layers.size(); l++)
-    {
-        m_layerMasks[l].setData(layers[l].mask.data(), layers[l].mask.size());
-
-        const VertexData* vertexData = m_layerMasks[l];
-        m_layersData[l] = *vertexData;
-
-        uint32_t offset = indices.size();
-
-        buildLayerGeometry(xsize, ysize, indices, layers[l].mask);
-
-        m_layerElements[l].material = layers[l].material;
-        m_layerElements[l].offset = offset;
-        m_layerElements[l].vertexnum = indices.size() - offset;
-
-        layerDisplayList[l] = &m_layerElements[l];
-    }
-
-    m_vertexBuffer.setData(vertices.data(), vertices.size());
-    m_indexBuffer.setData(indices.data(), indices.size());
-
-    m_displayData.emplace_back(DisplayBlock::display_regular,
+    m_displayData.emplace_back(layers.empty() ? DisplayBlock::display_regular : DisplayBlock::display_layered,
                                &m_mat,
                                m_vertexBuffer,
                                m_indexBuffer,
@@ -297,13 +254,8 @@ LayeredSurface::LayeredSurface(const vec3& pos,
 
     if (!layers.empty())
     {
-        m_displayData.emplace_back(DisplayBlock::display_layered,
-                                   &m_mat,
-                                   m_vertexBuffer,
-                                   m_indexBuffer,
-                                   layerDisplayList);
-
-        m_displayData.back().layersData = m_layersData.data();
+        m_displayData.back().layersData = m_maskBuffer;
+        m_displayData.back().parameters = &m_parameters.baseMaterial;
     }
 
     m_mat = mat4::Translate(pos);
@@ -324,6 +276,8 @@ LayeredSurface::LayeredSurface(const vec3& pos,
         m_bbox.min.z -= detailSize.z;
         m_bbox.max.z += detailSize.z;
     }
+
+    return;
 }
 
 void Surface::calculateBBox(const std::vector<Vertex>& vertices)
@@ -463,4 +417,4 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
                                data.instanceBuffer.size() });
 }
 
-} //namespace render
+} //namespace Render

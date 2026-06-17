@@ -11,7 +11,7 @@ namespace UI
 struct DrawCommand;
 class Vertex2d;
 
-constexpr UINT BlankImage = 0;
+constexpr UINT BlankImage = -1;
 
 class UiRenderer
 {

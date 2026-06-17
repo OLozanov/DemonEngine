@@ -37,7 +37,7 @@ public:
         rm_gbuffer = 14,
         rm_gbuffer_overlay = 15,
         rm_gbuffer_instanced = 16,
-        rm_gbuffer_layered = 17,
+        rm_gbuffer_surface = 17,
         rm_emissive = 18,
         rm_transparent = 19,
         rm_fog = 20,
@@ -82,6 +82,7 @@ private:
     static void SetupCascadedShadowShader();
     static void SetupShadowCubeShader();
     static void SetupGBufferShader();
+    static void SetupSurfaceShader();
     static void SetupEmissiveShader();
     static void SetupTransparentShader();
     static void SetupFogShader();

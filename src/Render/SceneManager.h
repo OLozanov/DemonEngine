@@ -295,8 +295,10 @@ private:
     Buffer<vec3> m_hemisphereSamples;
     ResourcePtr<Image> m_blueNoiseMask;
 
-    ResourcePtr<Image> m_skyboxFace[6];
-    VertexBuffer m_skyboxBuffer;
+    ResourcePtr<Image> m_skyboxImages[6];
+    uint32_t m_skyboxFaces[6];
+    VertexBuffer m_skyboxVertexBuffer;
+    IndexBuffer m_skyboxIndexBuffer;
 
     VertexBuffer m_volumeVertexBuffer;
     IndexBuffer m_volumeIndexBuffer;

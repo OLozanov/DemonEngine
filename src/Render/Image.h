@@ -89,4 +89,4 @@ using ImageHandle = UINT;
 
 #endif
 
-#define InvalidImage 0 //0xFFFFFFFF
+#define InvalidImage 0xFFFFFFFF

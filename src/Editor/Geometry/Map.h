@@ -134,6 +134,7 @@ private:
 
 	std::vector<Vertex> m_vertices;
 	std::vector<IndexType> m_indices;
+	std::vector<uint32_t> m_faces;
 
 	size_t m_zonePortalNum;
 
