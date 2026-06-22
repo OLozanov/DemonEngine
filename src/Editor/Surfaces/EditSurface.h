@@ -27,21 +27,16 @@ struct SurfaceLayer
 {
     LayerOrientation orientation;
     ResourcePtr<Material> material;
-    //Render::VertexArray<float> vertexBuffer;
 
     SurfaceLayer(Material* mat, size_t size)
     : material(mat)
     , orientation(LayerOrientation::Normal)
     {
-        //vertexBuffer.resize(size);
-
-        //for (size_t i = 0; i < size; i++) vertexBuffer[i] = 0;
     }
 
-    SurfaceLayer(Material* mat, LayerOrientation orientation, const std::vector<float>& layerMask)
+    SurfaceLayer(Material* mat, LayerOrientation orientation)
     : material(mat)
     , orientation(orientation)
-    //, vertexBuffer(layerMask)
     {
     }
 };
@@ -94,8 +89,10 @@ public:
     void applyTransform(const mat4& mat);
     void scale(const vec3& scale);
 
+    void setLayerMask(const std::vector<float>& layerMask);
+
     void addLayer(Material* material);
-    void addLayer(Material* material, LayerOrientation orientation, const std::vector<float>& layerMask);
+    void addLayer(Material* material, LayerOrientation orientation);
     void deleteLayer(size_t n);
     const std::vector<SurfaceLayer>& layers() { return m_layers; }
 
@@ -127,8 +124,6 @@ public:
 
     const Vertex& tsVertex(size_t i, size_t k) const { return m_vertices[k * m_xsize + i]; }
     Vertex& tsVertex(size_t i, size_t k) { return m_vertices[k * m_xsize + i]; }
-
-    void displayLayers(Render::CommandList& commandList) const;
 
 private:
     void tesselate(const Block* block, const BlockPolygon* poly);

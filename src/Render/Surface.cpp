@@ -174,6 +174,7 @@ LayeredSurface::LayeredSurface(const vec3& pos,
                                long ysize,
                                const std::vector<Vertex>& vertices,
                                const std::vector<SurfaceLayer>& layers,
+                               const std::vector<float>& layerMask,
                                const std::vector<Render::SurfaceLayerDetails>& layerDetails)
 {
     m_material = mat;
@@ -183,8 +184,6 @@ LayeredSurface::LayeredSurface(const vec3& pos,
     m_parameters.width = xsize;
     m_parameters.height = ysize;
 
-    std::vector<float> mask;
-
     m_layers.resize(layers.size());
 
     for (size_t i = 0; i < layers.size(); i++)
@@ -193,11 +192,9 @@ LayeredSurface::LayeredSurface(const vec3& pos,
 
         m_parameters.layers[i * 2] = layers[i].material->id;
         m_parameters.layers[i * 2 + 1] = 0;
-
-        mask.insert(mask.end(), layers[i].mask.begin(), layers[i].mask.end());
     }
 
-    if (!layers.empty()) m_maskBuffer.setData(mask.data(), mask.size());
+    if (!layers.empty()) m_maskBuffer.setData(layerMask.data(), layerMask.size());
 
     calculateBBox(vertices);
 
@@ -263,7 +260,7 @@ LayeredSurface::LayeredSurface(const vec3& pos,
     vec3 detailSize = {};
 
     for (const SurfaceLayerDetails& layer : layerDetails)
-        generateDetailInstances(layer, xsize, ysize, vertices, layers, detailSize);
+        generateDetailInstances(layer, xsize, ysize, vertices, layers, layerMask, detailSize);
 
     if (!layerDetails.empty())
     {
@@ -303,6 +300,7 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
                                              uint32_t xsize, uint32_t ysize, 
                                              const std::vector<Vertex>& verts,
                                              const std::vector<SurfaceLayer>& layers,
+                                             const std::vector<float>& layerMask,
                                              vec3& maxsize)
 {
     std::mt19937 randomGenerator;
@@ -311,6 +309,8 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
     std::uniform_real_distribution<float> distribution(-0.25f, 0.25f);
 
     std::vector<vec4> points;
+
+    size_t masksz = xsize * ysize;
 
     for (int k = 0; k < xsize - 1; k++)
     {
@@ -321,16 +321,18 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
             vec3 x = verts[v + 1].position - verts[v].position;
             vec3 y = verts[v + xsize].position - verts[v].position;
 
-            auto occlusionAlpha = [&layers, &layerDetails, v, xsize](float x, float y) -> float
+            auto occlusionAlpha = [&layers, &layerMask, &layerDetails, masksz, v, xsize](float x, float y) -> float
             {
                 float alpha = 0.0f;
 
                 for (size_t l = layerDetails.layer; l < layers.size(); l++)
                 {
-                    float a = layers[l].mask[v];
-                    float b = layers[l].mask[v + 1];
-                    float c = layers[l].mask[v + xsize];
-                    float d = layers[l].mask[v + xsize + 1];
+                    const float* mask = layerMask.data() + masksz * l;
+
+                    float a = mask[v];
+                    float b = mask[v + 1];
+                    float c = mask[v + xsize];
+                    float d = mask[v + xsize + 1];
 
                     float a1 = a * (1.0 - x) + b * x;
                     float a2 = c * (1.0 - x) + d * x;
@@ -341,16 +343,18 @@ void LayeredSurface::generateDetailInstances(const SurfaceLayerDetails& layerDet
                 return std::min(alpha, 1.0f);
             };
 
-            auto layerAlpha = [&layers, &layerDetails, v, xsize](float x, float y) -> float
+            auto layerAlpha = [&layers, &layerMask, &layerDetails, masksz, v, xsize](float x, float y) -> float
             {
                 if (layerDetails.layer == 0) return 1.0f;
 
                 size_t l = layerDetails.layer - 1;
 
-                float a = layers[l].mask[v];
-                float b = layers[l].mask[v + 1];
-                float c = layers[l].mask[v + xsize];
-                float d = layers[l].mask[v + xsize + 1];
+                const float* mask = layerMask.data() + masksz * l;
+
+                float a = mask[v];
+                float b = mask[v + 1];
+                float c = mask[v + xsize];
+                float d = mask[v + xsize + 1];
 
                 float a1 = a * (1.0 - x) + b * x;
                 float a2 = c * (1.0 - x) + d * x;

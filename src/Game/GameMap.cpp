@@ -827,29 +827,32 @@ void Game::loadSurfaces(FILE* file)
             fread(matname.data(), 1, mlen, file);
 
             std::vector<Render::SurfaceLayer> layers;
+            std::vector<float> layerMask;
 
             uint16_t layerNum = 0;
             fread(&layerNum, sizeof(uint8_t), 1, file);
 
-            layers.resize(layerNum);
-
-            for (size_t l = 0; l < layerNum; l++)
+            if (layerNum > 0)
             {
-                layers[l].mask.resize(xsize * ysize);
+                layers.resize(layerNum);
+                layerMask.resize(xsize * ysize * layerNum);
 
-                fread(&layers[l].orientation, sizeof(uint8_t), 1, file);
+                for (size_t l = 0; l < layerNum; l++)
+                {
+                    fread(&layers[l].orientation, sizeof(uint8_t), 1, file);
 
-                std::string mname;
-                uint16_t tlen;
-                fread(&tlen, sizeof(uint16_t), 1, file);
+                    std::string mname;
+                    uint16_t tlen;
+                    fread(&tlen, sizeof(uint16_t), 1, file);
 
-                mname.resize(tlen);
+                    mname.resize(tlen);
 
-                fread(mname.data(), 1, tlen, file);
+                    fread(mname.data(), 1, tlen, file);
 
-                layers[l].material = ResourceManager::GetMaterial(mname);
+                    layers[l].material = ResourceManager::GetMaterial(mname);
+                }
 
-                fread(layers[l].mask.data(), sizeof(float), xsize * ysize, file);
+                fread(layerMask.data(), sizeof(float), xsize * ysize * layerNum, file);
             }
 
             std::vector<Render::SurfaceLayerDetails> layerDetails;
@@ -895,8 +898,9 @@ void Game::loadSurfaces(FILE* file)
 
             bool layered = layerNum > 0 || layerDetailsNum > 0;
 
-            Render::Surface* surface = layered ? new Render::LayeredSurface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices, layers, layerDetails) :
-                                                        new Render::Surface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices);
+            Render::Surface* surface = layered ? new Render::LayeredSurface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices, 
+                                                                            layers, layerMask, layerDetails) :
+                                                 new Render::Surface(pos, ResourceManager::GetMaterial(matname), xsize, ysize, vertices);
         
             const BBox& bbox = surface->bbox();
 

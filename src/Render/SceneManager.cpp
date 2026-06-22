@@ -720,6 +720,7 @@ void SceneManager::drawDirectionalShadow(CommandList& commandList, const View& s
     commandList.setTopology(topology_trianglelist);
 
     commandList.drawDepth(m_dirLightView.displayList(View::DisplayRegular));
+    //commandList.drawDepth(m_dirLightView.displayList(View::DisplayLayered));
 
     commandList.setDefaultViewport();
 }

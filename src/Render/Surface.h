@@ -14,7 +14,6 @@ struct SurfaceLayer
 {
     uint8_t orientation;
     Material* material;
-    std::vector<float> mask;
 };
 
 struct SurfaceLayerDetails
@@ -94,6 +93,7 @@ public:
                    long ysize,
                    const std::vector<Vertex>& vertices,
                    const std::vector<SurfaceLayer>& layers,
+                   const std::vector<float>& layerMask,
                    const std::vector<Render::SurfaceLayerDetails>& layerDetails);
 
 private:
@@ -101,6 +101,7 @@ private:
                                  uint32_t xsize, uint32_t ysize, 
                                  const std::vector<Vertex>& verts,
                                  const std::vector<SurfaceLayer>& layers,
+                                 const std::vector<float>& layerMask,
                                  vec3& maxsize);
 };
 

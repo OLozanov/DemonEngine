@@ -59,6 +59,8 @@ PSInput VSMain(float3 position : POSITION, float4 tcoord : TEXCOORD, float3 norm
 
 PSOutput PSMain(PSInput input) : SV_TARGET
 {
+	if (input.position.w > 60.0) discard;
+	
 	float4 color = float4(materials[matid].color.xyz, 1.0);
 	
 	if (materials[matid].diffuse_map != InvalidImage)

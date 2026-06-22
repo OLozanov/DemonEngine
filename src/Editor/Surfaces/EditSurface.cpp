@@ -180,6 +180,12 @@ void EditSurface::scale(const vec3& scale)
     updateBBox();
 }
 
+void EditSurface::setLayerMask(const std::vector<float>& layerMask)
+{
+    m_maskBuffer.resize(layerMask.size());
+    memcpy(m_maskBuffer.data(), layerMask.data(), layerMask.size() * sizeof(float));
+}
+
 void EditSurface::addLayer(Material* material)
 {
     size_t size = m_xsize * m_ysize;
@@ -192,17 +198,14 @@ void EditSurface::addLayer(Material* material)
     for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
 }
 
-void EditSurface::addLayer(Material* material, LayerOrientation orientation, const std::vector<float>& layerMask)
+void EditSurface::addLayer(Material* material, LayerOrientation orientation)
 {
     size_t size = m_xsize * m_ysize;
     size_t base = m_layers.size() * size;
 
-    m_layers.emplace_back(material, orientation, layerMask);
+    m_layers.emplace_back(material, orientation);
 
-    m_maskBuffer.resize(size * m_layers.size());
     m_layersBuffer.resize(m_layers.size() * 2);
-
-    for (size_t i = 0; i < size; i++) m_maskBuffer[base + i] = layerMask[i];
 
     for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
 }
@@ -374,22 +377,6 @@ void EditSurface::buildVertices()
     }
 }
 
-void EditSurface::displayLayers(Render::CommandList& commandList) const
-{
-    /*if (m_layers.empty()) return;
-
-    commandList.bindVertexBuffer(m_vertexBuffer);
-    commandList.bindIndexBuffer(m_indexBuffer);
-
-    for (size_t i = 0; i < m_layers.size(); i++)
-    {
-        commandList.bind(3, m_layers[i].material->maps[Material::map_diffuse]);
-
-        commandList.bindVertexBuffer(m_layers[i].vertexBuffer, 1);
-        commandList.drawIndexed(m_indexNum);
-    }*/
-}
-
 void EditSurface::writeLayers(FILE* file) const
 {
     uint8_t layers = m_layers.size();
@@ -402,9 +389,9 @@ void EditSurface::writeLayers(FILE* file) const
         uint16_t tlen = m_layers[l].material->name.size();
         fwrite(&tlen, 1, sizeof(uint16_t), file);
         fwrite(m_layers[l].material->name.c_str(), 1, tlen, file);
-
-        //fwrite(m_layers[l].vertexBuffer.data(), sizeof(float), m_layers[l].vertexBuffer.size(), file);
     }
+
+    fwrite(m_maskBuffer.data(), sizeof(float), m_maskBuffer.size(), file);
 }
 
 void EditSurface::writeLayerDetails(FILE* file) const

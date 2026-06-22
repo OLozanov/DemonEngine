@@ -184,7 +184,7 @@ void Editor::readBlocks(FILE* file)
 
                 if (layers > 0)
                 {
-                    std::vector<float> layerMask(size);
+                    std::vector<float> layerMask(size * layers);
 
                     for (size_t l = 0; l < layers; l++)
                     {
@@ -200,11 +200,12 @@ void Editor::readBlocks(FILE* file)
                         tname.resize(tlen);
 
                         fread(tname.data(), 1, tlen, file);
-
-                        fread(layerMask.data(), sizeof(float), size, file);
                     
-                        poly.surface->addLayer(loadMaterial(tname), orientation, layerMask);
+                        poly.surface->addLayer(loadMaterial(tname), orientation);
                     }
+
+                    fread(layerMask.data(), sizeof(float), size * layers, file);
+                    poly.surface->setLayerMask(layerMask);
                 }
 
                 uint8_t layerDetails;

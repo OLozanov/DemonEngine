@@ -222,6 +222,9 @@ public:
 
     size_t size() const { return m_size; }
 
+    T* data() { return m_mappedData; }
+    const T* data() const { return m_mappedData; }
+
     T& operator[](UINT i) { return m_mappedData[i]; }
     const T& operator[](UINT i) const { return m_mappedData[i]; }
 
