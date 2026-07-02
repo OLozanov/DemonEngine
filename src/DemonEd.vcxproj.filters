@@ -271,6 +271,9 @@
     <ClCompile Include="Editor\Geometry\Decal.cpp">
       <Filter>Source\Editor\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\Objects\ZoneInfo.cpp">
+      <Filter>Source\Editor\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\EditorApp.h">
@@ -554,6 +557,9 @@
     </ClInclude>
     <ClInclude Include="Editor\Geometry\Decal.h">
       <Filter>Source\Editor\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Objects\ZoneInfo.h">
+      <Filter>Source\Editor\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

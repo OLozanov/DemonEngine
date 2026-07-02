@@ -9,15 +9,16 @@
 #include <list>
 
 class Block;
+class ZoneInfo;
 
 using MapIndex = uint32_t;
 
 enum class ZoneType : uint8_t
 {
-	Default,
-	Water,
-	Lava,
-	Slime
+	Regular = 0,
+	Water = 1,
+	Lava = 2,
+	Slime = 3
 };
 
 struct MapPolygon
@@ -86,6 +87,8 @@ public:
 	void build(PolygonList& polygons);
 	void build(const LinkedList<Block>& blocks);
 
+	void assignZoneInfo(const std::list<ZoneInfo*>& infolist);
+
 	bool empty() const { return m_nodes.empty(); }
 	bool hasPortals() const { return !m_portals.empty(); }
 
@@ -108,6 +111,8 @@ private:
 	void splitPoly(const vec4& plane, const IndexList& verts, IndexList& left, IndexList& right);
 	bool selectSplitter(const PolygonList& plg, size_t& splitterId, bool& zonePortal);
 	MapIndex buildTree(PolygonList& plg);
+
+	MapIndex traceTree(const vec3& pos, MapIndex nodeId = TreeRoot);
 
 	static void getPortalBounds(const Portal& portal, vec3& min, vec3& max);
 

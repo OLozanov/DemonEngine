@@ -4,6 +4,7 @@
 #include "Render/Frustum.h"
 #include "Render/Clipping.h"
 #include "Resources/Resources.h"
+#include "Objects/ZoneInfo.h"
 
 #include <utility>
 #include <set>
@@ -81,6 +82,7 @@ void Editor::buildMap()
     PolygonList polygons;
 
     m_map.build(m_blocks);
+    m_map.assignZoneInfo(ZoneInfo::List());
     onUpdate();
 }
 

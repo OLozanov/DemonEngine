@@ -31,7 +31,7 @@ void World::reset()
     m_portals.clear();
 }
 
-Index World::tracePos(const Node& node, const vec3& pos)
+Index World::tracePos(const Node& node, const vec3& pos) const
 {
     if (node.leaf != InvalidIndex) return node.leaf;
 
@@ -172,9 +172,50 @@ void World::moveFogVolume(FogVolume* volume)
     addFogVolume(volume);
 }
 
+uint8_t World::zoneType(const vec3& pos) const
+{
+    Index leafId = tracePos(pos);
+
+    if (leafId != InvalidIndex)
+    {
+        const Leaf& leaf = m_leafs[leafId];
+
+        const Zone& zone = m_zones[leaf.zone];
+        return zone.type;
+    }
+    else return 0;
+}
+
+float World::getSubmergeDepth(const vec3& pos) const
+{
+    Index leafId = tracePos(pos);
+
+    if (leafId != InvalidIndex)
+    {
+        const Leaf& leaf = m_leafs[leafId];
+        const Zone& zone = m_zones[leaf.zone];
+
+        if (zone.type == 0) return 0;
+
+        for (int p = 0; p < zone.portals.size(); p++)
+        {
+            const Portal& portal = m_portals[zone.portals[p]];
+
+            if (fabs(1 - fabs(portal.plane.y)) > math::eps) continue;
+
+            Index opid = portal.zone[0] == leaf.zone ? portal.zone[1] : portal.zone[0];
+            const Zone& opzone = m_zones[opid];
+
+            if (opzone.type != zone.type) return fabs(portal.plane.xyz * pos + portal.plane.w);
+        }
+    }
+
+    return 0;
+}
+
 void World::resetLeafFrameNum()
 {
     for (Leaf& leaf : m_leafs) leaf.frame = 0;
 }
 
-} //namespace render
+} //namespace Render

@@ -674,15 +674,17 @@ void SceneManager::forwardPass()
 
         m_commandList.setConstant(4, std::make_pair<uint32_t, uint32_t>(m_width - 1, m_height - 1));
 
-        m_commandList.bind(6, m_lightGrid);
-        m_commandList.bind(7, m_omniLightData);
-        m_commandList.bind(8, m_spotLightData);
+        m_commandList.bindBuffer(6, ResourceManager::MaterialHeap());
+        m_commandList.bindBuffer(7, m_lightGrid);
+        m_commandList.bindBuffer(8, m_omniLightData);
+        m_commandList.bindBuffer(9, m_spotLightData);
 
-        m_commandList.bind(13, m_shadowBuffer);
-        m_commandList.bind(14, m_cubemapBuffers[0]);
-        m_commandList.bind(15, m_shadowBuffers[0]);
+        m_commandList.bind(10, m_background);
+        m_commandList.bind(11, m_shadowBuffer);
+        m_commandList.bind(12, m_cubemapBuffers[0]);
+        m_commandList.bind(13, m_shadowBuffers[0]);
+        m_commandList.bind(14, 0);
 
-        m_commandList.bind(12, m_background);
         m_commandList.drawRefract(m_mainView.displayList(View::DisplayTransparent));
     }
 }
@@ -1398,9 +1400,9 @@ void SceneManager::display()
 
         lightPass();
         skyPass();
+        fogPass();
         forwardPass();
         spritePass();
-        fogPass();
 
         toneMapping();
 

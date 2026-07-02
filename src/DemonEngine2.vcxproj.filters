@@ -347,6 +347,9 @@
     <ClCompile Include="Render\View.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Core\Buoyancy.cpp">
+      <Filter>Source\Game\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Game.h">
@@ -754,6 +757,9 @@
     </ClInclude>
     <ClInclude Include="Render\View.h">
       <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Core\Buoyancy.h">
+      <Filter>Source\Game\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

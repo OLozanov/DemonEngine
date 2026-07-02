@@ -42,11 +42,7 @@ cbuffer ScreenConstantBuffer : register(b4)
 
 cbuffer MaterialConstantBuffer : register(b5)
 {
-    float4 material_color;
-    float material_metalness;
-    float material_roughness;
-    float material_luminosity;
-    uint material_flags;
+    uint matid;
 };
 
 struct PSInput
@@ -59,18 +55,16 @@ struct PSInput
 	float3 binormal : BINORMAL;
 };
 
-StructuredBuffer<uint> light_grid : register(t0);
-StructuredBuffer<OmniLightData> omni_lights : register(t1);
-StructuredBuffer<SpotLightData> spot_lights : register(t2);
+StructuredBuffer<Material> materials : register(t0);
+StructuredBuffer<uint> light_grid : register(t1);
+StructuredBuffer<OmniLightData> omni_lights : register(t2);
+StructuredBuffer<SpotLightData> spot_lights : register(t3);
 
-Texture2D diffuse_map : register(t3);
-Texture2D normal_map : register(t4);
-Texture2D roughness_map : register(t5);
-Texture2D background : register(t6);
-
-Texture2DArray shadow : register(t7);
-TextureCube omni_shadow[] : register(t8);
+Texture2D background : register(t4);
+Texture2DArray shadow : register(t5);
+TextureCube omni_shadow[] : register(t6);
 Texture2D spot_shadow[] : register(t0, space1);
+Texture2D image[] : register(t0, space2);
 
 SamplerState g_sampler : register(s0);
 SamplerComparisonState g_cmpSampler : register(s1);
@@ -104,17 +98,23 @@ float4 PSMain(PSInput input) : SV_TARGET
 {
 	float3 eyevec = normalize(eyepos - input.worldpos);
 	
-	float3 diffuse = material_color.xyz;
-	
-	if (material_flags & DiffuseMap)
-		diffuse *= pow(diffuse_map.Sample(g_sampler, input.tcoord).xyz, 2.2);
+	float3 diffuse = materials[matid].color.xyz;
+		
+	if (materials[matid].diffuse_map != InvalidImage)
+	{
+		float3 color = image[materials[matid].diffuse_map].Sample(g_sampler, input.tcoord).xyz;
+		diffuse *= pow(color, 2.2);
+	}
 	
     //if (material_color.w < 0.2) discard;
     
 	float3 norm_local;
 	
-	if (material_flags & NormalMap)
-		norm_local = normal_map.Sample(g_sampler, input.tcoord).xyz * 2.0 - 1.0;
+	if (materials[matid].normal_map != InvalidImage)
+	{
+		norm_local = image[materials[matid].normal_map].Sample(g_sampler, input.tcoord);
+		norm_local.xyz = norm_local.xyz*2.0 - 1.0;
+	}
 	else
 		norm_local = float3(0.0, 0.0, 1.0);
 	
@@ -130,14 +130,14 @@ float4 PSMain(PSInput input) : SV_TARGET
     bgpos.y = clamp(bgpos.y, 0, height);
     
     float3 bgcolor = background.Load(int3(bgpos)).rgb;	
-	float3 color = lerp(bgcolor, diffuse, material_color.w);
+	float3 color = lerp(bgcolor, diffuse, materials[matid].color.w);
 	
 	float roughness; 
     
-    if (material_flags & RoughnessMap) 
-        roughness = roughness_map.Sample(g_sampler, input.tcoord).r;
+    if (materials[matid].roughness_map != InvalidImage) 
+        roughness = image[materials[matid].roughness_map].Sample(g_sampler, input.tcoord).r;
     else 
-        roughness = material_roughness;
+        roughness = materials[matid].roughness;
 	
 	if (roughness == 1.0) return float4(color, 1.0);
 	

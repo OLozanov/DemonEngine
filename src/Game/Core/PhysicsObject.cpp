@@ -35,31 +35,10 @@ PhysicsObject::PhysicsObject(const vec3& pos, const mat3& mat, float mass, unsig
 
     m_object = static_cast<Hitable*>(this);
 
-    /*const vec3& bbox = StaticObject::m_bbox.max;
-    float volume = bbox.x * bbox.y * bbox.z * 8;
+    const vec3& bbox = StaticObject::m_bbox.max;
 
-    if (mass < 10) volume = 0.8;
-
-    float dimension = std::min(bbox.x, std::min(bbox.y, bbox.z));
-
-    static const vec3 points[] = { {0.5, 0.5, 0.5},
-                                {-0.5, 0.5, 0.5},
-                                {0.5, 0.5, -0.5},
-                                {-0.5, 0.5, -0.5},
-                                {0.5, -0.5, 0.5},
-                                {-0.5, -0.5, 0.5},
-                                {0.5, -0.5, -0.5},
-                                {-0.5, -0.5, -0.5},
-                                {0.0, 0.0, 0.0} };
-
-    m_buoyancy.reset(new  BuoyancyGenerator(*SceneManager::GetInstance()->getWorld(), dimension / 2.0, volume / 8));
-    PhysicsManager::GetInstance()->addForce(*m_buoyancy, *this);
-
-    for (int i = 0; i < 8; i++)
-    {
-        vec3 applyPoint = { points[i].x * bbox.x, points[i].y * bbox.y, points[i].z * bbox.z };
-        m_buoyancy->addPoint(applyPoint);
-    }*/
+    m_buoyancy.reset(new BuoyancyForce(Render::SceneManager::GetInstance().getWorld(), bbox));
+    Physics::PhysicsManager::GetInstance().addForce(*m_buoyancy, *this);
 }
 
 float PhysicsObject::RestVelocity(const BBox& bbox)
@@ -85,10 +64,10 @@ void PhysicsObject::onCollide(const vec3& normal, float impulse)
 
 void PhysicsObject::hit(const vec3& point, const vec3& direction, uint32_t power)
 {
-    vec3 localPoint = (point - RigidBody::m_pos) * RigidBody::m_orientation;
-    vec3 localDir = (direction * RigidBody::m_orientation);
+    //vec3 localPoint = (point - RigidBody::m_pos) * RigidBody::m_orientation;
+    //vec3 localDir = (direction * RigidBody::m_orientation);
 
-    applyImpulse(localDir * power, localPoint);
+    applyImpulse(direction * power, point - RigidBody::m_pos);
 }
 
 void PhysicsObject::remove()

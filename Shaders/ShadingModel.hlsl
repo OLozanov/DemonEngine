@@ -53,7 +53,11 @@ float3 BRDF(float3 n,               // surface normal
 {
 	float3 h = normalize(l + v); // half vector
 
-    float ltCos = max(0.0, dot(l, n));
+    float ltCos = dot(l, n);
+	
+	if (ltCos < 0.0001) return float3(0.0, 0.0, 0.0);
+	
+	ltCos = max(0.0, ltCos);
 
 	n = CorrectNormal(n, v);
 

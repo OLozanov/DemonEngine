@@ -102,7 +102,7 @@ class World
     std::vector<Zone> m_zones;
     std::vector<Portal> m_portals;
 
-    Index tracePos(const Node& node, const vec3& pos);
+    Index tracePos(const Node& node, const vec3& pos) const;
 
     void traceObject(DisplayObject* object, Node& node, const vec3& pos, const vec3& bbox, const vec3* axis);
     void traceLight(Light* light, Node& node, const vec3& pos, const vec3& bbox);
@@ -145,7 +145,7 @@ public:
 
     bool empty() { return m_nodes.empty(); }
 
-    Index tracePos(const vec3& pos) { return tracePos(m_nodes[0], pos); }
+    Index tracePos(const vec3& pos) const { return tracePos(m_nodes[0], pos); }
 
     void addObject(DisplayObject* object);
     void addLight(Light* light);
@@ -155,7 +155,10 @@ public:
     void moveLight(Light* light);
     void moveFogVolume(FogVolume* volume);
 
+    uint8_t zoneType(const vec3& pos) const const;
+    float getSubmergeDepth(const vec3& pos) const;
+
     void resetLeafFrameNum();
 };
 
-} //namespace render
+} //namespace Render

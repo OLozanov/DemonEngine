@@ -11,6 +11,7 @@
 #include "Objects/MapFinish.h"
 #include "Objects/Ladder.h"
 #include "Objects/FogVolume.h"
+#include "Objects/ZoneInfo.h"
 
 #include "Resources/Resources.h"
 
@@ -153,6 +154,7 @@ void ConsoleImpl::initEntityList()
     m_entityTree->AppendItem(map, "Sound", -1, -1, new ObjectInfo(ObjectType::AmbientSound));
     m_entityTree->AppendItem(map, "Ladder", -1, -1, new ObjectInfo(ObjectType::Ladder));
     m_entityTree->AppendItem(map, "FogVolume", -1, -1, new ObjectInfo(ObjectType::FogVolume));
+    m_entityTree->AppendItem(map, "ZoneInfo", -1, -1, new ObjectInfo(ObjectType::ZoneInfo));
 
     m_entityTree->AppendItem(activators, "Trigger", -1, -1, new ObjectInfo(ObjectType::Trigger));
 
@@ -336,78 +338,28 @@ void ConsoleImpl::onCreateObject(wxCommandEvent& event)
 {
     ObjectInfo* tinfo = (ObjectInfo*)m_entityTree->GetItemData(m_objectId);
 
+    Object* obj = nullptr;
+
     if (tinfo)
     {
         switch (tinfo->objectType)
         {
-        case ObjectType::Entity:
-        {
-            Object* entity = Entity::CreateEntity(tinfo->entityClass);
-
-            vec3 pos = calcNewPos(2.0);
-            entity->setPos(pos);
-
-            m_editor.addObject(entity);
+        case ObjectType::Entity: obj = Entity::CreateEntity(tinfo->entityClass); break;
+        case ObjectType::AmbientSound: obj = new AmbientSound(); break;
+        case ObjectType::Trigger: obj = new Trigger(); break;
+        case ObjectType::PlayerStart: obj = new PlayerStart(); break;
+        case ObjectType::MapFinish: obj = new MapFinish(); break;
+        case ObjectType::Ladder: obj = new Ladder(); break;
+        case ObjectType::FogVolume: obj = new FogVolume(); break;
+        case ObjectType::ZoneInfo: obj = new ZoneInfo(); break;
         }
-        break;
-        case ObjectType::AmbientSound:
-        {
-            Object* obj = new AmbientSound();
 
+        if (obj)
+        {
             vec3 pos = calcNewPos(2.0);
             obj->setPos(pos);
 
             m_editor.addObject(obj);
-        }
-        break;
-        case ObjectType::Trigger:
-        {
-            Object* obj = new Trigger();
-
-            vec3 pos = calcNewPos(2.0);
-            obj->setPos(pos);
-
-            m_editor.addObject(obj);
-        }
-        break;
-        case ObjectType::PlayerStart:
-        {
-            Object* obj = new PlayerStart();
-
-            vec3 pos = calcNewPos(2.0);
-            obj->setPos(pos);
-
-            m_editor.addObject(obj);
-        }
-        break;
-        case ObjectType::MapFinish:
-        {
-            Object* obj = new MapFinish();
-
-            vec3 pos = calcNewPos(2.0);
-            obj->setPos(pos);
-
-            m_editor.addObject(obj);
-        }
-        break;
-        case ObjectType::Ladder:
-        {
-            Object* obj = new Ladder();
-
-            vec3 pos = calcNewPos(2.0);
-            obj->setPos(pos);
-
-            m_editor.addObject(obj);
-        }
-        break;
-        case ObjectType::FogVolume:
-            Object* obj = new FogVolume();
-
-            vec3 pos = calcNewPos(2.0);
-            obj->setPos(pos);
-
-            m_editor.addObject(obj);
-        break;
         }
     }
 }

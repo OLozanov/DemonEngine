@@ -1,5 +1,7 @@
 #include "Map.h"
 
+#include "Objects/ZoneInfo.h"
+
 #include <map>
 
 void Map::cleanup()
@@ -52,6 +54,20 @@ void Map::build(const LinkedList<Block>& blocks)
     buildPortlaGeometry();
 }
 
+void Map::assignZoneInfo(const std::list<ZoneInfo*>& infolist)
+{
+    for (const ZoneInfo* info : infolist)
+    {
+        MapIndex leaf = traceTree(info->pos());
+
+        if (leaf != InvalidMapIndex)
+        {
+            MapIndex zone = m_leafs[leaf].zone;
+            m_zones[zone].type = info->zoneType();
+        }
+    }
+}
+
 void Map::addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons)
 {
     if (block->hasSurfaces()) return;
@@ -63,10 +79,12 @@ void Map::addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons
         if (block->type() != BlockType::Subtruct && poly.status != VolumeStatus::Outside) continue;
         if (block->type() == BlockType::Subtruct && poly.status != VolumeStatus::Inside) continue;
 
+        std::vector<IndexType> verts;
+
+        bool splitter = (block->type() == BlockType::Solid) && (poly.flags & PolyZonePortal) == 0;
+
         if (block->type() == BlockType::Subtruct) // revert vertices
         {
-            std::vector<IndexType> verts;
-
             for (int i = poly.vertices.size() - 1; i >= 0; i--)
             {
                 verts.push_back(m_vertices.size());
@@ -77,15 +95,11 @@ void Map::addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons
                                        -poly.vertices[i].binormal });
             }
 
-            bool splitter = (poly.flags & PolyZonePortal) == 0;
-
             polygons.push_back({ -poly.plane, splitter, poly.flags, poly.material, std::move(verts) });
 
         }
         else
         {
-            std::vector<IndexType> verts;
-
             for (int i = 0; i < poly.vertices.size(); i++)
             {
                 verts.push_back(m_vertices.size());
@@ -96,9 +110,27 @@ void Map::addBlockGeometry(const Block* block, std::vector<MapPolygon>& polygons
                                        -poly.vertices[i].binormal });
             }
 
-            bool splitter = (block->type() == BlockType::Solid) && ((poly.flags & PolyZonePortal) == 0);
+             polygons.push_back({ poly.plane, splitter, poly.flags, poly.material, verts });
+        }
 
-            polygons.push_back({ poly.plane, splitter, poly.flags, poly.material, verts });
+        if (poly.flags & PolyTwoSide)
+        {
+            std::vector<IndexType> rverts;
+        
+            for (int i = poly.vertices.size() - 1; i >= 0; i--)
+            {
+                const Vertex& vert = m_vertices[polygons.back().vertices[i]];
+        
+                rverts.push_back(m_vertices.size());
+                m_vertices.push_back({ vert.position,
+                                       vert.tcoord,
+                                       -vert.normal,
+                                       vert.tangent,
+                                       vert.binormal });
+            }
+        
+            uint8_t flags = poly.flags & (~PolyZonePortal);
+            polygons.push_back({ poly.plane, false, flags, poly.material, rverts });
         }
     }
 }
@@ -350,7 +382,7 @@ MapIndex Map::buildTree(PolygonList& plg)
         if (polyId == splitterId)
         {
             if (zportals) addZonePortal(poly);
-            else frontList.emplace_back(std::move(poly));
+            frontList.emplace_back(std::move(poly));
 
             continue;
         }
@@ -368,18 +400,14 @@ MapIndex Map::buildTree(PolygonList& plg)
         break;
 
         case PolyType::Plane:
+        {
+            float sg = (poly.plane.xyz) * (splitter.plane.xyz);
 
-            if (poly.flags & PolyZonePortal) addZonePortal(poly);
+            if (sg > 0)
+                frontList.emplace_back(poly);
             else
-            {
-                float sg = (poly.plane.xyz) * (splitter.plane.xyz);
-
-                if (sg > 0) 
-                    frontList.emplace_back(poly);
-                else 
-                    backList.emplace_back(poly);
-            }
-
+                backList.emplace_back(poly);
+        }
         break;
 
         case PolyType::Split:
@@ -408,6 +436,31 @@ MapIndex Map::buildTree(PolygonList& plg)
         m_nodes[nodeId].right = InvalidMapIndex;
 
     return nodeId;
+}
+
+MapIndex Map::traceTree(const vec3& pos, MapIndex nodeId)
+{
+    const MapNode& node = m_nodes[nodeId];
+
+    if (node.leaf != InvalidMapIndex) return node.leaf;
+
+    PointType type = ClassifyPoint(node.plane, pos);
+
+    switch (type)
+    {
+    case PointType::Plane:
+    case PointType::Front:
+        if (node.right) return traceTree(pos, node.right);
+        else return node.leaf;
+    break;
+
+    case PointType::Back:
+        if (node.left) return traceTree(pos, node.left);
+        else return InvalidMapIndex;
+    break;
+    }
+
+    return InvalidMapIndex;
 }
 
 void Map::getPortalBounds(const Portal& portal, vec3& min, vec3& max)
@@ -736,7 +789,7 @@ void Map::generateZones()
         m_zones.emplace_back();
         MapIndex zoneId = m_zones.size() - 1;
 
-        m_zones[zoneId].type = ZoneType::Default;
+        m_zones[zoneId].type = ZoneType::Regular;
         m_zones[zoneId].leafs.push_back(leafId);
 
         leaf.zone = zoneId;
@@ -869,11 +922,17 @@ void Map::writeLeafs(FILE* file)
         fwrite(&leaf.rtxGeometry.count, sizeof(uint32_t), 1, file);
         
         // collision polygons
-        uint32_t polynum = leaf.polygons.size();
+        uint32_t polynum = 0;
+
+        for (const MapPolygon& poly : leaf.polygons)
+            if ((poly.flags & PolyNoCollision) == 0) polynum++;
+
         fwrite(&polynum, sizeof(uint32_t), 1, file);
 
         for (const MapPolygon& poly : leaf.polygons)
         {
+            if (poly.flags & PolyNoCollision) continue;
+
             uint32_t vnum = poly.vertices.size();
             fwrite(&vnum, sizeof(uint32_t), 1, file);
 

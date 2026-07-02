@@ -25,4 +25,4 @@ private:
     bool m_playing;
 };
 
-} // namespace gamelogic
+} // namespace Gamelogic

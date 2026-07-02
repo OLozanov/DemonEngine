@@ -37,7 +37,9 @@ Player::Player(const vec3& pos, const FirstPersonCamera& camera)
 
 void Player::move(float speed, bool side)
 {
-    if (m_walk || side)
+    bool walk = m_walk && !m_swim;
+
+    if (walk || side)
     {
         float ang = m_camera.horizontalAngle();
         if (side) ang += 90.0f;
@@ -58,8 +60,9 @@ void Player::move(float speed, bool side)
 
 void Player::updateForce()
 {
-    float speed = (m_canjump || !m_walk) ? (m_sitting ? 100 : 200) * m_mass : 
-                                           20 * m_mass;
+    bool walk = m_walk && !m_swim;
+    float speed = (m_canjump || !walk) ? (m_sitting ? 100 : 200) * m_mass : 
+                                          20 * m_mass;
 
     m_force = {};
 
@@ -172,12 +175,19 @@ void Player::fly()
 void Player::walk()
 {
     m_walk = true;
-    m_acceleration = {0, -9.8, 0};
+    m_acceleration = m_swim ? vec3(0, -3.0, 0) : vec3(0, -9.8, 0);
 }
 
 void Player::setGhostMode(bool ghost)
 {
     m_layers = ghost ? 0 : collision_actor | collision_target;
+}
+
+void Player::swim(bool swimming)
+{
+    m_swim = swimming;
+
+    if (m_walk) m_acceleration = m_swim ? vec3(0, -3.0, 0) : vec3(0, -9.8, 0);
 }
 
 void Player::attachToClimbArea(const ClimbArea* climbArea) 
@@ -283,8 +293,9 @@ void Player::update(float dt)
     {
         updateForce();
 
-        float dump = (m_canjump || !m_walk) ? 0.02 : 0.002;
-        m_velocity -= vec3(m_velocity.x, m_walk ? 0 : m_velocity.y, m_velocity.z) * dump * (dt / 0.0015);
+        bool walk = m_walk && !m_swim;
+        float dump = (m_canjump || !walk) ? 0.02 : 0.002;
+        m_velocity -= vec3(m_velocity.x, walk ? 0.0f : m_velocity.y, m_velocity.z) * dump * (dt / 0.0015f);
 
         if (m_tryStandUp) standUp();
 
@@ -298,7 +309,6 @@ void Player::update(float dt)
         // Sitting down
         if (m_crouch && !m_sitting)
         {
-
             m_headDist -= CrouchSpeed * dt;
             if (m_headDist < SitDist) sit();
         }
@@ -317,7 +327,10 @@ void Player::onUpdate(float dt)
         return;
     }
 
-    testGroundHeight();
+    if (m_swim)
+        testShore();
+    else
+        testGroundHeight();
 }
 
 void Player::onCollide(const vec3& normal, float impulse)

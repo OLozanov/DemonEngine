@@ -1359,6 +1359,7 @@ void Block::generatePolygons()
 
 void Block::buildGeometry()
 {
+    if (m_type == BlockType::Edit) return;
     if (!m_surfaces.empty()) return;
 
     m_geometry.clear();

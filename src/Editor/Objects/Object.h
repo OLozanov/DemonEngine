@@ -23,6 +23,7 @@ enum class ObjectType : uint8_t
     MapFinish = 6,
     Ladder = 7,
     FogVolume = 9,
+    ZoneInfo = 10,
     Invalid = 0xFF
 };
 

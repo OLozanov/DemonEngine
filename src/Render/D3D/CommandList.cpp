@@ -462,13 +462,7 @@ void CommandList::drawRefract(const DisplayList& displayList)
             if (data->material != material)
             {
                 material = data->material;
-
-                m_commandList->SetGraphicsRoot32BitConstants(5, 8, &material->color, 0);
-
-                UINT diffuse = material->maps[Material::map_diffuse];
-                UINT normal = material->maps[Material::map_normal];
-                m_commandList->SetGraphicsRootDescriptorTable(9, d3dInstance.GpuDescriptor(diffuse));
-                m_commandList->SetGraphicsRootDescriptorTable(10, d3dInstance.GpuDescriptor(normal));
+                m_commandList->SetGraphicsRoot32BitConstants(5, 1, &material->id, 0);
             }
 
             if (block->indexData)

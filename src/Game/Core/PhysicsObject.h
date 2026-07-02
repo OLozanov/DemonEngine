@@ -3,6 +3,7 @@
 #include "Game/GameObject.h"
 #include "Render/StaticObject.h"
 #include "Physics/RigidBody.h"
+#include "Game/Core/Buoyancy.h"
 
 #include "Resources/Resources.h"
 
@@ -20,7 +21,7 @@ protected:
     SoundPtr m_bumpSnd;
     float m_bumpImpulse;
 
-    //std::unique_ptr<BuoyancyGenerator> m_buoyancy;
+    std::unique_ptr<BuoyancyForce> m_buoyancy;
 
 public:
 

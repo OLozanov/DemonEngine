@@ -492,6 +492,9 @@ void Game::update(float dt)
 
         if (!m_player.isDead())
         {
+            bool inWater = m_world.zoneType(m_player.pos() + vec3(0, 0.2, 0)) == ZoneWater;
+            m_player.swim(inWater);
+
             m_playerCamera.setViewOffset({ 0.0f, m_player.headDist(), 0.0f });
 
             if (m_weapon)

@@ -8,6 +8,7 @@
 #include "MapFinish.h"
 #include "Ladder.h"
 #include "FogVolume.h"
+#include "ZoneInfo.h"
 
 #include <string>
 
@@ -20,7 +21,8 @@ ObjectFactory::FactoryFunc ObjectFactory::Factories[] = { ObjectFactory::CreateO
                                                           ObjectFactory::CreateMapFinish,
                                                           ObjectFactory::CreateLadder,
                                                           ObjectFactory::CreateSpotLight,
-                                                          ObjectFactory::CreateFogVolume };
+                                                          ObjectFactory::CreateFogVolume,
+                                                          ObjectFactory::CreateZoneInfo };
 
 Object* ObjectFactory::CreateOmniLight(FILE* file)
 {
@@ -254,6 +256,17 @@ Object* ObjectFactory::CreateFogVolume(FILE* file)
     FogVolume* fog = new FogVolume(pos, size, color, density, type, lighting);
 
     return fog;
+}
+
+Object* ObjectFactory::CreateZoneInfo(FILE* file)
+{
+    vec3 pos;
+    ZoneType type;
+
+    fread(&pos, sizeof(vec3), 1, file);
+    fread(&type, sizeof(ZoneType), 1, file);
+
+    return new ZoneInfo(pos, type);
 }
 
 Object* ObjectFactory::CreateObject(ObjectType type, FILE* file)

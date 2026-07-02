@@ -49,6 +49,7 @@ public:
 protected:
     void updateBBox();
     void testGroundHeight();
+    void testShore();
 
     void onCollide(const vec3& normal, float impulse) override {}
     void onUpdate(float dt) override;

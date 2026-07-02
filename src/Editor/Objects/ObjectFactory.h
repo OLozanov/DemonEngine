@@ -21,6 +21,7 @@ class ObjectFactory
     static Object* CreateMapFinish(FILE* file);
     static Object* CreateLadder(FILE* file);
     static Object* CreateFogVolume(FILE* file);
+    static Object* CreateZoneInfo(FILE* file);
 
 public:
 

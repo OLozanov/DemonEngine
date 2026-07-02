@@ -25,7 +25,8 @@ class Player : public Actor
     bool m_moveRight = false;
     bool m_crouch = false;
 
-    bool m_walk = true;
+    bool m_walk = true;     // normal movement mode, not flying and not ghosting
+    bool m_swim = false;    // is in water
 
     bool m_sitting = false;
     bool m_tryStandUp = false;
@@ -72,6 +73,8 @@ public:
     void fly();
     void walk();
     void setGhostMode(bool ghost);
+
+    void swim(bool swimming);
 
     bool isWalking() { return m_walk; }
 

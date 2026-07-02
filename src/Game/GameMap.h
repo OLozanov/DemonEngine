@@ -48,6 +48,7 @@ enum class ObjectType : uint8_t
     object_ladder = 7,
     object_spot_light = 8,
     object_fog_volume = 9,
+    object_zone_info = 10,
     object_endlist = 0xFF
 };
 

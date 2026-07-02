@@ -106,15 +106,15 @@ void Actor::testGroundHeight()
     {
         float stepheight = height - (m_pos.y - m_bbox.y);
 
-        constexpr float max = 0.25;
-        float min = m_canjump ? -max : 0;
+        constexpr float max = 0.25f;
+        float min = m_canjump ? -max : 0.0f;
 
-        if (stepheight > min && stepheight < max && tilt > 0.8)
+        if (stepheight > min && stepheight < max && tilt > 0.8f)
         {
             if (m_velocity.y < -FallDamageThreshold) damage(-m_velocity.y * FallDamageCoefficient);
 
-            m_pos.y += stepheight + 0.001;
-            m_velocity.y = 0;
+            m_pos.y += stepheight + 0.001f;
+            m_velocity.y = 0.0f;
             m_onfloor = true;
             m_surfaceTilt = tilt;
         }
@@ -122,6 +122,33 @@ void Actor::testGroundHeight()
 
     m_canjump = m_onfloor;
     m_onfloor = false;
+}
+
+void Actor::testShore()
+{
+    auto& pm = Physics::PhysicsManager::GetInstance();
+
+    float height;
+    float tilt;
+
+    const Render::World world = Render::SceneManager::GetInstance().getWorld();
+    if (world.zoneType(m_pos + vec3(0.0f, m_bbox.y, 0.0f)) == ZoneWater) return;
+
+    if (pm.testHeight(m_pos, m_bbox, collision_solid, height, tilt))
+    {
+        float shoreheight = height - (m_pos.y - m_bbox.y);
+
+        float max = m_bbox.y * 2.0f;
+        float min = m_bbox.y * 0.5f;
+
+        if (shoreheight > min && shoreheight < max && tilt > 0.8f)
+        {
+            m_pos += {0.0f, 0.5f, 0.0f};
+            m_velocity += {0.0f, 1.0f, 0.0f};
+
+            m_canjump = false;
+        }
+    }
 }
 
 void Actor::onUpdate(float dt)

@@ -38,3 +38,11 @@ enum GameObjectType
 	object_moving = 8,
 	object_terminate = 0xFF
 };
+
+enum ZoneType
+{
+	ZoneRegular = 0,
+	ZoneWater = 1,
+	ZoneLava = 2,
+	ZoneSlime = 3
+};

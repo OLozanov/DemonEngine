@@ -50,6 +50,7 @@
     <ClCompile Include="Editor\Objects\Sound.cpp" />
     <ClCompile Include="Editor\Objects\StaticObject.cpp" />
     <ClCompile Include="Editor\Objects\Trigger.cpp" />
+    <ClCompile Include="Editor\Objects\ZoneInfo.cpp" />
     <ClCompile Include="Editor\PlaneDlg.cpp" />
     <ClCompile Include="Editor\PolyDlg.cpp" />
     <ClCompile Include="Editor\PreferencesDlg.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="Editor\Objects\StaticObject.h" />
     <ClInclude Include="Editor\Objects\Trigger.h" />
     <ClInclude Include="Editor\Objects\TypeInfo.h" />
+    <ClInclude Include="Editor\Objects\ZoneInfo.h" />
     <ClInclude Include="Editor\PlaneDlg.h" />
     <ClInclude Include="Editor\PolyDlg.h" />
     <ClInclude Include="Editor\PreferencesDlg.h" />

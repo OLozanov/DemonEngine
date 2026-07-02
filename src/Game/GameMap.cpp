@@ -600,6 +600,11 @@ void Game::loadObjects(FILE* file)
             Render::FogVolume* volume = new Render::FogVolume(pos, size, color, density, type, lighting);
             m_sceneManager.addFogVolume(volume);
         }
+
+        if (otag == ObjectType::object_zone_info)
+        {
+            fseek(file, sizeof(vec3) + sizeof(uint8_t), SEEK_CUR);
+        }
     }
 }
 
