@@ -1,7 +1,7 @@
 #include "AnimatedMap.h"
 #include "Resources/Resources.h"
 
-AnimatedMap::AnimatedMap(Material * material, int mapnum, std::string name)
+AnimatedMap::AnimatedMap(Material* material, int mapnum, std::string name)
 : m_material(material)
 , m_map(mapnum)
 , m_time(0.0)
@@ -27,7 +27,8 @@ AnimatedMap::AnimatedMap(Material * material, int mapnum, std::string name)
 
     m_duration = m_images.size()*AnimRate;
 
-    m_material->maps[m_map] = m_images[0]->handle;
+    MaterialData* matdata = ResourceManager::MaterialData(material->id);
+    matdata->maps[m_map] = m_images[0]->handle;
 }
 
 size_t AnimatedMap::referenceCount()
@@ -51,6 +52,8 @@ void AnimatedMap::update(float dt)
     if(frame != m_frame)
     {
         m_frame = frame;
-        m_material->maps[m_map] = m_images[m_frame]->handle;
+
+        MaterialData* matdata = ResourceManager::MaterialData(m_material->id);
+        matdata->maps[m_map] = m_images[m_frame]->handle;
     }
 }

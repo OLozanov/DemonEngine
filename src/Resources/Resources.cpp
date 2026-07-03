@@ -68,6 +68,11 @@ void ResourceManager::FreeMaterial(MaterialId matid)
     m_freeMaterials.push_back(matid);
 }
 
+MaterialData* ResourceManager::MaterialData(MaterialId matid)
+{
+    return m_materialHeap.data() + matid;
+}
+
 void ResourceManager::AnimateMaps(float dt)
 {
     for (auto& animatedMap : m_animatedMaps) animatedMap.update(dt);

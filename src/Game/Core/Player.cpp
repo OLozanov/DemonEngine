@@ -85,6 +85,16 @@ void Player::updateForce()
     {
         move(-speed, true);
     }
+
+    if (m_moveUp)
+    {
+        m_force += vec3(0.0f, 0.75f, 0.0f) * speed;
+    }
+
+    if (m_moveDown)
+    {
+        m_force += vec3(0.0f, -0.75f, 0.0f) * speed;
+    }
 }
 
 void Player::climb(float dt)
@@ -188,6 +198,12 @@ void Player::swim(bool swimming)
     m_swim = swimming;
 
     if (m_walk) m_acceleration = m_swim ? vec3(0, -3.0, 0) : vec3(0, -9.8, 0);
+
+    if (!m_swim)
+    {
+        m_moveUp = false;
+        m_moveDown = false;
+    }
 }
 
 void Player::attachToClimbArea(const ClimbArea* climbArea) 
@@ -243,12 +259,24 @@ void Player::input(int key, bool keyDown)
         break;
 
     case 'C':
+        if (m_swim)
+        {
+            m_moveDown = keyDown;
+            return;
+        }
+
         m_crouch = keyDown;
         if (!keyDown) standUp();
 
         break;
 
     case ' ':
+        if (m_swim)
+        {
+            m_moveUp = keyDown;
+            return;
+        }
+
         if (!keyDown) break;
 
         if (m_climbArea)

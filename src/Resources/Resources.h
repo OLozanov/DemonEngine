@@ -44,6 +44,8 @@ private:
     static MaterialId AllocateMaterial();
     static void FreeMaterial(MaterialId matid);
 
+    static MaterialData* MaterialData(MaterialId matid);
+
     static bool LoadMaterialMap(Lexer& lexer, Material* material, uint32_t mapn);
     static bool ReadParam(Lexer& lexer, float& param);
     static bool ReadString(Lexer& lexer, std::string& str);
@@ -53,6 +55,7 @@ private:
     static void CleanupAnimatedMaps();
 
     friend Material::~Material();
+    friend AnimatedMap;
 
 public:
 

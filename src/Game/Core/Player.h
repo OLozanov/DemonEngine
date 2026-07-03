@@ -23,6 +23,8 @@ class Player : public Actor
     bool m_moveBack = false;
     bool m_moveLeft = false;
     bool m_moveRight = false;
+    bool m_moveUp = false;
+    bool m_moveDown = false;
     bool m_crouch = false;
 
     bool m_walk = true;     // normal movement mode, not flying and not ghosting
