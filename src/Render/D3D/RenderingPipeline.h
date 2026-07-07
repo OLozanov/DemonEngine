@@ -15,6 +15,15 @@ using Microsoft::WRL::ComPtr;
 
 class CommandList;
 
+enum TextureFiltering
+{
+    Trilinear = 0,
+    Anisotropic2x = 1,
+    Anisotropic4x = 2,
+    Anisotropic8x = 3,
+    Anisotropic16x = 4,
+};
+
 class RenderingPipeline
 {
 public:
@@ -57,6 +66,7 @@ public:
 
     static void Init();
 
+    static void SetFiltering(uint8_t val);
     static void ResizeViewport(int width, int height);
 
     static void StartRender(CommandList& commandList, RenderingPipeline::RenderMode mode);
@@ -103,6 +113,9 @@ private:
     static void InitResources();
 
 private:
+    static uint8_t m_filtering;
+    static UINT m_anisotropy[5];
+
     static CD3DX12_VIEWPORT m_viewport;
     static CD3DX12_RECT m_scissorRect;
 

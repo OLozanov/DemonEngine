@@ -175,7 +175,7 @@ void ComboDropDown::Show(ComboBox* owner, int16_t x, int16_t y, uint16_t width, 
     DropDownList.show();
 
     DropDownList.m_owner = owner;
-    DropDownList.m_length = owner->m_items.size() * 18 - height + 4;
+    DropDownList.m_length = std::max(0.0f, owner->m_items.size() * 18.0f - height + 4.0f);
 
     DropDownList.m_scrollSpeed = 0.0f;
     DropDownList.m_offset = float(owner->m_index) * 18.0f + 10.0f - DropDownList.m_height * 0.5f;
@@ -240,9 +240,23 @@ void ComboBox::addItem(const std::string& item)
 
 void ComboBox::selectItem(size_t index)
 {
-    m_index = index;
-    OnChange(index);
+    if (index >= m_items.size()) return;
 
+    size_t oldindex = m_index;
+    m_index = index;
+
+    if (m_index != oldindex)
+    {
+        OnChange(m_index);
+        refresh();
+    }
+}
+
+void ComboBox::setItem(size_t index)
+{
+    if (index >= m_items.size()) return;
+
+    m_index = index;
     refresh();
 }
 

@@ -51,6 +51,9 @@ Game::Game()
 , m_cameraMode(CameraMode::FirstPerson)
 , m_medkitSound(ResourceManager::GetSound("Items/medkit_pickup.wav"))
 {
+    loadSettings();
+    Win32App::InitSubsytems();
+
     m_randomGenerator.seed(1729);
 
     AudioManager::GetInstance().setVolume(0.5);
@@ -120,6 +123,7 @@ void Game::saveSettings()
     out << "resolution " << settings.resolution << std::endl;
     out << "fullscreen " << App::IsFullscreen() << std::endl;  // We can bypass menu data here
     out << "vsync " << settings.vsync << std::endl;
+    out << "filtering " << settings.filtering << std::endl;
     out << "gi " << settings.gi << std::endl;
     out << "volume " << settings.volume << std::endl;
 }
@@ -141,6 +145,7 @@ void Game::readSettings(Settings& settings)
         if (param == "resolution") in >> settings.resolution;
         else if (param == "fullscreen") in >> settings.fullscreen;
         else if (param == "vsync") in >> settings.vsync;
+        else if (param == "filtering") in >> settings.filtering;
         else if (param == "gi") in >> settings.gi;
         else if (param == "volume") in >> settings.volume;
         else in >> param;
@@ -155,6 +160,8 @@ void Game::loadSettings()
     Settings settings;
 
     readSettings(settings);
+
+    Render::RenderingPipeline::SetFiltering(settings.filtering);
 
     AudioManager::GetInstance().setVolume(settings.volume);
     m_sceneManager.enableGI(settings.gi);
@@ -220,11 +227,6 @@ void Game::onScreenResize(int width, int height)
     m_msg.move(width / 2, height / 2);
 
     m_menu.move(width / 2 - m_menu.width() / 2, height / 2 - m_menu.height() / 2);
-}
-
-void Game::onSwichFullscreen(bool fullscreen)
-{
-    m_menu.setFullscreenStatus(fullscreen);
 }
 
 void Game::onKeyPress(int key, bool keyDown)
@@ -490,7 +492,7 @@ void Game::update(float dt)
             }
         }
 
-        if (!m_player.isDead())
+        if (!m_player.isDead() && m_activeMap)
         {
             bool inWater = m_world.zoneType(m_player.pos() + vec3(0, 0.2, 0)) == ZoneWater;
             m_player.swim(inWater);

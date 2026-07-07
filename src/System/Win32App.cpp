@@ -92,12 +92,6 @@ int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
 
     m_swapChain = d3dInstance.createSwapChain(m_hwnd);
 
-    Render::SceneManager& sceneManager = Render::SceneManager::GetInstance();
-    UI::UiLayer& uiLayer = UI::UiLayer::GetInstance();
-
-    sceneManager.init(width, height);
-    uiLayer.init(width, height);
-
     m_game = new GameLogic::Game();
     m_game->onScreenResize(width, height);
 
@@ -105,7 +99,6 @@ int Win32App::Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow)
 
     ShowCursor(false);
 
-    m_game->loadSettings();
     m_game->processCommandLine(lpszArgument);
 
     //Main loop
@@ -194,6 +187,21 @@ void Win32App::GameTick()
     sceneManager.display();
     uiLayer.display();
     m_swapChain.present();
+}
+
+void Win32App::InitSubsytems()
+{
+    RECT clientRect = {};
+
+    GetClientRect(m_hwnd, &clientRect);
+    int width = clientRect.right - clientRect.left;
+    int height = clientRect.bottom - clientRect.top;
+
+    Render::SceneManager& sceneManager = Render::SceneManager::GetInstance();
+    UI::UiLayer& uiLayer = UI::UiLayer::GetInstance();
+
+    sceneManager.init(width, height);
+    uiLayer.init(width, height);
 }
 
 void Win32App::Shutdown()
@@ -295,8 +303,6 @@ void Win32App::ToggleFullscreen()
     }
 
     Resize(m_displayMode);
-
-    m_game->onSwichFullscreen(m_fullscreen);
 }
 
 void Win32App::SyncTime()

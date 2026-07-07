@@ -69,6 +69,9 @@ const wchar_t* RaygenShaderName = L"RaygenShader";
 const wchar_t* ClosestHitShaderName = L"ClosestHitShader";
 const wchar_t* MissShaderName = L"MissShader";
 
+uint8_t RenderingPipeline::m_filtering = TextureFiltering::Trilinear;
+UINT RenderingPipeline::m_anisotropy[5] = { 0, 2, 4, 8, 16 };
+
 CD3DX12_VIEWPORT RenderingPipeline::m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(1280), static_cast<float>(720));
 CD3DX12_RECT RenderingPipeline::m_scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(1280), static_cast<LONG>(720));
 
@@ -1444,12 +1447,12 @@ void RenderingPipeline::SetupGBufferShader()
     rootParameters[4].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
     D3D12_STATIC_SAMPLER_DESC sampler = {};
-    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.Filter = m_filtering == Trilinear ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_ANISOTROPIC;
     sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.MipLODBias = 0;
-    sampler.MaxAnisotropy = 0;
+    sampler.MaxAnisotropy = m_anisotropy[m_filtering];
     sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
     sampler.MinLOD = 0.0f;
@@ -1619,12 +1622,12 @@ void RenderingPipeline::SetupSurfaceShader()
     rootParameters[5].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
     D3D12_STATIC_SAMPLER_DESC sampler = {};
-    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.Filter = m_filtering == Trilinear ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_ANISOTROPIC;
     sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.MipLODBias = 0;
-    sampler.MaxAnisotropy = 0;
+    sampler.MaxAnisotropy = m_anisotropy[m_filtering];
     sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
     sampler.MinLOD = 0.0f;
@@ -1716,12 +1719,12 @@ void RenderingPipeline::SetupEmissiveShader()
     rootParameters[3].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
     D3D12_STATIC_SAMPLER_DESC sampler = {};
-    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.Filter = m_filtering == Trilinear ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_ANISOTROPIC;
     sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.MipLODBias = 0;
-    sampler.MaxAnisotropy = 0;
+    sampler.MaxAnisotropy = m_anisotropy[m_filtering];
     sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
     sampler.MinLOD = 0.0f;
@@ -1840,12 +1843,12 @@ void RenderingPipeline::SetupTransparentShader()
     rootParameters[14].InitAsDescriptorTable(1, &ranges[4], D3D12_SHADER_VISIBILITY_PIXEL);
 
     D3D12_STATIC_SAMPLER_DESC samplers[2] = {};
-    samplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    samplers[0].Filter = m_filtering == Trilinear ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_ANISOTROPIC;;
     samplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplers[0].MipLODBias = 0;
-    samplers[0].MaxAnisotropy = 0;
+    samplers[0].MaxAnisotropy = m_anisotropy[m_filtering];
     samplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     samplers[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
     samplers[0].MinLOD = 0.0f;
@@ -2652,6 +2655,11 @@ void RenderingPipeline::InitResources()
         m_boxVolumeView.StrideInBytes = sizeof(vec3);
         m_boxVolumeView.SizeInBytes = vertexBufferSize;
     }*/
+}
+
+void RenderingPipeline::SetFiltering(uint8_t val)
+{
+    m_filtering = val;
 }
 
 void RenderingPipeline::ResizeViewport(int width, int height)

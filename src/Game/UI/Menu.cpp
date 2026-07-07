@@ -18,23 +18,31 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
 , m_resLabel(this, 100, 27, 50, 20, UI::Widget::Alignment::Right)
 , m_windowedLabel(this, 100, 57, 50, 20, UI::Widget::Alignment::Right)
 , m_vsyncLabel(this, 100, 87, 50, 20, UI::Widget::Alignment::Right)
-, m_giLabel(this, 100, 117, 50, 20, UI::Widget::Alignment::Right)
+, m_filteringLabel(this, 100, 117, 50, 20, UI::Widget::Alignment::Right)
+, m_giLabel(this, 100, 157, 50, 20, UI::Widget::Alignment::Right)
+, m_warningLabel(this, 20, 375, 100, 20)
 , m_resolutionCombo(this, 112, 30, 100, UI::Widget::Alignment::Left)
 , m_windowedChbox(this, 120, 60)
 , m_vsyncChbox(this, 120, 90)
-, m_giChbox(this, 120, 120)
+, m_filteringCombo(this, 112, 120, 130, UI::Widget::Alignment::Left)
+, m_giChbox(this, 120, 160)
 {
     Render::GpuInstance& renderApi = Render::GpuInstance::GetInstance();
 
     m_resLabel.setText("Resolution:");
     m_windowedLabel.setText("Windowed:");
     m_vsyncLabel.setText("VSync:");
+    m_filteringLabel.setText("Filtering:");
     m_giLabel.setText("GI:");
+    m_warningLabel.setText("Settings will apply after restart!");
+    m_warningLabel.hide();
 
     m_resLabel.setColor(1.0f, 1.0f, 1.0f);
     m_windowedLabel.setColor(1.0f, 1.0f, 1.0f);
     m_vsyncLabel.setColor(1.0f, 1.0f, 1.0f);
+    m_filteringLabel.setColor(1.0f, 1.0f, 1.0f);
     m_giLabel.setColor(1.0f, 1.0f, 1.0f);
+    m_warningLabel.setColor(1.0f, 0.5f, 0.0f);
 
     std::stringstream sstream;
 
@@ -46,8 +54,15 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
         sstream.str({});
     }
 
+    m_filteringCombo.addItem("Trilinear");
+    m_filteringCombo.addItem("Anisotropic 2x");
+    m_filteringCombo.addItem("Anisotropic 4x");
+    m_filteringCombo.addItem("Anisotropic 8x");
+    m_filteringCombo.addItem("Anisotropic 16x");
+
     m_resolutionCombo.selectItem(7);
     m_windowedChbox.setValue(true);
+    m_filteringCombo.selectItem(0);
 
     if (!renderApi.rtxSupport())
     {
@@ -72,6 +87,11 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
         m_settings.vsync = enable;
     });
 
+    m_filteringCombo.OnChange.bind([this](size_t index) {
+        m_settings.filtering = index;
+        m_warningLabel.show();
+    });
+
     m_giChbox.OnChange.bind([this](bool enable) {
         Render::SceneManager::GetInstance().enableGI(enable);
 
@@ -81,17 +101,12 @@ VideoPanel::VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint1
 
 void VideoPanel::update()
 {
-    m_resolutionCombo.selectItem(m_settings.resolution);
+    m_resolutionCombo.setItem(m_settings.resolution);
     m_windowedChbox.setValue(!m_settings.fullscreen);
     m_vsyncChbox.setValue(m_settings.vsync);
+    m_filteringCombo.setItem(m_settings.filtering);
     m_giChbox.setValue(m_settings.gi);
 
-    refresh();
-}
-
-void VideoPanel::updateFullscreenStatus()
-{
-    m_windowedChbox.setValue(!m_settings.fullscreen);
     refresh();
 }
 
@@ -179,12 +194,6 @@ void SettingsPanel::setSettings(const Settings& settings)
 
     m_videoPanel.update();
     m_audioPanel.update();
-}
-
-void SettingsPanel::setFullscreenStatus(bool fullscreen)
-{
-    m_settings.fullscreen = fullscreen;
-    m_videoPanel.updateFullscreenStatus();
 }
 
 void SettingsPanel::display()

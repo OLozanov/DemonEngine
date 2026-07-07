@@ -16,6 +16,7 @@ public:
 
 public:
     static int Run(HINSTANCE hInstance, LPSTR lpszArgument, int nCmdShow);
+    static void InitSubsytems();
     static void Shutdown();
     static void ShowMessage(const char* msg, const char* title);
     

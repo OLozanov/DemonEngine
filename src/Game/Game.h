@@ -50,7 +50,6 @@ public:
     void processCommandLine(const std::string& cmd);
 
     void onScreenResize(int width, int height);
-    void onSwichFullscreen(bool fullscreen);
 
     void onKeyPress(int key, bool keyDown);
     void onMouseMove(int x, int y);

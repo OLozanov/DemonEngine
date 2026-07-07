@@ -73,6 +73,7 @@ public:
 	void addItem(const std::string& item);
 	size_t selection() { return m_index; }
 	void selectItem(size_t index);
+	void setItem(size_t index);
 
 	void onMouseButtonUp(int button, short x, short y) override;
 	void onMouseOver() override;

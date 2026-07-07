@@ -19,6 +19,7 @@ struct Settings
     size_t resolution = 7;
     bool fullscreen = false;
     bool vsync = false;
+    size_t filtering = 0;
 
     bool gi = true;
 
@@ -31,7 +32,6 @@ public:
     VideoPanel(UI::Widget* parent, Settings& settings, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 
     void update();
-    void updateFullscreenStatus();
 
 private:
     Settings& m_settings;
@@ -39,11 +39,15 @@ private:
     Widgets::Label m_resLabel;
     Widgets::Label m_windowedLabel;
     Widgets::Label m_vsyncLabel;
+    Widgets::Label m_filteringLabel;
     Widgets::Label m_giLabel;
+
+    Widgets::Label m_warningLabel;
 
     Widgets::ComboBox m_resolutionCombo;
     Widgets::CheckBox m_windowedChbox;
     Widgets::CheckBox m_vsyncChbox;
+    Widgets::ComboBox m_filteringCombo;
     
     Widgets::CheckBox m_giChbox;
 
@@ -112,7 +116,6 @@ public:
 
     const Settings& settings() const { return m_settingsPanel.settings(); }
     void setSettings(const Settings& settings) { m_settingsPanel.setSettings(settings); }
-    void setFullscreenStatus(bool fullscreen) { m_settingsPanel.setFullscreenStatus(fullscreen); }
 
     void display() override;
 
