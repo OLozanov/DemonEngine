@@ -195,6 +195,8 @@ void Player::setGhostMode(bool ghost)
 
 void Player::swim(bool swimming)
 {
+    if (m_climbArea) return;
+
     m_swim = swimming;
 
     if (m_walk) m_acceleration = m_swim ? vec3(0, -3.0, 0) : vec3(0, -9.8, 0);

@@ -56,8 +56,6 @@ Game::Game()
 
     m_randomGenerator.seed(1729);
 
-    AudioManager::GetInstance().setVolume(0.5);
-
     UI::UiLayer& uiLayer = UI::UiLayer::GetInstance();
 
     m_sceneManager.setSkybox("sky01");
@@ -699,18 +697,36 @@ void Game::weaponFire()
             reinterpret_cast<Hitable*>(traceInfo.object)->hit(point, direction, 5);
         }
 
-        if (traceInfo.dist < 200)
+        if (traceInfo.dist < 200.0f)
         {
-            vec3 hitpos = camera.pos() + direction * (traceInfo.dist - 0.05);
+            vec3 hitpos = camera.pos() + direction * traceInfo.dist; 
+            vec3 genpos = camera.pos() + direction * (traceInfo.dist - 0.05f);
 
             Particle* particle = nullptr;
 
             if ((traceInfo.layers & collision_character) != 0)
-                particle = new Particle(hitpos, 0.07f, { 0, -0.1f, 0 }, 0.0f, 0.4f, ResourceManager::GetImage("Effects/blood01.dds"));
+                particle = new Particle(genpos, 0.07f, { 0, -0.1f, 0 }, 0.0f, 0.4f, ResourceManager::GetImage("Effects/blood01.dds"));
             else
-                particle = new Particle(hitpos, 0.1f, traceInfo.norm * 0.3f, 2.0f, 1.8f, ResourceManager::GetImage("Effects/smoke.dds"));
+                particle = new Particle(genpos, 0.1f, traceInfo.norm * 0.3f, 2.0f, 1.8f, ResourceManager::GetImage("Effects/smoke.dds"));
 
             m_objects.append(particle);
+
+            if (traceInfo.object == nullptr)
+            {
+                vec3 z = traceInfo.norm;
+                vec3 x = cammat[0] - z * (cammat[0] * z);
+
+                x.normalize();
+                vec3 y = z ^ x;
+
+                mat3 orientation = { x, y, z };
+
+                static constexpr vec3 decalsz = { 0.02f, 0.02f, 0.05f };
+                Material* material = ResourceManager::GetMaterial("Decals/concrete_hole");
+
+                Render::Decal* decal = new Render::Decal(hitpos, orientation, decalsz, material);
+                m_sceneManager.addDecal(decal);
+            }
         }
     }
 }

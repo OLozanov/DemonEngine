@@ -16,6 +16,7 @@ bool FrustumLeafVis(const vec3& pos, const vec3* frustum, const vec4& plane, con
 bool FrustumObjVis(const vec3& pos, const vec3* frustum, const vec4& plane, const DisplayObject& obj);
 
 float PlaneDist(const vec4& plane, const DisplayObject* obj);
+float PlaneDist(const vec4& plane, const vec3& bbox, const vec3& pos, const mat3& mat);
 
 bool LeafVis(const vec3& pos, const Portal& portal, const BBox& bbox);
 bool ObjVis(const vec3& pos, const Portal& portal, const DisplayObject* obj);

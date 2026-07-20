@@ -761,6 +761,9 @@
     <ClInclude Include="Game\Core\Buoyancy.h">
       <Filter>Source\Game\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Decal.h">
+      <Filter>Source\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Render\Shaders\GI.hlsl">

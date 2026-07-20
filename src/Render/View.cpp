@@ -65,6 +65,19 @@ void View::addObjectData(DisplayObject* object)
     for (const InstanceData& data : object->instanceData()) m_instancedList.push_back(&data);
 }
 
+void View::addDecal(Decal* decal)
+{
+    const vec3& size = decal->size();
+    float dist = Clipping::PlaneDist(m_screenPlane, size, decal->pos(), decal->orientation());
+
+    float maxdist = std::max(size.x, size.y) * (1.0f + 1.41f) * 500.0f + 0.1f;
+
+    if (dist > maxdist) return;
+
+    decal->setFrame(m_frame);
+    m_decalList.push_back(decal);
+}
+
 void View::markAll(const Frustum& frustum)
 {
     Index lfid = 0;
@@ -170,6 +183,16 @@ void View::markZoneObjects(const Frustum& frustum, Index zind)
         if (!viewDynamic && obj->isDynamic()) continue;
 
         if (frustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
+    }
+
+    if (m_flags & ViewDecals)
+    {
+        for (Decal* decal : zone.decals)
+        {
+            if (m_frame == decal->frame()) continue;
+
+            if (frustum.test(decal->pos(), decal->size(), decal->orientation())) addDecal(decal);
+        }
     }
 
     for (FogVolume* volume : zone.fogVolumes)
@@ -328,7 +351,7 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd, Index
             }
         }
 
-        //Object visibility
+        // Object visibility
         for (DisplayObject* obj : opzone.objects)
         {
             if (m_frame == obj->frame()) continue;
@@ -350,6 +373,17 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd, Index
             }
 
             if (pfrustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
+        }
+
+        // Decal visibility
+        if (m_flags & ViewDecals)
+        {
+            for (Decal* decal : opzone.decals)
+            {
+                if (m_frame == decal->frame()) continue;
+
+                if (pfrustum.test(decal->pos(), decal->size(), decal->orientation())) addDecal(decal);
+            }
         }
 
         zoneVisibility(pos, pfrustum, opzoneInd, zoneInd);
@@ -421,12 +455,23 @@ void View::zoneVisibility(vec3 pos, const Frustum& frustum, Index zoneInd)
             }
         }
 
-        //Object visibility
+        // Object visibility
         for (DisplayObject* obj : opzone.objects)
         {
             if (m_frame == obj->frame()) continue;
 
             if (pfrustum.test(obj->bbox(), obj->mat())) addObjectData(obj);
+        }
+
+        // Decal visibility
+        if (m_flags & ViewDecals)
+        {
+            for (Decal* decal : opzone.decals)
+            {
+                if (m_frame == decal->frame()) continue;
+
+                if (pfrustum.test(decal->pos(), decal->size(), decal->orientation())) addDecal(decal);
+            }
         }
 
         // Fog volumes visibility
@@ -462,7 +507,7 @@ void View::updateVisibility(const vec3& pos, const Frustum& frustum, uint64_t fr
     m_displayList[DisplayDebug].clear();
 
     m_instancedList.clear();
-
+    m_decalList.clear();
     m_fogVolumes.clear();
 
     m_global.vertexData = m_world.vertexData();

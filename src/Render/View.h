@@ -9,6 +9,7 @@ namespace Render
 
 class Light;
 using LightList = std::vector<Light*>;
+using DecalList = std::vector<Decal*>;
 using FogVolumeList = std::vector<FogVolume*>;
 
 class View
@@ -21,7 +22,8 @@ public:
         ViewStatic = 4,
         ViewDynamic = 8,
         ViewInstanced = 16,
-        ViewRestrictDist = 32,
+        ViewDecals = 32,
+        ViewRestrictDist = 64,
     };
 
     enum DisplayType
@@ -46,6 +48,7 @@ public:
     void update(const vec3& dir, uint64_t frame);
 
     const DisplayList& displayList(size_t type) const { return m_displayList[type]; }
+    const DecalList& decalList() const { return m_decalList; }
     const FogVolumeList& fogVolumes() const { return m_fogVolumes; }
     const InstancedList& instancedList() const { return m_instancedList; }
 
@@ -56,6 +59,7 @@ public:
 
 private:
     void addObjectData(DisplayObject* object);
+    void addDecal(Decal* decal);
 
     void markAll(const Frustum& frustum);
     void markAll(const vec3& pos);
@@ -81,6 +85,7 @@ private:
 
     DisplayList m_displayList[DisplayListNum];
     InstancedList m_instancedList;
+    DecalList m_decalList;
     FogVolumeList m_fogVolumes;
 
     std::vector<Index> m_visLeaves;

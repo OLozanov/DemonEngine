@@ -100,6 +100,32 @@ void World::traceLight(Light* light, Node& node, const vec3& pos, const vec3& bb
     }
 }
 
+void World::traceDecal(Decal* decal, Node& node, const vec3& pos, const vec3& bbox, const vec3* axis)
+{
+    if (node.leaf != InvalidIndex)
+    {
+        Leaf& leaf = m_leafs[node.leaf];
+
+        Zone& zone = m_zones[leaf.zone];
+        decal->addReference(zone.decals);
+
+        return;
+    }
+
+    float r = fabs(axis[0] * node.plane.xyz) * bbox.x + fabs(axis[1] * node.plane.xyz) * bbox.y + fabs(axis[2] * node.plane.xyz) * bbox.z;
+    float dist = pos * node.plane.xyz + node.plane.w;
+
+    if ((dist + r) > -math::eps)
+    {
+        if (node.right != InvalidIndex) traceDecal(decal, m_nodes[node.right], pos, bbox, axis);
+    }
+
+    if ((dist - r) < math::eps)
+    {
+        if (node.left != InvalidIndex) traceDecal(decal , m_nodes[node.left], pos, bbox, axis);
+    }
+}
+
 void World::traceFogVolume(FogVolume* volume, Node& node, const vec3& pos, const vec3& bbox)
 {
     if (node.leaf != InvalidIndex)
@@ -147,6 +173,12 @@ void World::addLight(Light* light)
 {
     float ldist = light->radius() + light->falloff();
     traceLight(light, m_nodes[0], light->pos(), { ldist, ldist, ldist });
+}
+
+void  World::addDecal(Decal* decal)
+{
+    const mat3& mat = decal->orientation();
+    traceDecal(decal, m_nodes[0], decal->pos(), decal->size(), &mat[0]);
 }
 
 void World::addFogVolume(FogVolume* volume)

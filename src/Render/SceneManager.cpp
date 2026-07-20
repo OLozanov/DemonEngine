@@ -15,7 +15,7 @@ SceneManager::SceneManager()
 , m_wireframe(false)
 , m_enableGI(true)
 , m_frontBuffer(0)
-, m_mainView(m_world, View::ViewLeafs | View::ViewStatic | View::ViewDynamic | View::ViewInstanced)
+, m_mainView(m_world, View::ViewLeafs | View::ViewStatic | View::ViewDynamic | View::ViewInstanced | View::ViewDecals)
 , m_dirLightView(m_world)
 , m_dirLightActive(false)
 , m_width(1280)
@@ -140,6 +140,7 @@ void SceneManager::reset()
 {
     m_lights.destroy();
     m_objects.clear();
+    m_decals.destroy();
     m_skeletalData.clear();
     m_fogVolumes.destroy();
     m_world.reset();
@@ -286,6 +287,18 @@ void SceneManager::removeObject(DisplayObject* object)
 {
     object->clearReferences();
     m_objects.remove(object);
+}
+
+void SceneManager::addDecal(Decal* decal)
+{
+    m_decals.append(decal);
+    m_world.addDecal(decal);
+}
+
+void SceneManager::removeDecal(Decal* decal)
+{
+    decal->clearReferences();
+    m_decals.remove(decal);
 }
 
 void SceneManager::addFogVolume(FogVolume* volume)
@@ -612,6 +625,30 @@ void SceneManager::geometryPass()
         m_geometryCommandList.bindBuffer(3, ResourceManager::MaterialHeap());
         m_geometryCommandList.bind(5, 0);
         m_geometryCommandList.drawLayered(m_mainView.displayList(View::DisplayLayered));
+    }
+
+    // decals
+    if (!m_mainView.decalList().empty())
+    {
+        m_geometryCommandList.barrier(m_depthBuffer[m_frontBuffer], STATE_PIXEL_SHADER_READ);
+        m_geometryCommandList.setRenderMode(RenderingPipeline::rm_gbuffer_decal);
+
+        m_geometryCommandList.bindFrameBuffer(m_gbuffer[m_frontBuffer], false);
+
+        m_geometryCommandList.bindConstantBuffer(0, m_sceneConstantBuffer);
+        m_geometryCommandList.bindBuffer(2, ResourceManager::MaterialHeap());
+        m_geometryCommandList.bind(3, m_depthBuffer[m_frontBuffer]);
+        m_geometryCommandList.bind(4, 0);
+
+        m_geometryCommandList.setTopology(topology_trianglestrip);
+        m_geometryCommandList.bindVertexBuffer(m_volumeVertexBuffer);
+        m_geometryCommandList.bindIndexBuffer(m_volumeIndexBuffer);
+
+        for (const Decal* decal : m_mainView.decalList())
+        {
+            m_geometryCommandList.setConstant(1, decal->data());
+            m_geometryCommandList.drawIndexed(14);
+        }
     }
    
     m_geometryCommandList.finish();
@@ -1353,6 +1390,10 @@ void SceneManager::setupView()
     m_topleft = worldMat * vec3(-m_fovx, m_fovy, 1.0f);
     m_xdir = worldMat[0] * m_fovx * (2.0 / m_width);
     m_ydir = -(worldMat[1] * m_fovy * (2.0 / m_height));
+
+    m_sceneConstantBuffer->topleft.xyz = m_topleft;
+    m_sceneConstantBuffer->xdir.xyz = m_xdir;
+    m_sceneConstantBuffer->ydir.xyz = m_ydir;
 
     m_raytraceContantBuffer->topleft = m_topleft;
     m_raytraceContantBuffer->xdir = m_xdir;

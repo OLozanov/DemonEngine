@@ -116,9 +116,9 @@ void CommandList::bindBuffer(UINT index, D3D12_GPU_VIRTUAL_ADDRESS buffer)
     m_commandList->SetGraphicsRootShaderResourceView(index, buffer);
 }
 
-void CommandList::bindFrameBuffer(const FrameBuffer& frameBuffer)
+void CommandList::bindFrameBuffer(const FrameBuffer& frameBuffer, bool depth)
 {
-    m_commandList->OMSetRenderTargets(frameBuffer.size(), frameBuffer.renderTargets(), FALSE, frameBuffer.depthStencil());
+    m_commandList->OMSetRenderTargets(frameBuffer.size(), frameBuffer.renderTargets(), FALSE, depth ? frameBuffer.depthStencil() : NULL);
 }
 
 void CommandList::bindFrameBuffer(const Bitmap& colorBuffer)

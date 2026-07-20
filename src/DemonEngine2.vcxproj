@@ -332,6 +332,7 @@
     <ClInclude Include="Render\AnimatedObject.h" />
     <ClInclude Include="Render\CompositeObject.h" />
     <ClInclude Include="Render\D3D\D3DRender.h" />
+    <ClInclude Include="Render\Decal.h" />
     <ClInclude Include="Render\DirectionalLight.h" />
     <ClInclude Include="Render\ArticulatedObject.h" />
     <ClInclude Include="Render\Camera.h" />

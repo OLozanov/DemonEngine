@@ -5,6 +5,7 @@
 #include "Collision/Collision.h"
 
 #include "Render/DisplayObject.h"
+#include "Render/Decal.h"
 #include "Render/FogVolume.h"
 #include "Render/Render.h"
 
@@ -87,6 +88,7 @@ struct Zone
     std::vector<Index> portals;
 
     RefList<DisplayObject> objects;
+    RefList<Decal> decals;
     RefList<FogVolume> fogVolumes;
 };
 
@@ -106,6 +108,7 @@ class World
 
     void traceObject(DisplayObject* object, Node& node, const vec3& pos, const vec3& bbox, const vec3* axis);
     void traceLight(Light* light, Node& node, const vec3& pos, const vec3& bbox);
+    void traceDecal(Decal* decal, Node& node, const vec3& pos, const vec3& bbox, const vec3* axis);
     void traceFogVolume(FogVolume* volume, Node& node, const vec3& pos, const vec3& bbox);
 
 public:
@@ -149,6 +152,7 @@ public:
 
     void addObject(DisplayObject* object);
     void addLight(Light* light);
+    void addDecal(Decal* decal);
     void addFogVolume(FogVolume* volume);
 
     void moveObject(DisplayObject* object);

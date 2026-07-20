@@ -47,10 +47,11 @@ public:
         rm_gbuffer_overlay = 15,
         rm_gbuffer_instanced = 16,
         rm_gbuffer_surface = 17,
-        rm_emissive = 18,
-        rm_transparent = 19,
-        rm_fog = 20,
-        rm_tone_mapping = 21,
+        rm_gbuffer_decal = 18,
+        rm_emissive = 19,
+        rm_transparent = 20,
+        rm_fog = 21,
+        rm_tone_mapping = 22,
         rm_count
     };
 
@@ -93,6 +94,7 @@ private:
     static void SetupShadowCubeShader();
     static void SetupGBufferShader();
     static void SetupSurfaceShader();
+    static void SetupDecalShader();
     static void SetupEmissiveShader();
     static void SetupTransparentShader();
     static void SetupFogShader();

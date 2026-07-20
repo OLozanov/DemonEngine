@@ -107,6 +107,14 @@ float PlaneDist(const vec4& plane, const DisplayObject* object)
     return dist - r;
 }
 
+float PlaneDist(const vec4& plane, const vec3& bbox, const vec3& pos, const mat3& mat)
+{
+    float r = fabs(mat[0] * plane.xyz) * bbox.x + fabs(mat[1] * plane.xyz) * bbox.y + fabs(mat[2] * plane.xyz) * bbox.z;
+    float dist = plane.xyz * pos + plane.w;
+
+    return dist - r;
+}
+
 bool OBBVis(vec3 pos, const Portal& portal, vec3 box, vec3 bpos, vec3* axis)
 {
     unsigned long vnum;

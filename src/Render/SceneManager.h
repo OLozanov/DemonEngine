@@ -16,6 +16,7 @@
 #include "Render/Light.h"
 #include "Render/DirectionalLight.h"
 #include "Render/DisplayObject.h"
+#include "Render/Decal.h"
 #include "Render/FogVolume.h"
 
 #include <map>
@@ -114,6 +115,9 @@ public:
 
     void addObject(DisplayObject* object);
     void removeObject(DisplayObject* object);
+
+    void addDecal(Decal* decal);
+    void removeDecal(Decal* decal);
 
     void addFogVolume(FogVolume* volume);
     void removeFogVolume(FogVolume* volume);
@@ -219,6 +223,7 @@ private:
     LinkedList<Light> m_lights;
     LinkedList<DisplayObject> m_objects;
     LinkedList<SkeletalData> m_skeletalData;
+    LinkedList<Decal> m_decals;
     LinkedList<FogVolume> m_fogVolumes;
 
     LinkedList<DisplayObject> m_overlayObjects;

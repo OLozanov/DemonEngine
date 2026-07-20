@@ -6,7 +6,7 @@
 namespace Collision
 {
 
-using MaterialId = uint32_t;
+using MaterialType = uint32_t;
 
 struct ContactInfo
 {
@@ -37,7 +37,7 @@ struct CollisionPolygon
     std::vector<vec3> verts;
     vec4 plane;
     
-    MaterialId material;
+    MaterialType material;
 
     bool isPointInside(const vec3& pt) const;
     bool isInsidePerimeter(const vec3& pt) const;
