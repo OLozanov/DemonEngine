@@ -60,6 +60,8 @@ float4 PSMain(PSInput input) : SV_TARGET
 	{
 		uint diffuse = materials[baseMaterial].diffuse_map;
 		float3 color = image[diffuse].Sample(g_sampler, input.tcoord).xyz;
+		
+		color *= colorAlpha.xyz;
 	
 		return float4(color, 1.0);
 	}
@@ -67,11 +69,18 @@ float4 PSMain(PSInput input) : SV_TARGET
 	float3 color = float3(0, 0, 0);
 	float ralpha = 1.0;
 	    
-	uint x1 = input.maskcoord.x;
-	uint y1 = input.maskcoord.y;
+	uint x1 = min(input.maskcoord.x, width - 1);
+	uint y1 = min(input.maskcoord.y, height - 1);
 	
-	uint x2 = min(x1 + 1, width);
-	uint y2 = min(y1 + 1, height);
+	uint x2 = min(x1 + 1, width - 1);
+	uint y2 = min(y1 + 1, height - 1);
+	
+	uint size = width * height;
+	
+	uint4 offset = uint4(y1 * width + x1,
+	                     y1 * width + x2,
+	                     y2 * width + x1,
+	                     y2 * width + x2);
 	
 	float fx = input.maskcoord.x - x1;
 	float fy = input.maskcoord.y - y1;
@@ -83,12 +92,12 @@ float4 PSMain(PSInput input) : SV_TARGET
 		
 	for (int i = layernum - 1; i >= 0; i--)
 	{				
-		uint baseptr = width * height * i;
+		uint baseptr = size * i;
 		
-		float4 values = float4(layer_masks[baseptr + y1 * width + x1],
-		                       layer_masks[baseptr + y1 * width + x2],
-		                       layer_masks[baseptr + y2 * width + x1],
-		                       layer_masks[baseptr + y2 * width + x2]);
+		float4 values = float4(layer_masks[baseptr + offset[0]],
+		                       layer_masks[baseptr + offset[1]],
+		                       layer_masks[baseptr + offset[2]],
+		                       layer_masks[baseptr + offset[3]]);
 		
 		float alpha = dot(values, weights);
 					  

@@ -15,13 +15,14 @@ public:
 
     const BBox& bbox() const { return m_bbox; }
 
-    const TexturedVertex& vertex(size_t i) const { return m_vertexBuffer[i]; }
-    TexturedVertex& vertex(size_t i) { return m_vertexBuffer[i]; }
+    const TexturedVertex& vertex(size_t i) const { return m_vertices[i]; }
+    TexturedVertex& vertex(size_t i) { return m_vertices[i]; }
 
-    const TexturedVertex& vertex(size_t i, size_t k) const { return m_vertexBuffer[k * m_xsize + i]; }
-    TexturedVertex& vertex(size_t i, size_t k) { return m_vertexBuffer[k * m_xsize + i]; }
+    const TexturedVertex& vertex(size_t i, size_t k) const { return m_vertices[k * m_xsize + i]; }
+    TexturedVertex& vertex(size_t i, size_t k) { return m_vertices[k * m_xsize + i]; }
 
     void updateBBox();
+    void flushVertices();
 
     size_t xsize() const { return m_xsize; }
     size_t ysize() const { return m_ysize; }
@@ -47,6 +48,8 @@ protected:
     size_t m_ysize;
 
     size_t m_indexNum;
+
+    std::vector<TexturedVertex> m_vertices;
 
     Render::VertexArray<TexturedVertex> m_vertexBuffer;
     Render::IndexBuffer m_indexBuffer;

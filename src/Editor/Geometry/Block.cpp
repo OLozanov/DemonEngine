@@ -1586,7 +1586,7 @@ void Block::displayVertices(Render::CommandList& commandList) const
 void Block::displayGeometry(Render::CommandList& commandList) const
 {
     commandList.bindVertexBuffer(m_geometry);
-    commandList.bind(4, m_faces);
+    commandList.bindBuffer(4, m_faces);
     commandList.draw(m_geometry.size());
 
     //for (const Render::DisplayData& elem : m_displayData)
@@ -1621,10 +1621,22 @@ void Block::displaySurfaces(Render::CommandList& commandList, const Render::Frus
 
         const Material* material = surface->material();
 
-        uint32_t params[4] = { surface->material()->id, surface->layerNum(), surface->xsize(), surface->ysize()};
+        size_t layers = surface->layerNum();
+
+        uint32_t params[4] = { surface->material()->id, layers, surface->xsize(), surface->ysize()};
         commandList.setConstant(3, params, 4);
-        commandList.bind(5, surface->maskBuffer());
-        commandList.bind(6, surface->layersBuffer());
+        
+        if (layers)
+        {
+            commandList.bindBuffer(5, surface->maskBuffer());
+            commandList.bindBuffer(6, surface->layersBuffer());
+        }
+        else
+        {
+            commandList.bindBuffer(5, 0);
+            commandList.bindBuffer(6, 0);
+        }
+
         surface->display(commandList);
     }
 }

@@ -281,7 +281,7 @@ public:
     void scaleCp(const vec3& scale);
 
     void surfaceIntersect(const vec3& origin, const vec3& ray);
-    void surfaceDisplace(const vec3& origin, const vec3& ray);
+    void surfaceEdit(const vec3& origin, const vec3& ray, bool reverse);
 
     void addSurfaceDetails(size_t layer, const std::string& model, const std::string& material, float density);
     void clearSurfaceDetails();

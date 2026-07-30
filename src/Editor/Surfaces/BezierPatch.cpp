@@ -261,7 +261,7 @@ void BezierPatch::calcTexCoords(const vec2& t1, const vec2& t2, const vec2& t3, 
 
         for (int k = 0; k < m_xsize; k++)
         {
-            m_vertexBuffer[vptr].tcoord = tvert;
+            m_vertices[vptr].tcoord = tvert;
             vptr++;
 
             tvert += tedge;
@@ -274,10 +274,10 @@ void BezierPatch::calcTexCoords(const vec2& t1, const vec2& t2, const vec2& t3, 
 
 void BezierPatch::calcTexCoords(const vec3& s, const vec3& t, const vec2& uv)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)
+    for (int i = 0; i < m_vertices.size(); i++)
     {
-        const vec3& vert = m_vertexBuffer[i].position;
-        m_vertexBuffer[i].tcoord = vec2(vert * s, vert * t) + uv;
+        const vec3& vert = m_vertices[i].position;
+        m_vertices[i].tcoord = vec2(vert * s, vert * t) + uv;
     }
 }
 
@@ -382,7 +382,7 @@ void BezierPatch::update()
         for (int i = 0; i < m_xsize; i++)
         {
             size_t ind = k * m_xsize + i;
-            m_vertexBuffer[ind].position = blend(i, k, m_blendX, m_blendY);
+            m_vertices[ind].position = blend(i, k, m_blendX, m_blendY);
         }
     }
 

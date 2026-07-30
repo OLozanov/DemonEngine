@@ -49,8 +49,6 @@ struct TexturedVertex
     vec2 tcoord;
 };
 
-//enum DisplayType
-
 struct GeometryData
 {
     uint32_t offset;

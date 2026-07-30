@@ -194,7 +194,7 @@ public:
 
         buffer->Map(0, &readRange, reinterpret_cast<void**>(&data));
 
-        if (m_size != 0) memcpy(data, m_mappedData, std::min<size_t>(m_size, size) * sizeof(T));
+        //if (m_size != 0) memcpy(data, m_mappedData, std::min<size_t>(m_size, size) * sizeof(T));
 
         m_size = size;
         m_buffer = buffer;
@@ -227,6 +227,21 @@ public:
 
     T& operator[](UINT i) { return m_mappedData[i]; }
     const T& operator[](UINT i) const { return m_mappedData[i]; }
+
+    StreamBuffer& operator=(const std::vector<T>& data)
+    {
+        size_t newsize = data.size();
+
+        if (m_size != newsize)
+        {
+            m_size = newsize;
+            resize(newsize);
+        }
+
+        memcpy(m_mappedData, data.data(), m_size * sizeof(T));
+
+        return *this;
+    }
 
     operator bool() const { return static_cast<bool>(m_buffer); }
     operator UINT() const { return m_srvHandle; }

@@ -2815,7 +2815,7 @@ void Editor::surfaceIntersect(const vec3& origin, const vec3& ray)
     if (m_pointSurface) m_surfaceIntersect = origin + ray * dist;
 }
 
-void Editor::surfaceDisplace(const vec3& origin, const vec3& ray)
+void Editor::surfaceEdit(const vec3& origin, const vec3& ray, bool reverse)
 {
     bool pick = false;
 
@@ -2888,13 +2888,19 @@ void Editor::surfaceDisplace(const vec3& origin, const vec3& ray)
             switch (m_displaceMode)
             {
             case DisplaceMode::Up:
-                surface->displace(pickPoint - poly->owner->pos(), power, m_displaceRadius);
+                if (!reverse)
+                    surface->displace(pickPoint - poly->owner->pos(), power, m_displaceRadius);
+                else
+                    surface->displace(pickPoint - poly->owner->pos(), -power, m_displaceRadius);
             break;
             case DisplaceMode::Down:
                 surface->displace(pickPoint - poly->owner->pos(), -power, m_displaceRadius);
             break;
             case DisplaceMode::Paint:
-                surface->paintLayer(pickPoint - poly->owner->pos(), m_displaceRadius, m_paintLayer - 1);
+                if (!reverse)
+                    surface->paintLayer(pickPoint - poly->owner->pos(), m_displaceRadius, m_paintLayer - 1);
+                else
+                    surface->eraseLayer(pickPoint - poly->owner->pos(), m_displaceRadius, m_paintLayer - 1);
             break;
             }
         }
@@ -3126,11 +3132,12 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
         m_commandList.setConstant(1, mat4());
         m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
         m_commandList.bind(5, 0);
-        m_commandList.bind(3, ResourceManager::MaterialHeapHandle());
+        m_commandList.bindBuffer(3, ResourceManager::MaterialHeap());
 
         for (const Block* block : m_displayBlocks)
         {
             if (block->type() == BlockType::Edit) continue;
+            if (block->hasSurfaces()) continue;
             block->displayGeometry(m_commandList);
         }
     }
@@ -3236,7 +3243,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
         m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple);
         m_commandList.setTopology(Render::topology_trianglelist);
         m_commandList.bind(5, 0);
-        m_commandList.bind(3, ResourceManager::MaterialHeapHandle());
+        m_commandList.bindBuffer(3, ResourceManager::MaterialHeap());
 
         for (Object* object : m_displayRegular) object->display(m_commandList, DisplayType::Regular);
     }
@@ -3269,9 +3276,9 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
         m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple_surface);
         m_commandList.setTopology(Render::topology_trianglelist);
         m_commandList.bind(7, 0);
-        m_commandList.bind(4, ResourceManager::MaterialHeapHandle());
-        m_commandList.bind(5, 0);
-        m_commandList.bind(6, 0);
+        m_commandList.bindBuffer(4, ResourceManager::MaterialHeap());
+        m_commandList.bindBuffer(5, 0);
+        m_commandList.bindBuffer(6, 0);
 
         for (Surface* surface : m_displaySurfaces)
         {
@@ -3306,7 +3313,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
     m_commandList.setTopology(Render::topology_trianglelist);
     m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
     m_commandList.bind(7, 0);
-    m_commandList.bind(4, ResourceManager::MaterialHeapHandle());
+    m_commandList.bindBuffer(4, ResourceManager::MaterialHeap());
 
     for (const Block* block : m_blocks)
     {

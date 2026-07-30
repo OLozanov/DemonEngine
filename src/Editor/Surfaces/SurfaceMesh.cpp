@@ -12,6 +12,7 @@ SurfaceMesh::SurfaceMesh(size_t xsize, size_t ysize)
 {
     size_t size = m_xsize * m_ysize;
 
+    m_vertices.resize(size);
     m_vertexBuffer.resize(size);
 
     initIndices();
@@ -56,12 +57,12 @@ void SurfaceMesh::updateBBox()
 {
     m_bbox = {};
 
-    m_bbox.min = m_vertexBuffer[0].position;
-    m_bbox.max = m_vertexBuffer[0].position;
+    m_bbox.min = m_vertices[0].position;
+    m_bbox.max = m_vertices[0].position;
 
-    for (int i = 1; i < m_vertexBuffer.size(); i++)
+    for (int i = 1; i < m_vertices.size(); i++)
     {
-        const vec3& vert = m_vertexBuffer[i].position;
+        const vec3& vert = m_vertices[i].position;
 
         m_bbox.min.x = std::min(m_bbox.min.x, vert.x);
         m_bbox.min.y = std::min(m_bbox.min.y, vert.y);
@@ -73,24 +74,37 @@ void SurfaceMesh::updateBBox()
     }
 }
 
+void SurfaceMesh::flushVertices()
+{
+    m_vertexBuffer = m_vertices;
+}
+
 void SurfaceMesh::moveTexCoordS(float val)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)	m_vertexBuffer[i].tcoord.x += val;
+    for (int i = 0; i < m_vertices.size(); i++)	m_vertices[i].tcoord.x += val;
+
+    flushVertices();
 }
 
 void SurfaceMesh::moveTexCoordT(float val)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)	m_vertexBuffer[i].tcoord.y += val;
+    for (int i = 0; i < m_vertices.size(); i++)	m_vertices[i].tcoord.y += val;
+
+    flushVertices();
 }
 
 void SurfaceMesh::scaleTexCoordS(float val)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)	m_vertexBuffer[i].tcoord.x *= val;
+    for (int i = 0; i < m_vertices.size(); i++)	m_vertices[i].tcoord.x *= val;
+
+    flushVertices();
 }
 
 void SurfaceMesh::scaleTexCoordT(float val)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)	m_vertexBuffer[i].tcoord.y *= val;
+    for (int i = 0; i < m_vertices.size(); i++)	m_vertices[i].tcoord.y *= val;
+
+    flushVertices();
 }
 
 void SurfaceMesh::rotateTexCoord(float ang)
@@ -98,13 +112,15 @@ void SurfaceMesh::rotateTexCoord(float ang)
     float Cos = cos(ang / 180.0f * math::pi);
     float Sin = sin(ang / 180.0f * math::pi);
 
-    for (int i = 0; i < m_vertexBuffer.size(); i++)
+    for (int i = 0; i < m_vertices.size(); i++)
     {
-        vec2 tc = m_vertexBuffer[i].tcoord;
+        vec2 tc = m_vertices[i].tcoord;
 
-        m_vertexBuffer[i].tcoord.x = tc.x * Cos - tc.y * Sin;
-        m_vertexBuffer[i].tcoord.y = tc.x * Sin + tc.y * Cos;
+        m_vertices[i].tcoord.x = tc.x * Cos - tc.y * Sin;
+        m_vertices[i].tcoord.y = tc.x * Sin + tc.y * Cos;
     }
+
+    flushVertices();
 }
 
 bool SurfaceMesh::pick(const vec3& origin, const vec3& ray, float& dist) const
@@ -118,9 +134,9 @@ bool SurfaceMesh::pick(const vec3& origin, const vec3& ray, float& dist) const
             int ind = k * m_xsize + i;
 
             {
-                const vec3& v0 = m_vertexBuffer[ind].position;
-                const vec3& v1 = m_vertexBuffer[ind + 1].position;
-                const vec3& v2 = m_vertexBuffer[ind + m_xsize].position;
+                const vec3& v0 = m_vertices[ind].position;
+                const vec3& v1 = m_vertices[ind + 1].position;
+                const vec3& v2 = m_vertices[ind + m_xsize].position;
 
                 float d;
 
@@ -135,9 +151,9 @@ bool SurfaceMesh::pick(const vec3& origin, const vec3& ray, float& dist) const
             }
 
             {
-                const vec3& v0 = m_vertexBuffer[ind + 1].position;
-                const vec3& v1 = m_vertexBuffer[ind + m_xsize + 1].position;
-                const vec3& v2 = m_vertexBuffer[ind + m_xsize].position;
+                const vec3& v0 = m_vertices[ind + 1].position;
+                const vec3& v1 = m_vertices[ind + m_xsize + 1].position;
+                const vec3& v2 = m_vertices[ind + m_xsize].position;
 
                 float d;
 

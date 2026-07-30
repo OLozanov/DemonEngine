@@ -188,7 +188,7 @@ void Editor::readBlocks(FILE* file)
 
                     for (size_t l = 0; l < layers; l++)
                     {
-                        LayerOrientation orientation;
+                        LayerType orientation;
                         Material* material;
 
                         fread(&orientation, sizeof(uint8_t), 1, file);

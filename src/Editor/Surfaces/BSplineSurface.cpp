@@ -138,6 +138,8 @@ void BSplineSurface::update()
         for (BezierPatch& patch : m_patches) patch.calcTexCoords(m_s, m_t, m_uv);
 
     updateBBox();
+
+    for (BezierPatch& patch : m_patches) patch.flushVertices();
 }
 
 void BSplineSurface::reconfig()

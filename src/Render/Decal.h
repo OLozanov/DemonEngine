@@ -35,9 +35,7 @@ public:
           Material* material)
           : m_material(material)
           , m_orientation(orientation)
-          , m_data(orientation[0], orientation[1], orientation[2], pos, 
-            size, 
-            material->id)
+          , m_data({orientation[0], orientation[1], orientation[2], pos, size, material->id})
     {
     }
 

@@ -27,6 +27,7 @@ EditSurface::EditSurface(Block* block, BlockPolygon* polygon, size_t size)
 EditSurface::EditSurface(BlockPolygon* polygon, size_t size,
                         const std::vector<TexturedVertex>& vertices,
                         std::vector<vec3>& normals)
+: SurfaceMesh(size, size)
 {
     m_xsize = size;
     m_ysize = size;
@@ -34,8 +35,7 @@ EditSurface::EditSurface(BlockPolygon* polygon, size_t size,
     initIndices();
 
     size_t datasize = m_xsize * m_ysize;
-
-    m_vertexBuffer.resize(datasize);
+    memcpy(m_vertices.data(), vertices.data(), datasize * sizeof(TexturedVertex));
     memcpy(m_vertexBuffer.data(), vertices.data(), datasize * sizeof(TexturedVertex));
     
     m_normals = std::move(normals);
@@ -82,9 +82,9 @@ void EditSurface::tesselate(const Block* block, const BlockPolygon* poly)
 
         for (int k = 0; k < m_xsize; k++)
         {
-            m_vertexBuffer[vptr].position = vert;
-            m_vertexBuffer[vptr].tcoord.x = vert * poly->s + poly->tcoord.x;
-            m_vertexBuffer[vptr].tcoord.y = vert * -poly->t + poly->tcoord.y;
+            m_vertices[vptr].position = vert;
+            m_vertices[vptr].tcoord.x = vert * poly->s + poly->tcoord.x;
+            m_vertices[vptr].tcoord.y = vert * -poly->t + poly->tcoord.y;
             vptr++;
 
             vert += edge;
@@ -95,6 +95,7 @@ void EditSurface::tesselate(const Block* block, const BlockPolygon* poly)
     }
 
     updateBBox();
+    flushVertices();
 }
 
 void EditSurface::initNormals(const Block* block, const BlockPolygon* poly)
@@ -135,22 +136,26 @@ void EditSurface::updateTempBuffers()
 {
     for (size_t i = 0; i < m_xsize * m_ysize; i++)
     {
-        m_tempVertices[i] = m_vertexBuffer[i].position;
+        m_tempVertices[i] = m_vertices[i].position;
         m_tempNormals[i] = m_normals[i];
     }
+
+    flushVertices();
 }
 
 void EditSurface::applyChanges()
 {
-    for (size_t i = 0; i < m_xsize * m_ysize; i++) m_vertexBuffer[i].position = m_tempVertices[i];
+    for (size_t i = 0; i < m_xsize * m_ysize; i++) m_vertices[i].position = m_tempVertices[i];
     std::swap(m_normals, m_tempNormals);
+
+    flushVertices();
 }
 
 void EditSurface::applyTransform(const mat4& mat)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)
+    for (int i = 0; i < m_vertices.size(); i++)
     {
-        vec3& vert = m_vertexBuffer[i].position;
+        vec3& vert = m_vertices[i].position;
         vec3& norm = m_normals[i];
 
         vert = mat * vert;
@@ -158,13 +163,14 @@ void EditSurface::applyTransform(const mat4& mat)
     }
 
     updateBBox();
+    flushVertices();
 }
 
 void EditSurface::scale(const vec3& scale)
 {
-    for (int i = 0; i < m_vertexBuffer.size() ; i++)
+    for (int i = 0; i < m_vertices.size() ; i++)
     {
-        vec3& vert = m_vertexBuffer[i].position;
+        vec3& vert = m_vertices[i].position;
         vert.x *= scale.x;
         vert.y *= scale.y;
         vert.z *= scale.z;
@@ -178,12 +184,18 @@ void EditSurface::scale(const vec3& scale)
     }
 
     updateBBox();
+    flushVertices();
 }
 
 void EditSurface::setLayerMask(const std::vector<float>& layerMask)
 {
     m_maskBuffer.resize(layerMask.size());
     memcpy(m_maskBuffer.data(), layerMask.data(), layerMask.size() * sizeof(float));
+
+    size_t layerSize = m_xsize * m_ysize;
+
+    for (size_t i = 0; i < m_layers.size(); i++)
+        memcpy(m_layers[i].mask.data(), layerMask.data() + layerSize * i, layerSize * sizeof(float));
 }
 
 void EditSurface::addLayer(Material* material)
@@ -196,15 +208,20 @@ void EditSurface::addLayer(Material* material)
     m_layersBuffer.resize(m_layers.size() * 2);
 
     for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
+
+    size_t lid = m_layers.size() - 1;
+    memset(m_layers[lid].mask.data(), 0, size * sizeof(float));
+
+    for (size_t i = 0; i < m_layers.size(); i++)
+        memcpy(m_maskBuffer.data() + size * i, m_layers[i].mask.data(), size * sizeof(float));
 }
 
-void EditSurface::addLayer(Material* material, LayerOrientation orientation)
+void EditSurface::addLayer(Material* material, LayerType orientation)
 {
     size_t size = m_xsize * m_ysize;
     size_t base = m_layers.size() * size;
 
-    m_layers.emplace_back(material, orientation);
-
+    m_layers.emplace_back(material, orientation, size);
     m_layersBuffer.resize(m_layers.size() * 2);
 
     for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
@@ -232,9 +249,9 @@ void EditSurface::clearDetails()
 
 void EditSurface::displace(const vec3& point, float power, float radius)
 {
-    for (int i = 0; i < m_vertexBuffer.size(); i++)
+    for (int i = 0; i < m_vertices.size(); i++)
     {
-        vec3& vert = m_vertexBuffer[i].position;
+        vec3& vert = m_vertices[i].position;
 
         float dist = (point - vert).length();
 
@@ -242,6 +259,8 @@ void EditSurface::displace(const vec3& point, float power, float radius)
         {
             float factor = (1.0 - dist / radius) * power;
             vert += m_normals[i] * factor;
+            
+            m_vertexBuffer[i].position = vert;
         }
     }
 
@@ -255,9 +274,9 @@ void EditSurface::paintLayer(const vec3& point, float radius, size_t lid)
     SurfaceLayer& layer = m_layers[lid];
     size_t baseptr = m_xsize * m_ysize * lid;
 
-    for (int i = 0; i < m_vertexBuffer.size(); i++)
+    for (int i = 0; i < m_vertices.size(); i++)
     {
-        vec3& vert = m_vertexBuffer[i].position;
+        vec3& vert = m_vertices[i].position;
 
         float dist = (point - vert).length();
 
@@ -267,8 +286,36 @@ void EditSurface::paintLayer(const vec3& point, float radius, size_t lid)
 
             float rdst = std::max(0.0f, radius - dist);
             float value = rdst > falloff ? 1.0 : rdst / falloff;
-            float alpha = std::min(1.0f, m_maskBuffer[baseptr + i] + value * 0.2f);
+            float alpha = std::min(1.0f, m_layers[lid].mask[i] + value * 0.2f);
 
+            m_layers[lid].mask[i] = alpha;
+            m_maskBuffer[baseptr + i] = alpha;
+        }
+    }
+}
+
+void EditSurface::eraseLayer(const vec3& point, float radius, size_t lid)
+{
+    if (m_layers.size() <= lid) return;
+
+    SurfaceLayer& layer = m_layers[lid];
+    size_t baseptr = m_xsize * m_ysize * lid;
+
+    for (int i = 0; i < m_vertices.size(); i++)
+    {
+        vec3& vert = m_vertices[i].position;
+
+        float dist = (point - vert).length();
+
+        if (dist < radius)
+        {
+            constexpr float falloff = 3.0f;
+
+            float rdst = std::max(0.0f, radius - dist);
+            float value = rdst > falloff ? 1.0 : rdst / falloff;
+            float alpha = std::max(0.0f, m_layers[lid].mask[i] - value * 0.2f);
+
+            m_layers[lid].mask[i] = alpha;
             m_maskBuffer[baseptr + i] = alpha;
         }
     }
@@ -284,7 +331,7 @@ void EditSurface::collectVertices(const vec3& center, float radius, std::vector<
     {
         for (int k = 0; k < m_xsize; k++)
         {
-            vec3& vert = m_vertexBuffer[vptr].position;
+            vec3& vert = m_vertices[vptr].position;
 
             float dist = (point - vert).length();
 
@@ -305,7 +352,7 @@ void EditSurface::convolve(const vec3& center, float radius, float& value, vec3&
     {
         for (int k = 0; k < m_xsize; k++)
         {
-            const vec3& vert = m_vertexBuffer[vptr].position;
+            const vec3& vert = m_vertices[vptr].position;
             const vec3& vnorm = m_normals[vptr];
 
             float dist = (point - vert).length();
@@ -322,18 +369,18 @@ void EditSurface::convolve(const vec3& center, float radius, float& value, vec3&
     }
 }
 
-void EditSurface::buildVertices()
+void EditSurface::buildGeometry()
 {
     size_t ptr = 0;
 
-    m_vertices.resize(m_xsize * m_ysize);
+    m_geometry.resize(m_xsize * m_ysize);
 
     for (int k = 0; k < m_ysize; k++)
     {
         for (int i = 0; i < m_xsize; i++)
         {
-            m_vertices[ptr].position = vertex(i, k).position;
-            m_vertices[ptr].tcoord = vertex(i, k).tcoord;
+            m_geometry[ptr].position = vertex(i, k).position;
+            m_geometry[ptr].tcoord = vertex(i, k).tcoord;
 
             int x = (i == m_xsize - 1) ? m_xsize - 2 : i;
             int y = (k == m_ysize - 1) ? m_ysize - 2 : k;
@@ -358,7 +405,7 @@ void EditSurface::buildVertices()
             binormal.normalize();
             normal.normalize();
 
-            m_vertices[ptr].normal = normal;
+            m_geometry[ptr].normal = normal;
 
             const vec2& ta = vertex(i1).tcoord;
             const vec2& tb = vertex(i2).tcoord;
@@ -369,8 +416,8 @@ void EditSurface::buildVertices()
 
             TriangleTangentSpace(a, b, c, ta, tb, tc, s, t);
 
-            m_vertices[ptr].tangent = s;
-            m_vertices[ptr].binormal = -t;
+            m_geometry[ptr].tangent = s;
+            m_geometry[ptr].binormal = -t;
 
             ptr++;
         }
@@ -391,7 +438,8 @@ void EditSurface::writeLayers(FILE* file) const
         fwrite(m_layers[l].material->name.c_str(), 1, tlen, file);
     }
 
-    fwrite(m_maskBuffer.data(), sizeof(float), m_maskBuffer.size(), file);
+    for (size_t l = 0; l < m_layers.size(); l++)
+        fwrite(m_layers[l].mask.data(), sizeof(float), m_layers[l].mask.size(), file);
 }
 
 void EditSurface::writeLayerDetails(FILE* file) const
@@ -425,7 +473,7 @@ void EditSurface::write(FILE* file) const
     fwrite(&size, sizeof(uint16_t), 1, file);
     fwrite(&id, sizeof(uint16_t), 1, file);
 
-    fwrite(m_vertexBuffer.data(), sizeof(TexturedVertex), m_vertexBuffer.size(), file);
+    fwrite(m_vertices.data(), sizeof(TexturedVertex), m_vertices.size(), file);
     fwrite(m_normals.data(), sizeof(vec3), m_normals.size(), file);
 
     writeLayers(file);
@@ -443,7 +491,7 @@ void EditSurface::writeGameInfo(FILE* file) const
     fwrite(&size, 1, sizeof(uint16_t), file);
     fwrite(&size, 1, sizeof(uint16_t), file);
     fwrite(&pos, 1, sizeof(vec3), file);
-    fwrite(m_vertices.data(), sizeof(Vertex), m_vertices.size(), file);
+    fwrite(m_geometry.data(), sizeof(Vertex), m_geometry.size(), file);
 
     uint16_t tlen = m_material->name.size();
     fwrite(&tlen, 1, sizeof(uint16_t), file);
@@ -461,7 +509,7 @@ void EditSurface::writeGameInfo(FILE* file) const
         {
             size_t ind = k * m_xsize + i;
 
-            fwrite(&m_vertexBuffer[ind].position, 1, sizeof(vec3), file);
+            fwrite(&m_geometry[ind].position, 1, sizeof(vec3), file);
         }
     }
 }

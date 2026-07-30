@@ -758,7 +758,7 @@ void SurfaceGraph::smooth(const vec3& center, float power, float radius)
 
 void SurfaceGraph::buildGeometry()
 {
-    for (SurfaceFace& face : m_faces) face.surface->buildVertices();
+    for (SurfaceFace& face : m_faces) face.surface->buildGeometry();
 
     for (size_t i = 0; i < m_edges.size(); i++) blendEdgeTangentSpace(i);
     for (size_t i = 0; i < m_vertices.size(); i++) blendVertexTangentSpace(i);

@@ -12,6 +12,7 @@ PerspectiveView::PerspectiveView(wxWindow* parent, Editor& editor)
 , m_mouseMove(false)
 , m_axisLock(false)
 , m_appendSelection(false)
+, m_ctrl(false)
 , m_moveSpeed(0.3)
 {
     m_camera.setPos({ -3, 3, -3 });
@@ -438,7 +439,7 @@ void PerspectiveView::onMouseMove(wxMouseEvent* event)
 
         if (type == EditType::Displace)
         {
-            m_editor.surfaceDisplace(m_camera.pos(), ray);
+            m_editor.surfaceEdit(m_camera.pos(), ray, m_ctrl);
             Refresh();
 
             return;
@@ -589,6 +590,7 @@ void PerspectiveView::onKeyDown(wxKeyEvent* event)
     case 'Y': m_ylock = true; break;
     case 'Z': m_zlock = true; break;
     case WXK_SHIFT: m_appendSelection = true; break;
+    case WXK_CONTROL: m_ctrl = true; break;
     case WXK_DELETE: m_editor.deleteSelected(); break;
     //case WXK_CONTROL: mstate &= ~ACT_CONTROL; break;
     }
@@ -610,6 +612,7 @@ void PerspectiveView::onKeyUp(wxKeyEvent* event)
         event->Skip();
     break;
     case WXK_SHIFT: m_appendSelection = false; break;
+    case WXK_CONTROL: m_ctrl = false; break;
     }
 
     determineLockAxis();

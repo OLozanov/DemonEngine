@@ -60,6 +60,7 @@ private:
     bool m_ylock;
     bool m_zlock;
     bool m_appendSelection;
+    bool m_ctrl;
 
     int m_curX;
     int m_curY;

@@ -15,28 +15,30 @@ struct SurfaceVertexLink
     vec3& norm;
 };
 
-enum class LayerOrientation : uint8_t
+enum class LayerType : uint8_t
 {
     Normal,
-    Rot90,
-    Rot180,
-    Rot270
+    Triplanar
 };
 
 struct SurfaceLayer
 {
-    LayerOrientation orientation;
+    LayerType orientation;
     ResourcePtr<Material> material;
+
+    std::vector<float> mask;
 
     SurfaceLayer(Material* mat, size_t size)
     : material(mat)
-    , orientation(LayerOrientation::Normal)
+    , orientation(LayerType::Normal)
+    , mask(size * size)
     {
     }
 
-    SurfaceLayer(Material* mat, LayerOrientation orientation)
+    SurfaceLayer(Material* mat, LayerType orientation, size_t size)
     : material(mat)
     , orientation(orientation)
+    , mask(size* size)
     {
     }
 };
@@ -92,7 +94,7 @@ public:
     void setLayerMask(const std::vector<float>& layerMask);
 
     void addLayer(Material* material);
-    void addLayer(Material* material, LayerOrientation orientation);
+    void addLayer(Material* material, LayerType orientation);
     void deleteLayer(size_t n);
     const std::vector<SurfaceLayer>& layers() { return m_layers; }
 
@@ -108,6 +110,7 @@ public:
 
     void displace(const vec3& point, float power, float radius);
     void paintLayer(const vec3& point, float radius, size_t layer);
+    void eraseLayer(const vec3& point, float radius, size_t layer);
 
     void collectVertices(const vec3& center, float radius, std::vector<SurfaceVertexLink>& vlist);
     void convolve(const vec3& center, float radius, float& value, vec3& norm, float& num) const;
@@ -120,10 +123,10 @@ public:
     void setSurfaceGraph(SurfaceGraphPtr& surfaceGraph) { m_surfaceGraph = surfaceGraph; }
     SurfaceGraph* surfaceGraph() { return m_surfaceGraph.get(); }
 
-    void buildVertices();
+    void buildGeometry();
 
-    const Vertex& tsVertex(size_t i, size_t k) const { return m_vertices[k * m_xsize + i]; }
-    Vertex& tsVertex(size_t i, size_t k) { return m_vertices[k * m_xsize + i]; }
+    const Vertex& tsVertex(size_t i, size_t k) const { return m_geometry[k * m_xsize + i]; }
+    Vertex& tsVertex(size_t i, size_t k) { return m_geometry[k * m_xsize + i]; }
 
 private:
     void tesselate(const Block* block, const BlockPolygon* poly);
@@ -139,7 +142,7 @@ private:
     std::vector<vec3> m_tempVertices;
     std::vector<vec3> m_tempNormals;
     
-    std::vector<Vertex> m_vertices;
+    std::vector<Vertex> m_geometry;
 
     std::vector<SurfaceLayer> m_layers;
     std::vector<SurfaceLayerDetails> m_layerDetails;

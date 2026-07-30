@@ -204,7 +204,7 @@ void MeshObject::display(Render::CommandList& commandList, DisplayType displayTy
     commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * m_mat);
     commandList.bindVertexBuffer(m_model->vertexBuffer());
     commandList.bindIndexBuffer(m_model->indexBuffer());
-    commandList.bind(4, m_model->faceBuffer());
+    commandList.bindBuffer(4, m_model->faceBuffer());
 
     if (m_selected) commandList.setConstant(2, vec4(0.0, 0.8, 0.0, 1.0));
     else commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));

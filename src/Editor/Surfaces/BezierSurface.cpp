@@ -69,12 +69,14 @@ void BezierSurface::update()
 
     if (m_mapMode == TextureMapping::TSpace) m_bezierPatch.calcTexCoords(m_s, m_t, m_uv);
 
+    m_bezierPatch.flushVertices();
     updateBBox();
 }
 
 void BezierSurface::updateTCoord()
 {
     m_bezierPatch.calcTexCoords(m_s, m_t, m_uv);
+    m_bezierPatch.flushVertices();
 }
 
 uint32_t BezierSurface::getXResolution()
@@ -107,6 +109,8 @@ void BezierSurface::setResolution(uint32_t x, uint32_t y)
 
     if (m_mapMode == TextureMapping::TCoords) m_bezierPatch.calcTexCoords(t1, t2, t3, t4);
     else m_bezierPatch.calcTexCoords(m_s, m_t, m_uv);
+
+    m_bezierPatch.flushVertices();
 }
 
 bool BezierSurface::pick(const vec3& origin, const vec3& ray, vec3& point, float& dist) const
