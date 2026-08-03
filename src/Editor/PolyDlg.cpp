@@ -48,7 +48,14 @@ void PolyDlgImpl::update()
         m_layerList->Disable();
         m_addLayerBtn->Disable();
         m_delLayerBtn->Disable();
-        m_editLayerBtn->Disable();
+        m_layerUpBtn->Disable();
+        m_layerDownBtn->Disable();
+
+        m_tesselateBox->Disable();
+        m_mappingCaption->Disable();
+        m_mappingCombo->Disable();
+
+        m_tesselateBox->SetValue(false);
     break;
     case EditorSelectionType::One:
     {
@@ -103,6 +110,14 @@ void PolyDlgImpl::update()
         {
             const std::vector<SurfaceLayer>& layers = surface->layers();
             for (const SurfaceLayer& layer : layers) m_layerList->Append(layer.material->name);
+
+            m_mappingCombo->SetSelection(static_cast<uint32_t>(surface->baseLayerType()));
+
+            m_tesselateBox->SetValue(surface->tesselationEnabled());
+        }
+        else
+        {
+            m_tesselateBox->SetValue(false);
         }
     }
     break;
@@ -131,6 +146,12 @@ void PolyDlgImpl::update()
         m_smgroopEdit->Enable();
         m_subdivideBtn->Enable();
         m_resEdit->Enable();
+
+        m_tesselateBox->Disable();
+        m_mappingCaption->Disable();
+        m_mappingCombo->Disable();
+
+        m_tesselateBox->SetValue(false);
     break;
     }
 
@@ -154,7 +175,12 @@ void PolyDlgImpl::update()
         m_layerList->Enable(editLayers);
         m_addLayerBtn->Enable(surface != nullptr);
         m_delLayerBtn->Enable(editLayers);
-        m_editLayerBtn->Enable(editLayers);
+        m_layerUpBtn->Enable(editLayers);
+        m_layerDownBtn->Enable(editLayers);
+
+        m_tesselateBox->Enable(editLayers);
+        m_mappingCaption->Enable(editLayers);
+        m_mappingCombo->Enable(editLayers);
     }
 }
 
@@ -302,6 +328,9 @@ void PolyDlgImpl::onAddLayer(wxCommandEvent& event)
 
 void PolyDlgImpl::onDeleteLayer(wxCommandEvent& event)
 {
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
     EditSurface* surface = m_editor.getPolygonSurface();
 
     if (!surface) return;
@@ -317,6 +346,133 @@ void PolyDlgImpl::onDeleteLayer(wxCommandEvent& event)
     m_editor.updateViews();
 }
 
-void PolyDlgImpl::onEditLayer(wxCommandEvent& event)
+void PolyDlgImpl::onLayerUp(wxCommandEvent& event)
 {
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+
+    if (!surface) return;
+
+    int idx = m_layerList->GetSelection();
+
+    if (idx == 0) return;
+
+    if (idx != wxNOT_FOUND)
+    {
+        const wxString& matname = m_layerList->GetString(idx);
+        m_layerList->Delete(idx);
+        m_layerList->Insert(matname, idx - 1);
+        m_layerList->SetSelection(idx - 1);
+        
+        surface->moveLayerUp(idx);
+
+        m_editor.updateViews();
+    }
+}
+
+void PolyDlgImpl::onLayerDown(wxCommandEvent& event)
+{
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+
+    if (!surface) return;
+
+    int idx = m_layerList->GetSelection();
+
+    if (idx == m_layerList->GetCount() - 1) return;
+
+    if (idx != wxNOT_FOUND)
+    {
+        const wxString& matname = m_layerList->GetString(idx);
+        m_layerList->Delete(idx);
+        m_layerList->Insert(matname, idx + 1);
+        m_layerList->SetSelection(idx + 1);
+
+        surface->moveLayerDown(idx);
+
+        m_editor.updateViews();
+    }
+}
+
+void PolyDlgImpl::onLayerDeselect(wxCommandEvent& event)
+{
+    m_layerList->Deselect(wxNOT_FOUND);
+
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+    if (!surface) return;
+
+    m_mappingCombo->SetSelection(static_cast<uint32_t>(surface->baseLayerType()));
+}
+
+void PolyDlgImpl::onLayer(wxCommandEvent& event)
+{
+    int idx = event.GetInt();
+
+    if (idx == wxNOT_FOUND) return;
+
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+    if (!surface) return;
+
+    m_mappingCombo->SetSelection(static_cast<uint32_t>(surface->layer(idx).type));
+}
+
+void PolyDlgImpl::onLayerDClick(wxCommandEvent& event)
+{
+    int idx = event.GetInt();
+
+    if (idx == wxNOT_FOUND) return;
+
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+    if (!surface) return;
+
+    if (m_resourceDlg->open("Textures", ".mtl", false) == wxID_OK)
+    {
+        const wxString& matname = m_resourceDlg->getPath();
+        surface->setMaterial(m_editor.loadMaterial(matname.ToStdString()), idx);
+
+        m_layerList->SetString(idx, matname);
+
+        m_editor.updateViews();
+    }
+}
+
+void PolyDlgImpl::onTesselationBox(wxCommandEvent& event)
+{
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+    if (!surface) return;
+
+    surface->enableTesselation(m_tesselateBox->IsChecked());
+}
+
+void PolyDlgImpl::onMappingChange(wxCommandEvent& event)
+{
+    EditorSelectionType polyNum = m_editor.selectedPolygonsNum();
+    if (polyNum != EditorSelectionType::One) return;
+
+    EditSurface* surface = m_editor.getPolygonSurface();
+    if (!surface) return;
+
+    int layer = m_layerList->GetSelection();
+    int idx = m_mappingCombo->GetSelection();
+
+    if (layer == wxNOT_FOUND)
+        surface->setLayerType(static_cast<LayerType>(idx));
+    else
+        surface->setLayerType(static_cast<LayerType>(idx), layer);
 }

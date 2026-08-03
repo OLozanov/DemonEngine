@@ -444,7 +444,12 @@ class PolyDlg : public wxDialog
 		wxListBox* m_layerList;
 		wxButton* m_addLayerBtn;
 		wxButton* m_delLayerBtn;
-		wxButton* m_editLayerBtn;
+		wxButton* m_layerUpBtn;
+		wxButton* m_layerDownBtn;
+		wxButton* m_layerDeselectBtn;
+		wxCheckBox* m_tesselateBox;
+		wxStaticText* m_mappingCaption;
+		wxChoice* m_mappingCombo;
 		wxButton* m_subdivideBtn;
 		wxTextCtrl* m_resEdit;
 
@@ -471,9 +476,15 @@ class PolyDlg : public wxDialog
 		virtual void onRotateDown( wxSpinEvent& event ) { event.Skip(); }
 		virtual void onRotateUp( wxSpinEvent& event ) { event.Skip(); }
 		virtual void onRotateRateChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onLayer( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onLayerDClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onAddLayer( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onDeleteLayer( wxCommandEvent& event ) { event.Skip(); }
-		virtual void onEditLayer( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onLayerUp( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onLayerDown( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onLayerDeselect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onTesselationBox( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onMappingChange( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onSubdivide( wxCommandEvent& event ) { event.Skip(); }
 
 

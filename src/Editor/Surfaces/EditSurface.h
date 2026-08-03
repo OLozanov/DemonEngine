@@ -17,30 +17,33 @@ struct SurfaceVertexLink
 
 enum class LayerType : uint8_t
 {
-    Normal,
+    TCoord,
     Triplanar
 };
 
 struct SurfaceLayer
 {
-    LayerType orientation;
+    LayerType type;
     ResourcePtr<Material> material;
 
     std::vector<float> mask;
 
     SurfaceLayer(Material* mat, size_t size)
     : material(mat)
-    , orientation(LayerType::Normal)
+    , type(LayerType::TCoord)
     , mask(size * size)
     {
     }
 
-    SurfaceLayer(Material* mat, LayerType orientation, size_t size)
+    SurfaceLayer(Material* mat, LayerType type, size_t size)
     : material(mat)
-    , orientation(orientation)
-    , mask(size* size)
+    , type(type)
+    , mask(size * size)
     {
     }
+
+    SurfaceLayer(SurfaceLayer&& ptr) noexcept = default;
+    SurfaceLayer& operator=(SurfaceLayer&& ptr) noexcept = default;
 };
 
 struct SurfaceLayerDetails
@@ -77,6 +80,11 @@ public:
     void setMaterial(Material* material) { m_material.reset(material); }
     const Material* material() const { return m_material.get(); }
 
+    void setMaterial(Material* material, size_t layer);
+
+    void enableTesselation(bool enable) { m_tesselation = enable; }
+    bool tesselationEnabled() const { return m_tesselation; }
+
     const Block& owner() const { return *m_owner; }
 
     const vec3& normal(size_t i, size_t k) const { return m_normals[k * m_xsize + i]; }
@@ -94,9 +102,20 @@ public:
     void setLayerMask(const std::vector<float>& layerMask);
 
     void addLayer(Material* material);
-    void addLayer(Material* material, LayerType orientation);
+    void addLayer(Material* material, LayerType type);
     void deleteLayer(size_t n);
-    const std::vector<SurfaceLayer>& layers() { return m_layers; }
+    const std::vector<SurfaceLayer>& layers() const { return m_layers; }
+    SurfaceLayer& layer(size_t n) { return m_layers[n]; }
+    const SurfaceLayer& layer(size_t n) const { return m_layers[n]; }
+
+    void setLayerType(LayerType type);
+    void setLayerType(LayerType type, size_t layer);
+
+    LayerType baseLayerType() const { return m_baseLayer; }
+    
+    void swapLayers(size_t l1, size_t l2);
+    void moveLayerUp(size_t layer);
+    void moveLayerDown(size_t layer);
 
     size_t layerNum() const { return m_layers.size(); }
 
@@ -135,6 +154,9 @@ private:
     Block* m_owner;
     BlockPolygon* m_polygon;
 
+    bool m_tesselation;
+
+    LayerType m_baseLayer;
     ResourcePtr<Material> m_material;
 
     std::vector<vec3> m_normals;

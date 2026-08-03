@@ -43,7 +43,15 @@ private:
 
 	void onAddLayer(wxCommandEvent& event) override;
 	void onDeleteLayer(wxCommandEvent& event) override;
-	void onEditLayer(wxCommandEvent& event) override;
+	void onLayerUp(wxCommandEvent& event) override;
+	void onLayerDown(wxCommandEvent& event) override;
+	void onLayerDeselect(wxCommandEvent& event) override;
+
+	void onLayer(wxCommandEvent& event) override;
+	void onLayerDClick(wxCommandEvent& event) override;
+
+	void onTesselationBox(wxCommandEvent& event) override;
+	void onMappingChange(wxCommandEvent& event) override;
 
     Editor& m_editor;
 	ResourceDlgImpl* m_resourceDlg;

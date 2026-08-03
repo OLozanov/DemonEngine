@@ -1375,14 +1375,48 @@ PolyDlg::PolyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_delLayerBtn = new wxButton( this, wxID_ANY, wxT("-"), wxDefaultPosition, wxSize( 20,20 ), 0 );
 	bSizer102->Add( m_delLayerBtn, 0, wxALL, 5 );
 
-	m_editLayerBtn = new wxButton( this, wxID_ANY, wxT("edit"), wxDefaultPosition, wxSize( 40,20 ), 0 );
-	bSizer102->Add( m_editLayerBtn, 0, wxALL, 5 );
+	m_layerUpBtn = new wxButton( this, wxID_ANY, wxT("<"), wxDefaultPosition, wxSize( 20,20 ), 0 );
+	bSizer102->Add( m_layerUpBtn, 0, wxALL, 5 );
+
+	m_layerDownBtn = new wxButton( this, wxID_ANY, wxT(">"), wxDefaultPosition, wxSize( 20,20 ), 0 );
+	bSizer102->Add( m_layerDownBtn, 0, wxALL, 5 );
+
+	m_layerDeselectBtn = new wxButton( this, wxID_ANY, wxT("."), wxDefaultPosition, wxSize( 20,20 ), 0 );
+	bSizer102->Add( m_layerDeselectBtn, 0, wxALL, 5 );
 
 
 	bSizer101->Add( bSizer102, 1, wxEXPAND, 5 );
 
 
 	bSizer13->Add( bSizer101, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer116;
+	bSizer116 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer117;
+	bSizer117 = new wxBoxSizer( wxVERTICAL );
+
+	m_tesselateBox = new wxCheckBox( this, wxID_ANY, wxT("Tesselation"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer117->Add( m_tesselateBox, 1, wxALL, 5 );
+
+	wxBoxSizer* bSizer118;
+	bSizer118 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_mappingCaption = new wxStaticText( this, wxID_ANY, wxT("Layer Mapping:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_mappingCaption->Wrap( -1 );
+	bSizer118->Add( m_mappingCaption, 0, wxALL, 5 );
+
+	wxString m_mappingComboChoices[] = { wxT("UV coordinates"), wxT("Triplanar") };
+	int m_mappingComboNChoices = sizeof( m_mappingComboChoices ) / sizeof( wxString );
+	m_mappingCombo = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_mappingComboNChoices, m_mappingComboChoices, 0 );
+	m_mappingCombo->SetSelection( 0 );
+	bSizer118->Add( m_mappingCombo, 0, wxALL, 5 );
+
+
+	bSizer117->Add( bSizer118, 1, wxEXPAND, 5 );
+
+
+	bSizer116->Add( bSizer117, 1, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer100;
 	bSizer100 = new wxBoxSizer( wxHORIZONTAL );
@@ -1396,7 +1430,10 @@ PolyDlg::PolyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	bSizer100->Add( m_resEdit, 0, wxALIGN_BOTTOM|wxALL, 5 );
 
 
-	bSizer13->Add( bSizer100, 1, wxALIGN_BOTTOM, 5 );
+	bSizer116->Add( bSizer100, 0, wxEXPAND, 5 );
+
+
+	bSizer13->Add( bSizer116, 1, wxEXPAND, 5 );
 
 
 	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );
@@ -1433,9 +1470,15 @@ PolyDlg::PolyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_rotateBtn->Connect( wxEVT_SCROLL_LINEDOWN, wxSpinEventHandler( PolyDlg::onRotateDown ), NULL, this );
 	m_rotateBtn->Connect( wxEVT_SCROLL_LINEUP, wxSpinEventHandler( PolyDlg::onRotateUp ), NULL, this );
 	m_rotateEdit->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PolyDlg::onRotateRateChanged ), NULL, this );
+	m_layerList->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( PolyDlg::onLayer ), NULL, this );
+	m_layerList->Connect( wxEVT_COMMAND_LISTBOX_DOUBLECLICKED, wxCommandEventHandler( PolyDlg::onLayerDClick ), NULL, this );
 	m_addLayerBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onAddLayer ), NULL, this );
 	m_delLayerBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onDeleteLayer ), NULL, this );
-	m_editLayerBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onEditLayer ), NULL, this );
+	m_layerUpBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onLayerUp ), NULL, this );
+	m_layerDownBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onLayerDown ), NULL, this );
+	m_layerDeselectBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onLayerDeselect ), NULL, this );
+	m_tesselateBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( PolyDlg::onTesselationBox ), NULL, this );
+	m_mappingCombo->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PolyDlg::onMappingChange ), NULL, this );
 	m_subdivideBtn->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onSubdivide ), NULL, this );
 }
 
@@ -1464,9 +1507,15 @@ PolyDlg::~PolyDlg()
 	m_rotateBtn->Disconnect( wxEVT_SCROLL_LINEDOWN, wxSpinEventHandler( PolyDlg::onRotateDown ), NULL, this );
 	m_rotateBtn->Disconnect( wxEVT_SCROLL_LINEUP, wxSpinEventHandler( PolyDlg::onRotateUp ), NULL, this );
 	m_rotateEdit->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PolyDlg::onRotateRateChanged ), NULL, this );
+	m_layerList->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( PolyDlg::onLayer ), NULL, this );
+	m_layerList->Disconnect( wxEVT_COMMAND_LISTBOX_DOUBLECLICKED, wxCommandEventHandler( PolyDlg::onLayerDClick ), NULL, this );
 	m_addLayerBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onAddLayer ), NULL, this );
 	m_delLayerBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onDeleteLayer ), NULL, this );
-	m_editLayerBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onEditLayer ), NULL, this );
+	m_layerUpBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onLayerUp ), NULL, this );
+	m_layerDownBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onLayerDown ), NULL, this );
+	m_layerDeselectBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onLayerDeselect ), NULL, this );
+	m_tesselateBox->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( PolyDlg::onTesselationBox ), NULL, this );
+	m_mappingCombo->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( PolyDlg::onMappingChange ), NULL, this );
 	m_subdivideBtn->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PolyDlg::onSubdivide ), NULL, this );
 
 }

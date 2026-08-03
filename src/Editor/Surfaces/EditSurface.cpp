@@ -187,6 +187,27 @@ void EditSurface::scale(const vec3& scale)
     flushVertices();
 }
 
+void EditSurface::setMaterial(Material* material, size_t layer)
+{
+    if (layer >= m_layers.size()) return;
+
+    m_layers[layer].material = material;
+    m_layersBuffer[layer * 2] = material->id;
+}
+
+void EditSurface::setLayerType(LayerType mapping)
+{
+    m_baseLayer = mapping;
+}
+
+void EditSurface::setLayerType(LayerType type, size_t layer)
+{
+    if (layer >= m_layers.size()) return;
+
+    m_layers[layer].type = type;
+    m_layersBuffer[layer * 2 + 1] = static_cast<uint32_t>(type);
+}
+
 void EditSurface::setLayerMask(const std::vector<float>& layerMask)
 {
     m_maskBuffer.resize(layerMask.size());
@@ -207,7 +228,11 @@ void EditSurface::addLayer(Material* material)
     m_maskBuffer.resize(size * m_layers.size());
     m_layersBuffer.resize(m_layers.size() * 2);
 
-    for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
+    for (size_t i = 0; i < m_layers.size(); i++)
+    {
+        m_layersBuffer[i * 2] = m_layers[i].material->id;
+        m_layersBuffer[i * 2 + 1] = static_cast<uint32_t>(m_layers[i].type);
+    }
 
     size_t lid = m_layers.size() - 1;
     memset(m_layers[lid].mask.data(), 0, size * sizeof(float));
@@ -216,20 +241,67 @@ void EditSurface::addLayer(Material* material)
         memcpy(m_maskBuffer.data() + size * i, m_layers[i].mask.data(), size * sizeof(float));
 }
 
-void EditSurface::addLayer(Material* material, LayerType orientation)
+void EditSurface::addLayer(Material* material, LayerType type)
 {
     size_t size = m_xsize * m_ysize;
     size_t base = m_layers.size() * size;
 
-    m_layers.emplace_back(material, orientation, size);
+    m_layers.emplace_back(material, type, size);
     m_layersBuffer.resize(m_layers.size() * 2);
 
-    for (size_t i = 0; i < m_layers.size(); i++) m_layersBuffer[i * 2] = m_layers[i].material->id;
+    for (size_t i = 0; i < m_layers.size(); i++)
+    {
+        m_layersBuffer[i * 2] = m_layers[i].material->id;
+        m_layersBuffer[i * 2 + 1] = static_cast<uint32_t>(m_layers[i].type);
+    }
 }
 
 void EditSurface::deleteLayer(size_t n)
 {
     m_layers.erase(m_layers.begin() + n);
+
+    for (size_t i = 0; i < m_layers.size(); i++)
+    {
+        m_layersBuffer[i * 2] = m_layers[i].material->id;
+        m_layersBuffer[i * 2 + 1] = static_cast<uint32_t>(m_layers[i].type);
+    }
+
+    size_t size = m_xsize * m_ysize;
+
+    for (size_t i = 0; i < m_layers.size(); i++)
+        memcpy(m_maskBuffer.data() + size * i, m_layers[i].mask.data(), size * sizeof(float));
+}
+
+void EditSurface::swapLayers(size_t l1, size_t l2)
+{
+    if (l1 >= m_layers.size()) return;
+    if (l2 >= m_layers.size()) return;
+
+    std::swap(m_layers[l1], m_layers[l2]);
+
+    m_layersBuffer[l1 * 2] = m_layers[l1].material->id;
+    m_layersBuffer[l2 * 2] = m_layers[l2].material->id;
+
+    m_layersBuffer[l1 * 2 + 1] = static_cast<uint32_t>(m_layers[l1].type);
+    m_layersBuffer[l2 * 2 + 1] = static_cast<uint32_t>(m_layers[l2].type);
+
+    size_t size = m_xsize * m_ysize;
+    memcpy(m_maskBuffer.data() + size * l1, m_layers[l1].mask.data(), size * sizeof(float));
+    memcpy(m_maskBuffer.data() + size * l2, m_layers[l2].mask.data(), size * sizeof(float));
+}
+
+void EditSurface::moveLayerUp(size_t layer)
+{
+    if (layer == 0) return;
+
+    swapLayers(layer, layer - 1);
+}
+
+void EditSurface::moveLayerDown(size_t layer)
+{
+    if (layer == m_layers.size() - 1) return;
+
+    swapLayers(layer, layer + 1);
 }
 
 void EditSurface::addDetails(size_t layer, const std::string& model, const std::string& material, float density)
@@ -431,7 +503,7 @@ void EditSurface::writeLayers(FILE* file) const
 
     for (size_t l = 0; l < m_layers.size(); l++)
     {
-        fwrite(&m_layers[l].orientation, sizeof(uint8_t), 1, file);
+        fwrite(&m_layers[l].type, sizeof(uint8_t), 1, file);
 
         uint16_t tlen = m_layers[l].material->name.size();
         fwrite(&tlen, 1, sizeof(uint16_t), file);
