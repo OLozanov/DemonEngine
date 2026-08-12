@@ -57,6 +57,7 @@ public:
     size_t id() { return m_id; }
 
     void smooth(const vec3& center, float power, float radius);
+    void updateNormals();
     void buildGeometry();
 
 private:
@@ -66,8 +67,11 @@ private:
     std::vector<size_t> findVertexEdges(size_t v);
 
     void fillEdgeVertexPtr(SurfaceFace& face, std::vector<Vertex*>& verts, size_t a, size_t b);
+    void fillEdgeVertexIdx(SurfaceFace& face, std::vector<size_t>& verts, size_t a, size_t b);
     void blendEdgeTangentSpace(size_t e);
     void blendVertexTangentSpace(size_t v);
+    void blendEdgeNormals(size_t e);
+    void blendVertexNormals(size_t v);
 
     void addConjugateEdgeVertex(size_t faceid, size_t a, size_t b, uint16_t i, vec3& pos, vec3& norm);
     void addConjugateVertices(size_t faceid, size_t a, size_t b, size_t c, vec3& pos, vec3& norm, int& n);

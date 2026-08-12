@@ -228,10 +228,10 @@ void BezierSurface::applyScaleInternal()
 
 void BezierSurface::display(Render::CommandList& commandList) const
 {
-    uint32_t params[4] = { m_material->id, 0, 0, 0 };
+    uint32_t params[5] = { m_material->id, 0, 0, 0, 0 };
 
     commandList.setConstant(1, mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale));   
-    commandList.setConstant(3, params, 4);
+    commandList.setConstant(3, params, 5);
     m_bezierPatch.display(commandList);
 }
 

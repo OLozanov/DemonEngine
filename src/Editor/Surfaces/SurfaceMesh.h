@@ -6,6 +6,13 @@
 
 using TexturedVertex = Render::TexturedVertex;
 
+struct NormVertex
+{
+    vec3 position;
+    vec2 tcoord;
+    vec3 normal;
+};
+
 class SurfaceMesh
 {
 public:
@@ -15,14 +22,20 @@ public:
 
     const BBox& bbox() const { return m_bbox; }
 
-    const TexturedVertex& vertex(size_t i) const { return m_vertices[i]; }
-    TexturedVertex& vertex(size_t i) { return m_vertices[i]; }
+    const NormVertex& vertex(size_t i) const { return m_vertices[i]; }
+    NormVertex& vertex(size_t i) { return m_vertices[i]; }
 
-    const TexturedVertex& vertex(size_t i, size_t k) const { return m_vertices[k * m_xsize + i]; }
-    TexturedVertex& vertex(size_t i, size_t k) { return m_vertices[k * m_xsize + i]; }
+    const NormVertex& vertex(size_t i, size_t k) const { return m_vertices[k * m_xsize + i]; }
+    NormVertex& vertex(size_t i, size_t k) { return m_vertices[k * m_xsize + i]; }
+
+    size_t index(size_t i, size_t k) { return k * m_xsize + i; }
+
+    void calculateNormals();
 
     void updateBBox();
+    void updateNormals();
     void flushVertices();
+    void flushNormals();
 
     size_t xsize() const { return m_xsize; }
     size_t ysize() const { return m_ysize; }
@@ -49,9 +62,9 @@ protected:
 
     size_t m_indexNum;
 
-    std::vector<TexturedVertex> m_vertices;
+    std::vector<NormVertex> m_vertices;
 
-    Render::VertexArray<TexturedVertex> m_vertexBuffer;
+    Render::VertexArray<NormVertex> m_vertexBuffer;
     Render::IndexBuffer m_indexBuffer;
 
     BBox m_bbox;

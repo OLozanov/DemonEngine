@@ -53,6 +53,29 @@ void SurfaceMesh::initIndices()
     m_indexNum = indices.size();
 }
 
+void SurfaceMesh::calculateNormals()
+{
+    for (int k = 0; k < m_ysize; k++)
+    {
+        for (int i = 0; i < m_xsize; i++)
+        {
+            size_t x = (i == m_xsize - 1) ? m_xsize - 2 : i;
+            size_t y = (k == m_ysize - 1) ? m_ysize - 2 : k;
+
+            size_t ind = k * m_xsize + i;
+
+            const vec3& a = vertex(x, y).position;
+            const vec3& b = vertex(x, y + 1).position;
+            const vec3& c = vertex(x + 1, y).position;
+
+            vec3 norm = (b - a) ^ (a - c);
+            norm.normalize();
+
+            m_vertices[ind].normal = norm;
+        }
+    }
+}
+
 void SurfaceMesh::updateBBox()
 {
     m_bbox = {};
@@ -74,9 +97,25 @@ void SurfaceMesh::updateBBox()
     }
 }
 
+void SurfaceMesh::updateNormals()
+{
+    calculateNormals();
+    flushNormals();
+}
+
 void SurfaceMesh::flushVertices()
 {
-    m_vertexBuffer = m_vertices;
+    for (size_t i = 0; i < m_vertexBuffer.size(); i++)
+    {
+        m_vertexBuffer[i].position = m_vertices[i].position;
+        m_vertexBuffer[i].tcoord = m_vertices[i].tcoord;
+    }
+}
+
+void SurfaceMesh::flushNormals()
+{
+    for (size_t i = 0; i < m_vertexBuffer.size(); i++)
+        m_vertexBuffer[i].normal = m_vertices[i].normal;
 }
 
 void SurfaceMesh::moveTexCoordS(float val)

@@ -548,12 +548,16 @@ void Editor::applyMaterialToPolygons()
 {
     for (PolygonSelection* poly : m_selectedPolys)
     {
-        poly->origin->material = loadMaterial(m_curmat);
-        poly->owner->setMaterial(loadMaterial(m_curmat), poly->origin->displayList);
+        Material* material = loadMaterial(m_curmat);
 
-        if (poly->origin->surface) poly->origin->surface->setMaterial(loadMaterial(m_curmat));
+        poly->origin->material = material;
 
-        for (EditPolygon* editPoly : poly->origin->editPolygons) editPoly->material = loadMaterial(m_curmat);
+        if (poly->origin->surface) 
+            poly->origin->surface->setMaterial(material);
+        else
+            poly->owner->setMaterial(material, poly->origin->displayList);
+
+        for (EditPolygon* editPoly : poly->origin->editPolygons) editPoly->material = material;
     }
 
     onUpdate();

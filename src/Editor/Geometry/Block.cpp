@@ -1623,8 +1623,8 @@ void Block::displaySurfaces(Render::CommandList& commandList, const Render::Frus
 
         size_t layers = surface->layerNum();
 
-        uint32_t params[4] = { surface->material()->id, layers, surface->xsize(), surface->ysize()};
-        commandList.setConstant(3, params, 4);
+        uint32_t params[5] = { surface->material()->id, static_cast<uint32_t>(surface->baseLayerType()), layers, surface->xsize(), surface->ysize()};
+        commandList.setConstant(3, params, 5);
         
         if (layers)
         {

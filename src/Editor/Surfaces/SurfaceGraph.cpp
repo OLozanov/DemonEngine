@@ -177,6 +177,54 @@ void SurfaceGraph::fillEdgeVertexPtr(SurfaceFace& face, std::vector<Vertex*>& ve
     }
 }
 
+void SurfaceGraph::fillEdgeVertexIdx(SurfaceFace& face, std::vector<size_t>& verts, size_t a, size_t b)
+{
+    EditSurface* surf = face.surface;
+    uint16_t sz = surf->size();
+
+    verts.resize(sz);
+
+    if (face.vertices[0] == a && face.vertices[1] == b)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(i, 0);
+    }
+
+    if (face.vertices[0] == b && face.vertices[1] == a)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(sz - i - 1, 0);
+    }
+
+    if (face.vertices[1] == a && face.vertices[2] == b)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(sz - 1, i);
+    }
+
+    if (face.vertices[1] == b && face.vertices[2] == a)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(sz - 1, sz - i - 1);
+    }
+
+    if (face.vertices[3] == a && face.vertices[2] == b)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(i, sz - 1);
+    }
+
+    if (face.vertices[3] == b && face.vertices[2] == a)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(sz - i - 1, sz - 1);
+    }
+
+    if (face.vertices[0] == a && face.vertices[3] == b)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(0, i);
+    }
+
+    if (face.vertices[0] == b && face.vertices[3] == a)
+    {
+        for (size_t i = 0; i < sz; i++) verts[i] = surf->index(0, sz - i - 1);
+    }
+}
+
 void SurfaceGraph::blendEdgeTangentSpace(size_t e)
 {
     const SurfaceEdge& edge = m_edges[e];
@@ -257,6 +305,73 @@ void SurfaceGraph::blendVertexTangentSpace(size_t v)
         tsverts[v]->tangent = tangent;
         tsverts[v]->binormal = binormal;
     }
+}
+
+void SurfaceGraph::blendEdgeNormals(size_t e)
+{
+    const SurfaceEdge& edge = m_edges[e];
+
+    if (edge.faces.size() < 2) return;
+
+    SurfaceFace& face1 = m_faces[edge.faces[0]];
+    SurfaceFace& face2 = m_faces[edge.faces[1]];
+
+    std::vector<size_t> vptr1;
+    std::vector<size_t> vptr2;
+
+    fillEdgeVertexIdx(face1, vptr1, edge.a, edge.b);
+    fillEdgeVertexIdx(face2, vptr2, edge.a, edge.b);
+
+    for (size_t i = 0; i < vptr1.size(); i++)
+    {
+        size_t idx1 = vptr1[i];
+        size_t idx2 = vptr2[i];
+
+        vec3& norm1 = face1.surface->vertex(idx1).normal;
+        vec3& norm2 = face2.surface->vertex(idx2).normal;
+
+        vec3 normal = (norm1 + norm2) * 0.5f;
+        normal.normalize();
+
+        norm1 = normal;
+        norm2 = normal;
+    }
+}
+
+void SurfaceGraph::blendVertexNormals(size_t v)
+{
+    const SurfaceVertex& vert = m_vertices[v];
+
+    if (vert.faces.size() <= 1) return;
+
+    vec3 normal = {};
+
+    std::vector<NormVertex*> nverts(vert.faces.size());
+
+    for (int f = 0; f < vert.faces.size(); f++)
+    {
+        SurfaceFace& face = m_faces[vert.faces[f]];
+        EditSurface* surf = face.surface;
+
+        uint16_t max = surf->size() - 1;
+
+        size_t i, k;
+
+        if (v == face.vertices[0]) { i = 0; k = 0; }
+        if (v == face.vertices[1]) { i = max; k = 0; }
+        if (v == face.vertices[2]) { i = max; k = max; }
+        if (v == face.vertices[3]) { i = 0; k = max; }
+
+        NormVertex& nvert = surf->vertex(i, k);
+
+        normal += nvert.normal;
+
+        nverts[f] = &nvert;
+    }
+
+    normal.normalize();
+
+    for (int v = 0; v < nverts.size(); v++) nverts[v]->normal = normal;
 }
 
 void SurfaceGraph::addConjugateEdgeVertex(size_t faceid, size_t a, size_t b, uint16_t i, vec3& pos, vec3& norm)
@@ -754,6 +869,17 @@ void SurfaceGraph::smooth(const vec3& center, float power, float radius)
     float normFactor = 0.5 + 0.25 * power / 100.0;
 
     smoothPass(center, vertFactor, normFactor, radius);
+    updateNormals();
+}
+
+void SurfaceGraph::updateNormals()
+{
+    for (SurfaceFace& face : m_faces) face.surface->calculateNormals();
+
+    for (size_t i = 0; i < m_edges.size(); i++) blendEdgeNormals(i);
+    for (size_t i = 0; i < m_vertices.size(); i++) blendVertexNormals(i);
+
+    for (SurfaceFace& face : m_faces) face.surface->flushNormals();
 }
 
 void SurfaceGraph::buildGeometry()

@@ -12,6 +12,7 @@ EditSurface::EditSurface(Block* block, BlockPolygon* polygon, size_t size)
 : SurfaceMesh(size, size)
 , m_owner(block)
 , m_polygon(polygon)
+, m_dirty(false)
 {
     m_material = polygon->material;
 
@@ -28,6 +29,7 @@ EditSurface::EditSurface(BlockPolygon* polygon, size_t size,
                         const std::vector<TexturedVertex>& vertices,
                         std::vector<vec3>& normals)
 : SurfaceMesh(size, size)
+, m_dirty(false)
 {
     m_xsize = size;
     m_ysize = size;
@@ -121,6 +123,7 @@ void EditSurface::initNormals(const Block* block, const BlockPolygon* poly)
         for (int k = 0; k < m_xsize; k++)
         {
             m_normals[vptr] = norm;
+            m_vertexBuffer[vptr].normal = norm;
             vptr++;
         }
     }
@@ -139,8 +142,6 @@ void EditSurface::updateTempBuffers()
         m_tempVertices[i] = m_vertices[i].position;
         m_tempNormals[i] = m_normals[i];
     }
-
-    flushVertices();
 }
 
 void EditSurface::applyChanges()
@@ -164,6 +165,7 @@ void EditSurface::applyTransform(const mat4& mat)
 
     updateBBox();
     flushVertices();
+    updateNormals();
 }
 
 void EditSurface::scale(const vec3& scale)
@@ -337,6 +339,7 @@ void EditSurface::displace(const vec3& point, float power, float radius)
     }
 
     updateBBox();
+    updateNormals();
 }
 
 void EditSurface::paintLayer(const vec3& point, float radius, size_t lid)

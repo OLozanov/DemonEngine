@@ -17,8 +17,8 @@ struct SurfaceVertexLink
 
 enum class LayerType : uint8_t
 {
-    TCoord,
-    Triplanar
+    TCoord = 0,
+    Triplanar = 1
 };
 
 struct SurfaceLayer
@@ -147,6 +147,8 @@ public:
     const Vertex& tsVertex(size_t i, size_t k) const { return m_geometry[k * m_xsize + i]; }
     Vertex& tsVertex(size_t i, size_t k) { return m_geometry[k * m_xsize + i]; }
 
+    void invalidate() { m_dirty = true; }
+
 private:
     void tesselate(const Block* block, const BlockPolygon* poly);
     void initNormals(const Block* block, const BlockPolygon* poly);
@@ -159,7 +161,9 @@ private:
     LayerType m_baseLayer;
     ResourcePtr<Material> m_material;
 
-    std::vector<vec3> m_normals;
+    bool m_dirty;
+
+    std::vector<vec3> m_normals;    // Sculpt directions
 
     std::vector<vec3> m_tempVertices;
     std::vector<vec3> m_tempNormals;
