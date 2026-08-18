@@ -1617,6 +1617,7 @@ void Block::displaySurfaces(Render::CommandList& commandList, const Render::Frus
 
     for (const EditSurface* surface : m_surfaces)
     {
+        if (surface->tesselationEnabled()) continue;
         if (!frustum.test(surface->bbox(), transform)) continue;
 
         const Material* material = surface->material();
@@ -1638,6 +1639,41 @@ void Block::displaySurfaces(Render::CommandList& commandList, const Render::Frus
         }
 
         surface->display(commandList);
+    }
+}
+
+void Block::displayPatches(Render::CommandList& commandList, const Render::Frustum& frustum) const
+{
+    if (m_surfaces.empty()) return;
+
+    mat4 transform = mat4::Translate(m_pos) * mat4::Rotate(m_rot.x, m_rot.y, m_rot.z) * mat4::Scale(m_scale);
+
+    commandList.setConstant(1, transform);
+
+    for (const EditSurface* surface : m_surfaces)
+    {
+        if (!surface->tesselationEnabled()) continue;
+        if (!frustum.test(surface->bbox(), transform)) continue;
+
+        const Material* material = surface->material();
+
+        size_t layers = surface->layerNum();
+
+        uint32_t params[5] = { surface->material()->id, static_cast<uint32_t>(surface->baseLayerType()), layers, surface->xsize(), surface->ysize() };
+        commandList.setConstant(3, params, 5);
+
+        if (layers)
+        {
+            commandList.bindBuffer(5, surface->maskBuffer());
+            commandList.bindBuffer(6, surface->layersBuffer());
+        }
+        else
+        {
+            commandList.bindBuffer(5, 0);
+            commandList.bindBuffer(6, 0);
+        }
+
+        surface->displayPatch(commandList);
     }
 }
 

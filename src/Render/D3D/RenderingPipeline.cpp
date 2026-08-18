@@ -103,6 +103,7 @@ void RenderingPipeline::Init()
     SetupColorRangeShader();
     SetupSimpleShader();
     SetupSimpleSurfaceShader();
+    SetupSimplePatchShader();
     SetupSimpleSpriteShader();
 
 #ifndef EDITOR
@@ -807,6 +808,107 @@ void RenderingPipeline::SetupSimpleSurfaceShader()
     psoDesc.SampleDesc.Count = 1;
 
     ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_simple_surface])));
+}
+
+// Tesselated surface
+void RenderingPipeline::SetupSimplePatchShader()
+{
+    D3DInstance& d3dInstance = D3DInstance::GetInstance();
+
+    // Create root signature
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+
+    // This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+    featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+    if (FAILED(d3dInstance.device()->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+    {
+        featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+    }
+
+    CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+    CD3DX12_ROOT_PARAMETER1 rootParameters[9];
+
+    ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 4, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+
+    rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_ALL);
+    rootParameters[1].InitAsConstants(16, 1, 0, D3D12_SHADER_VISIBILITY_DOMAIN);
+    rootParameters[2].InitAsConstants(4, 2, 0, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[3].InitAsConstants(5, 3, 0, D3D12_SHADER_VISIBILITY_ALL);
+    rootParameters[4].InitAsShaderResourceView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[5].InitAsShaderResourceView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[6].InitAsShaderResourceView(2, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[7].InitAsShaderResourceView(3, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_DOMAIN);
+    rootParameters[8].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+    D3D12_STATIC_SAMPLER_DESC sampler = {};
+    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    sampler.MipLODBias = 0;
+    sampler.MaxAnisotropy = 0;
+    sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+    sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+    sampler.MinLOD = 0.0f;
+    sampler.MaxLOD = D3D12_FLOAT32_MAX;
+    sampler.ShaderRegister = 0;
+    sampler.RegisterSpace = 0;
+    sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+    // Allow input layout and deny uneccessary access to certain pipeline stages.
+    D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+        D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+
+    CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+    rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
+    ThrowIfFailed(d3dInstance.device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature[rm_simple_patch])));
+
+    ComPtr<IDxcBlob> vertexShader;
+    ComPtr<IDxcBlob> hullShader;
+    ComPtr<IDxcBlob> domainShader;
+    ComPtr<IDxcBlob> pixelShader;
+
+    std::wstring shaderPath = GetFullPath() + L"Shaders\\simple_patch.hlsl";
+
+    ThrowIfFailed(CompileShader(shaderPath.c_str(), L"VSMain", L"vs_6_0", &vertexShader));
+    ThrowIfFailed(CompileShader(shaderPath.c_str(), L"HSMain", L"hs_6_0", &hullShader));
+    ThrowIfFailed(CompileShader(shaderPath.c_str(), L"DSMain", L"ds_6_0", &domainShader));
+    ThrowIfFailed(CompileShader(shaderPath.c_str(), L"PSMain", L"ps_6_0", &pixelShader));
+
+    // Define the vertex input layout.
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+    };
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
+    psoDesc.pRootSignature = m_rootSignature[rm_simple_patch].Get();
+    psoDesc.VS = { vertexShader->GetBufferPointer(), vertexShader->GetBufferSize() };
+    psoDesc.HS = { hullShader->GetBufferPointer(), hullShader->GetBufferSize() };
+    psoDesc.DS = { domainShader->GetBufferPointer(), domainShader->GetBufferSize() };
+    psoDesc.PS = { pixelShader->GetBufferPointer(), pixelShader->GetBufferSize() };
+    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+    psoDesc.SampleMask = UINT_MAX;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+    psoDesc.NumRenderTargets = 1;
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.DSVFormat = EditorDepthFormat;
+    psoDesc.SampleDesc.Count = 1;
+
+    ThrowIfFailed(d3dInstance.device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState[rm_simple_patch])));
 }
 
 void RenderingPipeline::SetupSimpleSpriteShader()

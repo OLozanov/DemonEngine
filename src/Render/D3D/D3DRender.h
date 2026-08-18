@@ -35,7 +35,8 @@ enum Topology
     topology_linelist = D3D_PRIMITIVE_TOPOLOGY_LINELIST,
     topology_linestrip = D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
     topology_trianglelist = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-    topology_trianglestrip = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP
+    topology_trianglestrip = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+    topology_rectanglepatch = D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST
 };
 
 }

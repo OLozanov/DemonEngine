@@ -82,7 +82,7 @@ public:
 
     void setMaterial(Material* material, size_t layer);
 
-    void enableTesselation(bool enable) { m_tesselation = enable; }
+    void enableTesselation(bool enable);
     bool tesselationEnabled() const { return m_tesselation; }
 
     const Block& owner() const { return *m_owner; }
@@ -149,9 +149,13 @@ public:
 
     void invalidate() { m_dirty = true; }
 
+    void displayPatch(Render::CommandList& commandList) const;
+
 private:
     void tesselate(const Block* block, const BlockPolygon* poly);
     void initNormals(const Block* block, const BlockPolygon* poly);
+
+    void updatePatch();
 
     Block* m_owner;
     BlockPolygon* m_polygon;
@@ -175,6 +179,8 @@ private:
 
     MaskBuffer m_maskBuffer;
     Render::StreamBuffer<uint32_t> m_layersBuffer;
+
+    Render::VertexArray<vec3> m_patchBuffer;
 
     SurfaceGraphPtr m_surfaceGraph;
 };

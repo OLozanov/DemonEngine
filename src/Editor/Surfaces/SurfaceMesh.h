@@ -56,7 +56,6 @@ protected:
     void initIndices();
 
 protected:
-
     size_t m_xsize;
     size_t m_ysize;
 

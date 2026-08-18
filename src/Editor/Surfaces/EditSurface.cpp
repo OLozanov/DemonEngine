@@ -135,6 +135,23 @@ void EditSurface::link(Block* block, BlockPolygon* polygon)
     m_polygon = polygon;
 }
 
+void EditSurface::enableTesselation(bool enable) 
+{ 
+    m_tesselation = enable;
+
+    if (m_patchBuffer.empty()) m_patchBuffer.resize(4);
+}
+
+void EditSurface::updatePatch()
+{
+    uint16_t max = m_xsize - 1;
+
+    m_patchBuffer[0] = vertex(0, 0).position;
+    m_patchBuffer[1] = vertex(0, max).position;
+    m_patchBuffer[2] = vertex(max, max).position;
+    m_patchBuffer[3] = vertex(max, 0).position;
+}
+
 void EditSurface::updateTempBuffers()
 {
     for (size_t i = 0; i < m_xsize * m_ysize; i++)
@@ -150,6 +167,8 @@ void EditSurface::applyChanges()
     std::swap(m_normals, m_tempNormals);
 
     flushVertices();
+
+    if (!m_patchBuffer.empty()) updatePatch();
 }
 
 void EditSurface::applyTransform(const mat4& mat)
@@ -166,6 +185,8 @@ void EditSurface::applyTransform(const mat4& mat)
     updateBBox();
     flushVertices();
     updateNormals();
+
+    if (!m_patchBuffer.empty()) updatePatch();
 }
 
 void EditSurface::scale(const vec3& scale)
@@ -187,6 +208,8 @@ void EditSurface::scale(const vec3& scale)
 
     updateBBox();
     flushVertices();
+
+    if (!m_patchBuffer.empty()) updatePatch();
 }
 
 void EditSurface::setMaterial(Material* material, size_t layer)
@@ -340,6 +363,8 @@ void EditSurface::displace(const vec3& point, float power, float radius)
 
     updateBBox();
     updateNormals();
+
+    if (!m_patchBuffer.empty()) updatePatch();
 }
 
 void EditSurface::paintLayer(const vec3& point, float radius, size_t lid)
@@ -587,4 +612,11 @@ void EditSurface::writeGameInfo(FILE* file) const
             fwrite(&m_geometry[ind].position, 1, sizeof(vec3), file);
         }
     }
+}
+
+void EditSurface::displayPatch(Render::CommandList& commandList) const
+{
+    commandList.bindBuffer(7, m_vertexBuffer);
+    commandList.bindVertexBuffer(m_patchBuffer);
+    commandList.draw(4);
 }

@@ -146,6 +146,8 @@ public:
 
     operator ID3D12Resource* () { return m_buffer.Get(); }
     operator const D3D12_VERTEX_BUFFER_VIEW* () const { return &m_vertexBufferView; }
+
+    operator D3D12_GPU_VIRTUAL_ADDRESS() const { return m_buffer->GetGPUVirtualAddress(); }
 };
 
 } //namespace render

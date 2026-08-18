@@ -3100,6 +3100,7 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
 
     m_sceneConstantBuffer->projViewMat = projViewMat;
     m_sceneConstantBuffer->worldMat = camera.rotMat();
+    m_sceneConstantBuffer->eyepos = camera.pos();
     m_sceneConstantBuffer->fovx = width;
     m_sceneConstantBuffer->fovy = height;
 
@@ -3358,6 +3359,19 @@ void Editor::display(Render::FrameBuffer& frameBuffer, const ViewCamera& camera,
             m_commandList.setConstant(1, mat4::Translate(block->pos()));
             poly->origin->surface->display(m_commandList);
         }
+    }
+
+    // Patches
+    m_commandList.setRenderMode(Render::RenderingPipeline::rm_simple_patch);
+    m_commandList.setTopology(Render::topology_rectanglepatch);
+    m_commandList.bindConstantBuffer(0, m_sceneConstantBuffer);
+    m_commandList.setConstant(2, vec4(1.0, 1.0, 1.0, 1.0));
+    m_commandList.bind(8, 0);
+    m_commandList.bindBuffer(4, ResourceManager::MaterialHeap());
+
+    for (const Block* block : m_blocks)
+    {
+        block->displayPatches(m_commandList, frustum);
     }
 
     // Points

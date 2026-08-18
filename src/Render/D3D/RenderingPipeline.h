@@ -37,21 +37,22 @@ public:
         rm_simple = 5,
         rm_simple_decal = 6,
         rm_simple_surface = 7,
-        rm_sprite_simple = 8,
-        rm_sprite = 9,
-        rm_sky = 10,
-        rm_shadow = 11,
-        rm_shadow_cascaded = 12,
-        rm_shadow_cube = 13,
-        rm_gbuffer = 14,
-        rm_gbuffer_overlay = 15,
-        rm_gbuffer_instanced = 16,
-        rm_gbuffer_surface = 17,
-        rm_gbuffer_decal = 18,
-        rm_emissive = 19,
-        rm_transparent = 20,
-        rm_fog = 21,
-        rm_tone_mapping = 22,
+        rm_simple_patch = 8,
+        rm_sprite_simple = 9,
+        rm_sprite = 10,
+        rm_sky = 11,
+        rm_shadow = 12,
+        rm_shadow_cascaded = 13,
+        rm_shadow_cube = 14,
+        rm_gbuffer = 15,
+        rm_gbuffer_overlay = 16,
+        rm_gbuffer_instanced = 17,
+        rm_gbuffer_surface = 18,
+        rm_gbuffer_decal = 19,
+        rm_emissive = 20,
+        rm_transparent = 21,
+        rm_fog = 22,
+        rm_tone_mapping = 23,
         rm_count
     };
 
@@ -86,6 +87,7 @@ private:
     static void SetupColorRangeShader();
     static void SetupSimpleShader();
     static void SetupSimpleSurfaceShader();
+    static void SetupSimplePatchShader();
     static void SetupSimpleSpriteShader();
     static void SetupSpriteShader();
     static void SetupSkyShader();

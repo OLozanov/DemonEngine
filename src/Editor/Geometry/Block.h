@@ -171,6 +171,7 @@ public:
     void displayGeometry(Render::CommandList& commandList) const;
     void displayGeometry(Render::CommandList& commandList, const std::vector<size_t>& displayList) const;
     void displaySurfaces(Render::CommandList& commandList, const Render::Frustum& frustum) const;
+    void displayPatches(Render::CommandList& commandList, const Render::Frustum& frustum) const;
 
     void write(FILE* file) const;
     void writeSurfaces(FILE* file) const;
