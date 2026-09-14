@@ -350,6 +350,9 @@
     <ClCompile Include="Game\Core\Buoyancy.cpp">
       <Filter>Source\Game\Core</Filter>
     </ClCompile>
+    <ClCompile Include="UI\Path.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Game.h">
@@ -763,6 +766,9 @@
     </ClInclude>
     <ClInclude Include="Render\Decal.h">
       <Filter>Source\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Path.h">
+      <Filter>Source\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

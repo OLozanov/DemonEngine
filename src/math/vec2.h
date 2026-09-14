@@ -9,6 +9,8 @@ struct vec2
 
 	constexpr vec2(float fx, float fy) : x(fx), y(fy) {}
 
+	explicit constexpr vec2(float num) : x(num), y(num) {}
+
 	float & operator[](int i)
 	{
 		return(&x)[i];
@@ -37,7 +39,7 @@ struct vec2
 		return vec2(x - vect.x, y - vect.y);
 	}
 
-	const vec2 & operator-=(const vec2 & vect)
+	const vec2& operator-=(const vec2& vect)
 	{
 		x -= vect.x;
 		y -= vect.y;
@@ -50,12 +52,12 @@ struct vec2
 		return vec2(-x, -y);
 	}
 
-	float operator*(vec2 & vect) const	//Dot product
+	float operator*(const vec2& vect) const	//Dot product
 	{
 		return x*vect.x + y*vect.y;
 	}
 
-	float operator^(vec2 & vect) const	//Cross product
+	float operator^(const vec2& vect) const	//Cross product
 	{
 		return x*vect.y - y*vect.x;
 	}

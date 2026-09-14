@@ -134,6 +134,36 @@ void Canvas::polygon(const std::vector<vec2>& points, bool outline)
     polygon(points.data(), points.size(), outline);
 }
 
+void Canvas::path(const Path& figure, bool outline)
+{
+    const std::vector<vec2>& vertices = figure.vertices();
+    const std::vector<vec2>& triangles = figure.triangles();
+
+    if (vertices.empty()) return;
+
+    if (!triangles.empty() && m_fillcolor.w > 0.0f)
+    {
+        for (const vec2& vert : triangles)
+        {
+            vec2 tcoord = { vert.x / m_fillWidth, vert.y / m_fillHeight };
+            m_vertexBuffer.push(Vertex2d(vert, tcoord, m_fillcolor));
+        }
+
+        m_drawCommands.emplace_back(triangles.size(), m_fillImage, UiRenderer::topology_triangle_list);
+    }
+
+    if (outline)
+    {
+        for (const Path::Loop& loop : figure.loops())
+            line(vertices.data() + loop.first, loop.last - loop.first + 1, figure.closed());
+    }
+    else
+    {
+        for (const Path::Loop& loop : figure.loops())
+            smoothEdge(vertices.data() + loop.first, loop.last - loop.first + 1);
+    }
+}
+
 void Canvas::line(const vec2* points, size_t size, bool loop)
 {
     vec4 edgeColor = { m_fillcolor.x, m_fillcolor.y, m_fillcolor.z, 0.0f };
@@ -380,4 +410,4 @@ void Canvas::text(short x, short y, const std::string& str)
     m_drawCommands.emplace_back(str.size() * 6, m_font->m_image.get(), UiRenderer::topology_triangle_list);
 }
 
-} //namespace ui
+} //namespace UI

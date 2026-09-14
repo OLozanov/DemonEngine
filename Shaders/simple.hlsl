@@ -42,7 +42,7 @@ float4 PSMain(PSInput input, uint face : SV_PrimitiveID) : SV_TARGET
 {
 	uint matid = faces[face];
 	uint diffuse = materials[matid].diffuse_map;
-    float4 color = colorAlpha;
+    float4 color = colorAlpha * materials[matid].color;
 
 	if (diffuse != InvalidImage) color *= image[diffuse].Sample(g_sampler, input.tcoord);
     

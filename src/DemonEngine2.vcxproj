@@ -261,6 +261,7 @@
     <ClCompile Include="UI\Canvas.cpp" />
     <ClCompile Include="UI\D3D\UiRenderer.cpp" />
     <ClCompile Include="UI\Font.cpp" />
+    <ClCompile Include="UI\Path.cpp" />
     <ClCompile Include="UI\Text.cpp" />
     <ClCompile Include="UI\UiLayer.cpp" />
     <ClCompile Include="UI\Widget.cpp" />
@@ -392,6 +393,7 @@
     <ClInclude Include="UI\Canvas.h" />
     <ClInclude Include="UI\D3D\UiRenderer.h" />
     <ClInclude Include="UI\Font.h" />
+    <ClInclude Include="UI\Path.h" />
     <ClInclude Include="UI\Render.h" />
     <ClInclude Include="UI\Text.h" />
     <ClInclude Include="UI\UiLayer.h" />

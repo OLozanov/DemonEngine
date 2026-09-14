@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "UI/Render.h"
+#include "UI/Path.h"
 #include "UI/Font.h"
 
 namespace UI
@@ -103,11 +104,12 @@ public:
     void lineTo(float x, float y);
 
     void rectangle(short left, short top, short right, short bottom);
-    void polygon(const vec2* points, size_t size, bool outline = false); // Supposed to be convex
+    void polygon(const vec2* points, size_t size, bool outline = false); // Must to be convex, use path for arbitrary figures
     void polygon(const std::vector<vec2>& points, bool outline = false);
+    void path(const Path& figure, bool outline = false);
     void image(Image* img, short left, short top, short right, short bottom);
 
     void text(short x, short y, const std::string& str);
 };
 
-} //namespace ui
+} //namespace UI
