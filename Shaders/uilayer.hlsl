@@ -1,6 +1,9 @@
 
 static const uint InvalidImage = 0xFFFFFFFF;
 
+static const uint DistanceFunc = 1;
+static const uint NormalRange = 2;
+
 cbuffer ScreenConstantBuffer : register(b0)
 {
     float4 screenMat[2];
@@ -18,14 +21,14 @@ cbuffer DrawConstantBuffer : register(b1)
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float2 tcoord : TEXCOORD;
+    float3 tcoord : TEXCOORD;
 	float4 color : COLOR;
 };
 
 Texture2D image[] : register(t0);
 SamplerState g_sampler : register(s0);
 
-PSInput VSMain(float2 position : POSITION, float2 tcoord : TEXCOORD, float4 color : COLOR)
+PSInput VSMain(float2 position : POSITION, float3 tcoord : TEXCOORD, float4 color : COLOR)
 {
     PSInput result;
 
@@ -40,15 +43,22 @@ PSInput VSMain(float2 position : POSITION, float2 tcoord : TEXCOORD, float4 colo
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    float4 color;
-
+    float4 color = input.color;
+	
+	float u;
+	float v = input.tcoord.y;
+	
+    if (flags & DistanceFunc)
+	{
+		u = length(input.tcoord.xz); 
+		if (flags & NormalRange) u = u * 2.0 - 1.0;
+		
+        color.w *= 1.0 - max(0.0, (abs(u) - param)) / (1.0 - param);
+	}
+	else u = input.tcoord.x;
+	
 	if (img_handle != InvalidImage) 
-		color = image[img_handle].Sample(g_sampler, input.tcoord);
-	else
-		color = float4(1.0, 1.0, 1.0, 1.0);
+		color *= image[img_handle].Sample(g_sampler, float2(u, v));
 
-    if (flags & 1)
-        color.w *= 1.0 - max(0.0, (abs(input.tcoord.x) - param)) / (1.0 - param);
-    
-    return color*input.color;
+    return color;
 }

@@ -12,7 +12,6 @@ Console::Console()
 , m_cmdText(5, m_height - 18, m_width)
 {
 	m_canvas.setFont("Quantico");
-	m_canvas.setLineJointType(UI::JointType::Round);
 
 	m_cmdText.setFont(m_canvas.getFont());
 	m_penta.resize(5);

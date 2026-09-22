@@ -14,6 +14,8 @@ Canvas::Canvas()
 , m_linecolor(0.0f, 0.0f, 0.0f, 1.0f)
 , m_textcolor(0.0f, 0.0f, 0.0f, 1.0f)
 , m_fillImage(0)
+, m_jointType(JointType::Edge)
+, m_capType(CapType::Round)
 {
 
 }
@@ -164,17 +166,76 @@ void Canvas::path(const Path& figure, bool outline)
     }
 }
 
-void Canvas::line(const vec2* points, size_t size, bool loop)
+void Canvas::lineCaps(const vec2* points, size_t size, float width)
+{
+    float length = 0;
+
+    // start cap
+    {
+        const vec2& a = points[0];
+        const vec2& b = points[1];
+
+        vec2 e1 = (b - a).normalized();
+        vec2 e2 = { e1.y, -e1.x };
+
+        vec2 v1 = a + e2 * width;
+        vec2 v2 = a - e2 * width;
+
+        vec2 v3 = v1 - e1 * width;
+        vec2 v4 = v2 - e1 * width;
+
+        vec3 tc1 = { -1.0f, length, 0.0f };
+        vec3 tc2 = { 1.0f, length, 0.0f };
+        vec3 tc3 = { -1.0f, length, 1.0f };
+        vec3 tc4 = { 1.0f, length, 1.0f };
+
+        m_vertexBuffer.push(Vertex2d(v1, tc1, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v2, tc2, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v3, tc3, m_linecolor));
+
+        m_vertexBuffer.push(Vertex2d(v2, tc2, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v3, tc3, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v4, tc4, m_linecolor));
+    }
+
+    // end cap
+    {
+        const vec2& a = points[size - 2];
+        const vec2& b = points[size - 1];
+
+        vec2 e1 = (b - a).normalized();
+        vec2 e2 = { e1.y, -e1.x };
+
+        vec2 v1 = b - e2 * width;
+        vec2 v2 = b + e2 * width;
+
+        vec2 v3 = v1 + e1 * width;
+        vec2 v4 = v2 + e1 * width;
+
+        vec3 tc1 = { -1.0f, length, 0.0f };
+        vec3 tc2 = { 1.0f, length, 0.0f };
+        vec3 tc3 = { -1.0f, length, 1.0f };
+        vec3 tc4 = { 1.0f, length, 1.0f };
+
+        m_vertexBuffer.push(Vertex2d(v1, tc1, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v2, tc2, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v3, tc3, m_linecolor));
+
+        m_vertexBuffer.push(Vertex2d(v2, tc2, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v3, tc3, m_linecolor));
+        m_vertexBuffer.push(Vertex2d(v4, tc4, m_linecolor));
+    }
+
+    m_drawCommands.emplace_back(12, m_fillImage, UiRenderer::topology_triangle_list, UiRenderer::DistanceFunc, m_linesz / width);
+}
+
+void Canvas::lineStrip(const vec2 * points, size_t size, bool loop)
 {
     vec4 edgeColor = { m_fillcolor.x, m_fillcolor.y, m_fillcolor.z, 0.0f };
-
-    //vec2 v[4];
-    //vec2 ve[4]; //edge vertices
 
     float width = m_linesz + m_edgesz;
     float length = 0.0f;
 
-    //loop = false;
     size_t segments = loop ? size + 1 : size;
 
     for (size_t i = 0; i < segments; i++)
@@ -220,128 +281,200 @@ void Canvas::line(const vec2* points, size_t size, bool loop)
         length += len;
     }
 
-    m_drawCommands.emplace_back(segments * 2, m_fillImage, UiRenderer::topology_triangle_strip, UiRenderer::sdf, m_linesz / width);
+    m_drawCommands.emplace_back(segments * 2, m_fillImage, UiRenderer::topology_triangle_strip, UiRenderer::DistanceFunc, m_linesz / width);
+
+    if (!loop && m_capType == CapType::Round) lineCaps(points, size, width);
+}
+
+void Canvas::lineList(const vec2* points, size_t size, bool loop)
+{
+    vec4 edgeColor = { m_fillcolor.x, m_fillcolor.y, m_fillcolor.z, 0.0f };
+
+    float width = m_linesz + m_edgesz;
+    float length = 0.0f;
+
+    size_t segments = loop ? size + 1 : size;
+    size_t verts = 0;
+
+    vec2 norm;
+    vec2 p1, p2;
+
+    vec2 v1, v2, v3, v4, v5;
+
+    for (size_t i = 0; i < segments; i++)
+    {
+        size_t prev = (i == 0) ? size - 1 : i - 1;
+        size_t curr = (i == size) ? 0 : i;
+        size_t next = (i == size) ? 1 : (i == size - 1) ? 0 : i + 1;
+
+        vec2 a = points[prev];
+        vec2 b = points[curr];
+        vec2 c = points[next];
+
+        vec2 e1 = (b - a).normalized();
+        vec2 e2 = c - b;
+
+        float len = e2.normalize();
+
+        float rcos = 1.0f / (e1 ^ e2);
+
+        if (!loop && i == 0)
+            norm = { e2.y, -e2.x };
+        else if (!loop && i == segments - 1)
+            norm = { e1.y, -e1.x };
+        else
+            norm = (e1 - e2) * rcos;
+
+        vec2 tc1 = { 1.0f, length };
+        vec2 tc2 = { 0.0f, length };
+
+        vec2 c1 = b - norm * width;
+        vec2 c2 = b + norm * width;
+
+        if (rcos > 0.0f)
+        {
+            p1 = c1 + vec2(e1.y, -e1.x) * width * 2.0f;
+            p2 = c1 + vec2(e2.y, -e2.x) * width * 2.0f;
+        }
+        else
+        {
+            p1 = c2 - vec2(e2.y, -e2.x) * width * 2.0f;
+            p2 = c2 - vec2(e1.y, -e1.x) * width * 2.0f;
+        }
+
+        vec3 tc3, tc4, tc5, tc6;
+
+        if (!loop && i == segments - 1)
+        {
+            v3 = c1;
+            v4 = c2;
+        }
+        else if (rcos > 0.0f)
+        {
+            v3 = c1;
+            v4 = p1;
+            v5 = p2;
+
+            vec2 d1 = vec2(e1.x, e1.y) * (0.5f / width);
+            vec2 d2 = vec2(e1.y, -e1.x) * (0.5f / width);
+
+            if (m_jointType == JointType::Round)
+            {
+                tc3 = { 0.0f, length, 0.0f };
+                tc4 = { 0.0f, length, 1.0f };
+                tc5 = { (v5 - c1) * d1, length, (v5 - c1) * d2 };
+                tc6 = { (c2 - c1) * d1, length, (c2 - c1) * d2 };
+            }
+            else
+            {
+                tc3 = { 0.0f, length, 0.0f };
+                tc4 = { 0.0f, length, 1.0f };
+                tc5 = { 0.0f, length, 1.0f };
+            }
+        }
+        else
+        {
+            v3 = p2;
+            v4 = c2;
+            v5 = p1;
+
+            vec2 d1 = -vec2(e1.x, e1.y) * (0.5f / width);
+            vec2 d2 = -vec2(e1.y, -e1.x) * (0.5f / width);
+
+            if (m_jointType == JointType::Round)
+            {
+                tc3 = { 0.0f, length, 1.0f };
+                tc4 = { 0.0f, length, 0.0f };
+                tc5 = { (v5 - c2) * d1, length, (v5 - c2) * d2 };
+                tc6 = { (c1 - c2) * d1, length, (c1 - c2) * d2 };
+            }
+            else
+            {
+                tc3 = { 1.0f, length, 0.0f };
+                tc4 = { 0.0f, length, 0.0f };
+                tc5 = { 1.0f, length, 0.0f };
+            }
+        }
+
+        if (i > 0)
+        {
+            m_vertexBuffer.push(Vertex2d(v1, tc1, m_linecolor));
+            m_vertexBuffer.push(Vertex2d(v2, tc2, m_linecolor));
+            m_vertexBuffer.push(Vertex2d(v3, tc1, m_linecolor));
+
+            m_vertexBuffer.push(Vertex2d(v2, tc2, m_linecolor));
+            m_vertexBuffer.push(Vertex2d(v3, tc1, m_linecolor));
+            m_vertexBuffer.push(Vertex2d(v4, tc2, m_linecolor));
+
+            verts += 6;
+
+            if (i < segments - 1 || loop)
+            {
+                if (m_jointType == JointType::Flat)
+                {
+                    m_vertexBuffer.push(Vertex2d(v3, tc3, m_linecolor));
+                    m_vertexBuffer.push(Vertex2d(v4, tc4, m_linecolor));
+                    m_vertexBuffer.push(Vertex2d(v5, tc5, m_linecolor));
+
+                    verts += 3;
+                }
+                else
+                {
+                    const vec2& c = rcos > 0.0f ? c2 : c1;
+                    const vec2& v = rcos > 0.0f ? v3 : v4;
+                    const vec3& tc = rcos > 0.0f ? tc3 : tc4;
+
+                    m_vertexBuffer.push(Vertex2d(v3, tc3, m_linecolor));
+                    m_vertexBuffer.push(Vertex2d(v4, tc4, m_linecolor));
+                    m_vertexBuffer.push(Vertex2d(c, tc6, m_linecolor));
+
+                    m_vertexBuffer.push(Vertex2d(v, tc, m_linecolor));
+                    m_vertexBuffer.push(Vertex2d(c, tc6, m_linecolor));
+                    m_vertexBuffer.push(Vertex2d(v5, tc5, m_linecolor));
+
+                    verts += 6;
+                }
+            }
+        }
+
+        if (!loop && i == 0)
+        {
+            v1 = c1;
+            v2 = c2;
+        }
+        else if (rcos > 0.0f)
+        {
+            v1 = v3;
+            v2 = v5;
+        }
+        else
+        {
+            v1 = v5;
+            v2 = v4;
+        }
+
+        length += len / m_fillHeight;
+    }
+
+    constexpr uint32_t DrawFlags = UiRenderer::DistanceFunc | UiRenderer::NormalRange;
+
+    m_drawCommands.emplace_back(verts, m_fillImage, UiRenderer::topology_triangle_list, DrawFlags, m_linesz / width);
+
+    if (!loop && m_capType == CapType::Round) lineCaps(points, size, width);
+}
+
+void Canvas::line(const vec2* points, size_t size, bool loop)
+{
+    if (m_jointType == JointType::Edge)
+        lineStrip(points, size, loop);
+    else
+        lineList(points, size, loop);
 }
 
 void Canvas::line(const std::vector<vec2>& points, bool loop)
 {
     line(points.data(), points.size(), loop);
 }
-
-/*void Canvas::line(const std::vector<vec2>& verts, bool loop)
-{
-    vec4 edgecolor = vec4(m_linecolor.x, m_linecolor.y, m_linecolor.z, 0.0);
-
-    int segmentsNum = loop ? verts.size() : verts.size() - 1;
-
-    vec2 tangent_prev = {};
-
-    if (loop)
-    {
-        const vec2& v1 = verts[0];
-        const vec2& v2 = verts[verts.size() - 1];
-
-        tangent_prev = v2 - v1;
-        tangent_prev.normalize();
-    }
-
-    for (int i = 0; i < segmentsNum; i++)
-    {
-        int k = (i == verts.size() - 1) ? 0 : i + 1;
-
-        const vec2& v1 = verts[i];
-        const vec2& v2 = verts[k];
-
-        vec2 tangent = v2 - v1;
-        tangent.normalize();
-
-        vec2 norm = -vec2( tangent.y, -tangent.x );
-
-        vec2 a, b, c, d;
-        vec2 ae, be, ce, de; //edge vertices
-
-        vec2 tangent_next = {};
-
-        if (i != 0 || loop)
-        {
-            float rcos = 1.0f / (norm * tangent_prev);
-            vec2 jointVec = (tangent + tangent_prev) * rcos;
-
-            a = v1 + jointVec * m_linesz;
-            b = v1 - jointVec * m_linesz;
-
-            ae = a + jointVec * edgesz;
-            be = b - jointVec * edgesz;
-        }
-        else
-        {
-            a = v1 + norm * m_linesz;
-            b = v1 - norm * m_linesz;
-
-            ae = a + norm * edgesz;
-            be = b - norm * edgesz;
-        }
-
-        if (i != verts.size() - 2 || loop)
-        {
-            int l = (k == verts.size() - 1) ? 0 : k + 1;
-
-            const vec2& v3 = verts[k];
-            const vec2& v4 = verts[l];
-
-            vec2 tangent_next = v3 - v4;
-            tangent_next.normalize();
-        
-            float rcos = 1.0f / (norm * tangent_next);
-            vec2 jointVec = (tangent + tangent_next) * rcos;
-
-            c = v2 + jointVec * m_linesz;
-            d = v2 - jointVec * m_linesz;
-
-            ce = c + jointVec * edgesz;
-            de = d - jointVec * edgesz;
-        }
-        else
-        {
-            c = v2 + norm * m_linesz;
-            d = v2 - norm * m_linesz;
-
-            ce = c + norm * edgesz;
-            de = d - norm * edgesz;
-        }
-
-        //line
-        m_vertexBuffer.push(Vertex2d(a, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(b, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(c, m_linecolor));
-
-        m_vertexBuffer.push(Vertex2d(b, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(d, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(c, m_linecolor));
-
-        //uppder edge
-        m_vertexBuffer.push(Vertex2d(ae, edgecolor));
-        m_vertexBuffer.push(Vertex2d(a, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(c, m_linecolor));
-
-        m_vertexBuffer.push(Vertex2d(ce, edgecolor));
-        m_vertexBuffer.push(Vertex2d(ae, edgecolor));
-        m_vertexBuffer.push(Vertex2d(c, m_linecolor));
-
-        //lower edge
-        m_vertexBuffer.push(Vertex2d(b, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(be, edgecolor));
-        m_vertexBuffer.push(Vertex2d(d, m_linecolor));
-
-        m_vertexBuffer.push(Vertex2d(de, edgecolor));
-        m_vertexBuffer.push(Vertex2d(d, m_linecolor));
-        m_vertexBuffer.push(Vertex2d(be, edgecolor));
-
-        tangent_prev = -tangent;
-    }
-
-    m_drawCommands.emplace_back(segmentsNum*3*6, UiRenderer::topology_triangle_list);
-}*/
 
 void Canvas::moveTo(float x, float y)
 {

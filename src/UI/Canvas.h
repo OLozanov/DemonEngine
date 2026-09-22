@@ -22,7 +22,7 @@ struct Bitmap
 
 enum class JointType
 {
-    Triangle,
+    Edge,
     Flat,
     Round,
 };
@@ -55,8 +55,8 @@ class Canvas
     uint32_t m_fillWidth;
     uint32_t m_fillHeight;
 
-    JointType m_lineJointType;
-    CapType m_lineCapType;
+    JointType m_jointType;
+    CapType m_capType;
 
     const Font* m_font;
 
@@ -66,6 +66,10 @@ class Canvas
     const VertexBuffer& vertexBuffer() { return m_vertexBuffer; }
 
     void smoothEdge(const vec2* points, size_t size);
+
+    void lineCaps(const vec2* points, size_t size, float width);
+    void lineStrip(const vec2* points, size_t size, bool loop);
+    void lineList(const vec2* points, size_t size, bool loop);
 
     friend class UiLayer;
 
@@ -90,8 +94,8 @@ public:
     void setSmoothEdgeSize(float size) { m_edgesz = size; }
     void setLineSize(float size) { m_linesz = size * 0.5; }
 
-    void setLineJointType(JointType type) { m_lineJointType = type; }
-    void setLineCapType(CapType type) { m_lineCapType = type; }
+    void setLineJointType(JointType type) { m_jointType = type; }
+    void setLineCapType(CapType type) { m_capType = type; }
 
     void setFont(const Font* font) { m_font = font; }
     void setFont(const std::string& fontName);

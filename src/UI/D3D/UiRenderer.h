@@ -28,7 +28,8 @@ public:
 
     enum Flags
     {
-        sdf = 1
+        DistanceFunc = 1,
+        NormalRange = 2
     };
 
 private:

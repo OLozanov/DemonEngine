@@ -19,14 +19,15 @@ namespace UI
 struct Vertex2d
 {
     vec2 position;
-    vec2 texcoord;
+    vec3 texcoord;
     vec4 color;
 
     Vertex2d(float x, float y, const vec4& vcolor) : position({ x, y }), color(vcolor) {}
     Vertex2d(const vec2& pos, const vec4& vcolor) : position(pos), color(vcolor) {}
-    Vertex2d(float x, float y, float u, float v) : position({ x, y }), texcoord({ u, v }), color{ 1.0f, 1.0f, 1.0f, 1.0f } {}
-    Vertex2d(float x, float y, float u, float v, const vec4& vcolor) : position({x, y}), texcoord({u, v}), color{vcolor} {}
-    Vertex2d(const vec2& pos, const vec2& tcoord, const vec4& vcolor) : position(pos), texcoord(tcoord), color(vcolor) {}
+    Vertex2d(float x, float y, float u, float v) : position({ x, y }), texcoord({ u, v, 0.0f }), color{ 1.0f, 1.0f, 1.0f, 1.0f } {}
+    Vertex2d(float x, float y, float u, float v, const vec4& vcolor) : position({x, y}), texcoord({u, v, 0.0f}), color{vcolor} {}
+    Vertex2d(const vec2& pos, const vec2& tcoord, const vec4& vcolor) : position(pos), texcoord(tcoord.x, tcoord.y, 0.0f), color(vcolor) {}
+    Vertex2d(const vec2& pos, const vec3& tcoord, const vec4& vcolor) : position(pos), texcoord(tcoord), color(vcolor) {}
 };
 
 struct DrawCommand
