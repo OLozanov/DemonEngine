@@ -59,7 +59,7 @@ public:
         return m_ptr;
     }
 
-    bool empty()
+    bool empty() const
     {
         return m_ptr == 0;
     }

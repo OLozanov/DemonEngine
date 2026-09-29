@@ -1585,6 +1585,8 @@ void Block::displayVertices(Render::CommandList& commandList) const
 
 void Block::displayGeometry(Render::CommandList& commandList) const
 {
+    if (m_geometry.empty()) return;
+
     commandList.bindVertexBuffer(m_geometry);
     commandList.bindBuffer(4, m_faces);
     commandList.draw(m_geometry.size());

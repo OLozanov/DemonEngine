@@ -37,8 +37,12 @@ EditSurface::EditSurface(BlockPolygon* polygon, size_t size,
     initIndices();
 
     size_t datasize = m_xsize * m_ysize;
-    memcpy(m_vertices.data(), vertices.data(), datasize * sizeof(TexturedVertex));
-    memcpy(m_vertexBuffer.data(), vertices.data(), datasize * sizeof(TexturedVertex));
+
+    for (size_t i = 0; i < datasize; i++)
+    {
+        m_vertices[i].position = vertices[i].position;
+        m_vertices[i].tcoord = vertices[i].tcoord;
+    }
     
     m_normals = std::move(normals);
 
@@ -49,6 +53,8 @@ EditSurface::EditSurface(BlockPolygon* polygon, size_t size,
     m_material = polygon->material;
 
     updateBBox();
+    flushVertices();
+    updateNormals();
 }
 
 void EditSurface::tesselate(const Block* block, const BlockPolygon* poly)
@@ -573,7 +579,12 @@ void EditSurface::write(FILE* file) const
     fwrite(&size, sizeof(uint16_t), 1, file);
     fwrite(&id, sizeof(uint16_t), 1, file);
 
-    fwrite(m_vertices.data(), sizeof(TexturedVertex), m_vertices.size(), file);
+    for (size_t i = 0; i < m_vertices.size(); i++)
+    {
+        fwrite(&m_vertices[i].position, sizeof(vec3), 1, file);
+        fwrite(&m_vertices[i].tcoord, sizeof(vec2), 1, file);
+    }
+
     fwrite(m_normals.data(), sizeof(vec3), m_normals.size(), file);
 
     writeLayers(file);

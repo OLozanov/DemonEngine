@@ -31,14 +31,14 @@ struct SurfaceLayer
     SurfaceLayer(Material* mat, size_t size)
     : material(mat)
     , type(LayerType::TCoord)
-    , mask(size * size)
+    , mask(size)
     {
     }
 
     SurfaceLayer(Material* mat, LayerType type, size_t size)
     : material(mat)
     , type(type)
-    , mask(size * size)
+    , mask(size)
     {
     }
 
