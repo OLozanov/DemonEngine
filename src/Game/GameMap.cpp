@@ -193,9 +193,9 @@ bool Game::loadMap(const std::string& name)
 
     for (const Render::Leaf& leaf : leafs)
     {
-        if (leaf.raytraceGeometry.count == 0) continue;
+        if (leaf.raytraceGeometry.empty()) continue;
 
-        geometryData.push_back({ leaf.raytraceGeometry.offset, leaf.raytraceGeometry.count });
+        geometryData.insert(geometryData.end(), leaf.raytraceGeometry.begin(), leaf.raytraceGeometry.end());
     }
 
     m_world.setData(verts, indices, leafs, nodes, zones, portals);
@@ -268,7 +268,7 @@ void Game::loadLeafs(FILE* file, std::vector<Render::Leaf>& leafs)
 
         leaf.regularGeometry.reserve(dnum);
 
-        for (int i = 0; i < dnum; i++)
+        for (uint32_t i = 0; i < dnum; i++)
         {
             uint32_t mlen;
             fread(&mlen, 1, sizeof(uint32_t), file);
@@ -292,8 +292,21 @@ void Game::loadLeafs(FILE* file, std::vector<Render::Leaf>& leafs)
                 leaf.regularGeometry.push_back({ material, offset, vertexnum });
         }
 
-        fread(&leaf.raytraceGeometry.offset, sizeof(uint32_t), 1, file);
-        fread(&leaf.raytraceGeometry.count, sizeof(uint32_t), 1, file);
+        fread(&dnum, 1, sizeof(uint32_t), file);
+        leaf.raytraceGeometry.reserve(dnum);
+
+        for (uint32_t i = 0; i < dnum; i++)
+        {
+            uint32_t matid;
+            uint32_t offset;
+            uint32_t count;
+
+            fread(&matid, sizeof(uint32_t), 1, file);
+            fread(&offset, sizeof(uint32_t), 1, file);
+            fread(&count, sizeof(uint32_t), 1, file);
+
+            leaf.raytraceGeometry.emplace_back(matid, offset, count);
+        }
 
         uint32_t polynum;
         fread(&polynum, 1, sizeof(uint32_t), file);

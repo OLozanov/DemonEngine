@@ -230,6 +230,7 @@ private:
     DisplayList m_overlay;
 
     RaytraceScene m_raytraceScene;
+    RaytraceId m_staticRtxId;
     std::map<const Model*, RaytraceId> m_raytraceGeometry;
 
     bool m_dirLightActive;

@@ -314,28 +314,28 @@ void SceneManager::removeFogVolume(FogVolume* volume)
 
 void SceneManager::initStaticGeometry()
 {
-    RaytraceId id = m_raytraceScene.createGeometry();
-    m_raytraceScene.addInstance(id, {});
+    m_staticRtxId = m_raytraceScene.createGeometry();
+    m_raytraceScene.addInstance(m_staticRtxId, {});
 }
 
 void SceneManager::addStaticGeometry(const VertexData* vertexBuffer, const IndexData* indexBuffer, const std::vector<GeometryData>& geometryData)
 {
-    m_raytraceScene.addStaticGeometry(vertexBuffer, indexBuffer, geometryData);
+    m_raytraceScene.addGeometry(m_staticRtxId, vertexBuffer, indexBuffer, geometryData);
 }
 
 void SceneManager::addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos)
 {
-    m_raytraceScene.addStaticGeometry(vertexBuffer, pos);
+    m_raytraceScene.addGeometry(m_staticRtxId, vertexBuffer, pos);
 }
 
 void SceneManager::addStaticGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos)
 {
-    m_raytraceScene.addStaticGeometry(vertexBuffer, indexBuffer, pos);
+    m_raytraceScene.addGeometry(m_staticRtxId, vertexBuffer, indexBuffer, pos);
 }
 
 void SceneManager::addStaticGeometry(const VertexBuffer& vertexBuffer, const mat4& mat)
 {
-    m_raytraceScene.addStaticGeometry(vertexBuffer, mat);
+    m_raytraceScene.addGeometry(m_staticRtxId, vertexBuffer, mat);
 }
 
 RaytraceId SceneManager::addGeometry(const Model* model)

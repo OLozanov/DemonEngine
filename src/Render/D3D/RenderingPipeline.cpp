@@ -131,7 +131,8 @@ void RenderingPipeline::Init()
 
     if (D3DInstance::GetInstance().rtxSupport())
     {
-        CreateRaytracingSignatures();
+        CreateGlobalRtSignature();
+        CreateLocalRtSignature();
         SetupRaytracingPipeline();
         BuildRaytracingShaderTables();
     }
@@ -2625,7 +2626,7 @@ void RenderingPipeline::SetupLightingShader()
     ThrowIfFailed(d3dInstance.device()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_computePipelineState[cm_lighting])));
 }
 
-void RenderingPipeline::CreateRaytracingSignatures()
+void RenderingPipeline::CreateGlobalRtSignature()
 {
     D3DInstance& d3dInstance = D3DInstance::GetInstance();
 
@@ -2705,6 +2706,30 @@ void RenderingPipeline::CreateRaytracingSignatures()
     ThrowIfFailed(d3dInstance.device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_dxrGlobalRootSignature)));
 }
 
+void RenderingPipeline::CreateLocalRtSignature()
+{
+    D3DInstance& d3dInstance = D3DInstance::GetInstance();
+
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+
+    featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+    if (FAILED(d3dInstance.device()->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+    {
+        featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+    }
+
+    CD3DX12_ROOT_PARAMETER1 rootParameters[1];
+    rootParameters[0].InitAsConstants(1, 2, 0);
+
+    CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC localRootSignatureDesc(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
+
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&localRootSignatureDesc, featureData.HighestVersion, &signature, &error));
+    ThrowIfFailed(d3dInstance.device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_dxrLocalRootSignature)));
+}
+
 void RenderingPipeline::SetupRaytracingPipeline()
 {
     ComPtr<ID3D12Device5> dxrDevice;
@@ -2729,12 +2754,12 @@ void RenderingPipeline::SetupRaytracingPipeline()
     UINT attributeSize = sizeof(vec2);  // float2 barycentrics
     shaderConfig->Config(payloadSize, attributeSize);
 
-    /*auto localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+    auto localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
     localRootSignature->SetRootSignature(m_dxrLocalRootSignature.Get());
 
     auto rootSignatureAssociation = raytracingPipeline.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
     rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
-    rootSignatureAssociation->AddExport(HitGroupName);*/
+    rootSignatureAssociation->AddExport(HitGroupName);
 
     auto globalRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
     globalRootSignature->SetRootSignature(m_dxrGlobalRootSignature.Get());
@@ -2766,6 +2791,7 @@ void RenderingPipeline::BuildRaytracingShaderTables()
 
     CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
     CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+    CD3DX12_RESOURCE_DESC hitTableDesc = CD3DX12_RESOURCE_DESC::Buffer(D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES + 32);
 
     ThrowIfFailed(d3dInstance.device()->CreateCommittedResource(
         &heapProperties,
@@ -2794,13 +2820,58 @@ void RenderingPipeline::BuildRaytracingShaderTables()
     ThrowIfFailed(d3dInstance.device()->CreateCommittedResource(
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
+        &hitTableDesc,
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_PPV_ARGS(&m_hitGroupShaderTable)));
+
+    uint32_t defaultMat = 0;
+
+    m_hitGroupShaderTable->Map(0, &readRange, reinterpret_cast<void**>(&data));
+    memcpy(data, hitGroupShaderIdentifier, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+    memcpy((uint8_t*)data + D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES, &defaultMat, sizeof(uint32_t));
+    m_hitGroupShaderTable->Unmap(0, nullptr);
+}
+
+void RenderingPipeline::RaytraceSetGeometryParams(std::vector<uint32_t> params)
+{
+    D3DInstance& d3dInstance = D3DInstance::GetInstance();
+
+    void* hitGroupShaderIdentifier;
+
+    ComPtr<ID3D12StateObjectProperties> stateObjectProperties;
+    ThrowIfFailed(m_dxrState.As(&stateObjectProperties));
+
+    hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(HitGroupName);
+
+    constexpr size_t paramOffset = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+    size_t size = params.size() * RtxRecordSize;
+
+    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+    CD3DX12_RESOURCE_DESC hitTableDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+    uint8_t* data;
+    CD3DX12_RANGE readRange(0, 0);
+
+    ThrowIfFailed(d3dInstance.device()->CreateCommittedResource(
+        &heapProperties,
+        D3D12_HEAP_FLAG_NONE,
+        &hitTableDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&m_hitGroupShaderTable)));
 
     m_hitGroupShaderTable->Map(0, &readRange, reinterpret_cast<void**>(&data));
-    memcpy(data, hitGroupShaderIdentifier, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+
+    for (size_t i = 0; i < params.size(); i++)
+    {
+        uint8_t* ptr = data + i * RtxRecordSize;
+
+        memcpy(ptr, hitGroupShaderIdentifier, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+        memcpy(ptr + paramOffset, &params[i], sizeof(uint32_t));
+    }
+
     m_hitGroupShaderTable->Unmap(0, nullptr);
 }
 
@@ -2828,34 +2899,6 @@ void RenderingPipeline::InitResources()
 
     dxrCommandList->Close();
     dxrCommandList->QueryInterface(IID_PPV_ARGS(&m_dxrCommandList));
-
-    //Create light volume
-    /*{
-        vec3 lightVolume[] =
-        {
-            {1.0, -1.0,  1.0}, {1.0,  1.0,  1.0}, {-1.0,  1.0,  1.0},
-            {-1.0, -1.0,  1.0}, {1.0, -1.0,  1.0}, {-1.0,  1.0,  1.0},
-            { 1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0}, {-1.0,  1.0, -1.0},
-            { 1.0,  1.0, -1.0}, { 1.0, -1.0, -1.0}, {-1.0,  1.0, -1.0},
-            {-1.0,  1.0,  1.0}, { 1.0,  1.0,  1.0}, { 1.0,  1.0, -1.0},
-            {-1.0,  1.0, -1.0}, {-1.0,  1.0,  1.0}, { 1.0,  1.0, -1.0},
-            {-1.0, -1.0,  1.0}, {-1.0, -1.0, -1.0}, { 1.0, -1.0, -1.0},
-            { 1.0, -1.0,  1.0}, {-1.0, -1.0,  1.0}, { 1.0, -1.0, -1.0},
-            {-1.0, -1.0,  1.0}, {-1.0,  1.0,  1.0}, {-1.0,  1.0, -1.0},
-            {-1.0, -1.0, -1.0}, {-1.0, -1.0,  1.0}, {-1.0,  1.0, -1.0},
-            { 1.0, -1.0,  1.0}, { 1.0, -1.0, -1.0}, { 1.0,  1.0, -1.0},
-            { 1.0,  1.0,  1.0}, { 1.0, -1.0,  1.0}, { 1.0,  1.0, -1.0}
-        };
-
-        const UINT vertexBufferSize = sizeof(lightVolume);
-
-        m_boxVolume = d3dInstance.CreateBuffer(lightVolume, vertexBufferSize);
-
-        // Initialize the vertex buffer view.
-        m_boxVolumeView.BufferLocation = m_boxVolume->GetGPUVirtualAddress();
-        m_boxVolumeView.StrideInBytes = sizeof(vec3);
-        m_boxVolumeView.SizeInBytes = vertexBufferSize;
-    }*/
 }
 
 void RenderingPipeline::SetFiltering(uint8_t val)

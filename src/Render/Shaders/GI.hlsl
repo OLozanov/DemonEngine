@@ -27,6 +27,15 @@ RaytracingAccelerationStructure scene : register(t0, space0);
 ConstantBuffer<ViewConstantBuffer> cb : register(b0);
 ConstantBuffer<ShadowData> shadowData : register(b1);
 
+cbuffer Material : register(b2)
+{
+    uint matid;
+}
+
+static const float3 matcolor[3] = {{0.25, 1.0, 0.95},
+                                   {1.0, 0.5, 0.0},
+                                   {0.2, 1.0, 0.0}};
+
 RWTexture2D<half4> renderTarget : register(u0);
 RWTexture2D<uint> spp : register(u1);
 Texture2D<float> depth : register(t1);
@@ -135,7 +144,7 @@ float3 TraceIncidentRays(in float3 pos, in float3 normal)
     ray.TMin = 0.001;
     ray.TMax = 50.0;
 
-    TraceRay(scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 0, 0, ray, payload);
+    TraceRay(scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
 
     return payload.color;
 }
@@ -271,13 +280,13 @@ void RaygenShader()
 [shader("closesthit")]
 void ClosestHitShader(inout RayPayload payload, in Attributes attr)
 {
-    //payload.color = float3(0.0, 0.0, 0.0);
-
+    float3 color = matid == 0 ? float3(0.0, 0.0, 0.0) : matcolor[matid - 1];
+    
     const float max_dist = 5.0;
 
     if (!cb.enable_dir_light || RayTCurrent() > max_dist)
     {
-        payload.color = float3(0.0, 0.0, 0.0);
+        payload.color = color;
         return;
     }
 
@@ -302,7 +311,7 @@ void ClosestHitShader(inout RayPayload payload, in Attributes attr)
 
     const float3 zero = float3(0.0, 0.0, 0.0);
 
-    payload.color = lerp(zero, cb.light_color, shad * att);
+    payload.color = color + lerp(zero, cb.light_color, shad * att);
 }
 
 [shader("miss")]

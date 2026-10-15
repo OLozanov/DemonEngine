@@ -32,6 +32,8 @@ private:
     static HashMap<Model> m_models;
     static HashMap<Sound> m_sounds;
 
+    static std::map<std::string, uint32_t> m_gitypes;
+
     static Image* m_flatNormal;
 
     static std::vector<AnimatedMap> m_animatedMaps;
@@ -46,11 +48,13 @@ private:
 
     static MaterialData* MaterialData(MaterialId matid);
 
+    static uint32_t FindGiType(const std::string& type);
+
     static bool LoadMaterialMap(Lexer& lexer, Material* material, uint32_t mapn);
     static bool ReadParam(Lexer& lexer, float& param);
     static bool ReadString(Lexer& lexer, std::string& str);
     static bool ReadColor(Lexer& lexer, vec3& color);
-    static bool ReadType(Lexer& lexer, Material::MaterialType& type);
+    static bool ReadType(Lexer& lexer, Material::MaterialType& type, uint32_t& gitype);
 
     static void CleanupAnimatedMaps();
 

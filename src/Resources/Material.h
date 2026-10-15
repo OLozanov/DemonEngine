@@ -24,6 +24,8 @@ using MaterialId = uint32_t;
 
 struct Material : public Resource
 {
+    static constexpr uint32_t InvalidId = -1;
+
     enum MapId
     {
         map_diffuse = 0,
@@ -69,6 +71,8 @@ struct Material : public Resource
     float luminosity;
     uint32_t flags;
 
+    uint32_t gitype;
+
     Material()
     : type(material_regular)
     , color(1.0, 1.0, 1.0)
@@ -77,6 +81,7 @@ struct Material : public Resource
     , roughness(0.8)
     , luminosity(0)
     , flags(0)
+    , gitype(0)
     {
     }
 

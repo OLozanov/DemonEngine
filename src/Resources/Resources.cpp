@@ -20,6 +20,10 @@ Render::StreamBuffer<MaterialData> ResourceManager::m_materialHeap(512);
 std::vector<uint32_t> ResourceManager::m_freeMaterials;
 uint32_t ResourceManager::m_matHeapOffset = 0;
 
+static std::map<std::string, uint32_t> m_giTypes = { { "sky", 1 },
+                                                     { "lava", 2}, 
+                                                     { "slime", 3}};
+
 Material::~Material()
 {
     ResourceManager::FreeMaterial(id);
@@ -185,7 +189,14 @@ bool ResourceManager::ReadColor(Lexer& lexer, vec3& color)
     return true;
 }
 
-bool ResourceManager::ReadType(Lexer& lexer, Material::MaterialType& type)
+uint32_t ResourceManager::FindGiType(const std::string& type)
+{
+    auto it = m_giTypes.find(type);
+   
+    return it == m_giTypes.end() ? Material::InvalidId : it->second;
+}
+
+bool ResourceManager::ReadType(Lexer& lexer, Material::MaterialType& type, uint32_t& gitype)
 {
     if (!lexer.match(Lexer::lex_colon)) return false;
     
@@ -198,7 +209,8 @@ bool ResourceManager::ReadType(Lexer& lexer, Material::MaterialType& type)
         type = Material::material_regular;
 
         if (value == "transparent") type = Material::material_transparent;
-        if (value == "emissive") type = Material::material_emissive;
+        else if (value == "emissive") type = Material::material_emissive;
+        else gitype = FindGiType(value);
     }
 
     return true;
@@ -284,7 +296,7 @@ Material* ResourceManager::GetMaterial(const std::string& name)
                     if (lexer.tokenValue() == "luminosity") ReadParam(lexer, material->luminosity);
 
                     // Type
-                    if (lexer.tokenValue() == "type") ReadType(lexer, material->type);
+                    if (lexer.tokenValue() == "type") ReadType(lexer, material->type, material->gitype);
                 }
 
                 if (tk == Lexer::lex_blclose)
@@ -299,6 +311,7 @@ Material* ResourceManager::GetMaterial(const std::string& name)
             std::cout << "Fail to parse material file " << filename << std::endl;
         }
 
+        if (material->gitype) material->luminosity = std::min(material->luminosity, 4.0f);
         if (material->type == Material::material_transparent) material->alpha = std::min(material->alpha, 0.5f);
 
         m_materialHeap[material->id].color = material->color;

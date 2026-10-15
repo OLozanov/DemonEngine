@@ -45,6 +45,7 @@ void RaytraceGeometry::addGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer,
         geometryDesc.Triangles.VertexBuffer.StrideInBytes = vertexBuffer->StrideInBytes;
 
         m_geometryDesc.push_back(geometryDesc);
+        m_geometryParams.push_back(data.matid);
     }
 }
 
@@ -65,6 +66,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer)
     geometryDesc.Triangles.VertexBuffer.StrideInBytes = vertexView->StrideInBytes;
 
     m_geometryDesc.push_back(geometryDesc);
+    m_geometryParams.push_back(0);
 }
 
 void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
@@ -85,6 +87,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const Index
     geometryDesc.Triangles.VertexBuffer.StrideInBytes = vertexView->StrideInBytes;
 
     m_geometryDesc.push_back(geometryDesc);
+    m_geometryParams.push_back(0);
 }
 
 void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const vec3& pos)
@@ -110,6 +113,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const vec3&
     m_transformData.emplace_back(0.0f, 0.0f, 1.0f, pos.z);
 
     m_geometryDesc.push_back(geometryDesc);
+    m_geometryParams.push_back(0);
 }
 
 void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos)
@@ -136,6 +140,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const Index
     m_transformData.emplace_back(0.0f, 0.0f, 1.0f, pos.z);
 
     m_geometryDesc.push_back(geometryDesc);
+    m_geometryParams.push_back(0);
 }
 
 void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const mat4& mat)
@@ -161,6 +166,7 @@ void RaytraceGeometry::addGeometry(const VertexBuffer& vertexBuffer, const mat4&
     m_transformData.emplace_back(mat[0][2], mat[1][2], mat[2][2], mat[3][2]);
 
     m_geometryDesc.push_back(geometryDesc);
+    m_geometryParams.push_back(0);
 }
 
 void RaytraceGeometry::setScratchBuffer(D3D12_GPU_VIRTUAL_ADDRESS buffer)
@@ -231,26 +237,27 @@ void RaytraceGeometry::init(ID3D12Device5* dxrDevice)
     buildTransformInfo(dxrDevice);
 }
 
-void RaytraceScene::addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
-                                      const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
-                                      const std::vector<GeometryData>& geometryData)
+void RaytraceScene::addGeometry(RaytraceId geometryId,
+                                const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
+                                const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                                const std::vector<GeometryData>& geometryData)
 {
-    m_geometry[0].addGeometry(vertexBuffer, indexBuffer, geometryData);
+    m_geometry[geometryId].addGeometry(vertexBuffer, indexBuffer, geometryData);
 }
 
-void RaytraceScene::addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos)
+void RaytraceScene::addGeometry(RaytraceId geometryId, const VertexBuffer& vertexBuffer, const vec3& pos)
 {
-    m_geometry[0].addGeometry(vertexBuffer, pos);
+    m_geometry[geometryId].addGeometry(vertexBuffer, pos);
 }
 
-void RaytraceScene::addStaticGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos)
+void RaytraceScene::addGeometry(RaytraceId geometryId, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos)
 {
-    m_geometry[0].addGeometry(vertexBuffer, indexBuffer, pos);
+    m_geometry[geometryId].addGeometry(vertexBuffer, indexBuffer, pos);
 }
 
-void RaytraceScene::addStaticGeometry(const VertexBuffer& vertexBuffer, const mat4& mat)
+void RaytraceScene::addGeometry(RaytraceId geometryId, const VertexBuffer& vertexBuffer, const mat4& mat)
 {
-    m_geometry[0].addGeometry(vertexBuffer, mat);
+    m_geometry[geometryId].addGeometry(vertexBuffer, mat);
 }
 
 RaytraceId RaytraceScene::createGeometry()
@@ -316,7 +323,7 @@ void RaytraceScene::createInstanceDescription(ID3D12Device5* device)
 
         for (size_t l = 0; l < 3; l++)
         {
-            for (size_t m = 0; m < 4; m++)  m_instanceData[i].Transform[l][m] = m_instances[i].trandform[m][l];
+            for (size_t m = 0; m < 4; m++) m_instanceData[i].Transform[l][m] = m_instances[i].trandform[m][l];
         }
     }
 }
@@ -383,6 +390,17 @@ void RaytraceScene::build()
     RenderingPipeline::RaytraceFinishBuild();
 
     m_update = false;
+
+    //
+    std::vector<uint32_t> params;
+
+    for (RaytraceGeometry& geometry : m_geometry)
+    {
+        const std::vector<uint32_t>& geometryParams = geometry.getParameters();
+        params.insert(params.end(), geometryParams.begin(), geometryParams.end());
+    }
+
+    RenderingPipeline::RaytraceSetGeometryParams(params);
 }
 
 void RaytraceScene::update(ID3D12GraphicsCommandList5* commandList)

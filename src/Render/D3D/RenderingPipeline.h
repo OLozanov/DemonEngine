@@ -79,6 +79,9 @@ public:
     static void RaytraceBuildAs(const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC* bottomLevelAsDes);
     static void RaytraceBuildBarrier(ID3D12Resource* resource);
     static void RaytraceFinishBuild();
+    static void RaytraceSetGeometryParams(std::vector<uint32_t> params);
+
+    static constexpr size_t RtxRecordSize = ((D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES + sizeof(uint32_t) - 1) / 32 + 1) * 32;
 
 private:
     static void SetupColorShader();
@@ -109,7 +112,8 @@ private:
     static void SetupLightGridShader();
     static void SetupLightingShader();
 
-    static void CreateRaytracingSignatures();
+    static void CreateGlobalRtSignature();
+    static void CreateLocalRtSignature();
     static void SetupRaytracingPipeline();
     static void BuildRaytracingShaderTables();
 #endif

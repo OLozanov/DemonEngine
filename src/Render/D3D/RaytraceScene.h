@@ -25,6 +25,7 @@ private:
 
     ComPtr<ID3D12Resource> m_bottomLevelAccelerationStructure;
     std::vector<D3D12_RAYTRACING_GEOMETRY_DESC> m_geometryDesc;
+    std::vector<uint32_t> m_geometryParams;
 
     ComPtr<ID3D12Resource> m_transformInfo;
 
@@ -53,6 +54,8 @@ public:
     void addGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos);
 
     void addGeometry(const VertexBuffer& vertexBuffer, const mat4& mat);
+
+    const std::vector<uint32_t>& getParameters() { return m_geometryParams; }
 
     ID3D12Resource* getAccelerationStructure() { return m_bottomLevelAccelerationStructure.Get(); }
 
@@ -100,12 +103,13 @@ public:
 
     RaytraceScene() {}
 
-    void addStaticGeometry(const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
-                           const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
-                           const std::vector<GeometryData>& geometryData);
-    void addStaticGeometry(const VertexBuffer& vertexBuffer, const vec3& pos);
-    void addStaticGeometry(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos);
-    void addStaticGeometry(const VertexBuffer& vertexBuffer, const mat4& mat);
+    void addGeometry(RaytraceId geometryId,
+                     const D3D12_VERTEX_BUFFER_VIEW* vertexBuffer, 
+                     const D3D12_INDEX_BUFFER_VIEW* indexBuffer, 
+                     const std::vector<GeometryData>& geometryData);
+    void addGeometry(RaytraceId geometryId, const VertexBuffer& vertexBuffer, const vec3& pos);
+    void addGeometry(RaytraceId geometryId, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const vec3& pos);
+    void addGeometry(RaytraceId geometryId, const VertexBuffer& vertexBuffer, const mat4& mat);
 
     RaytraceId createGeometry();
     RaytraceId createGeometry(const VertexBuffer& vertexBuffer);

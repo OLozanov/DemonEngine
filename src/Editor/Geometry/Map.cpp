@@ -810,6 +810,22 @@ void Map::buildPortlaGeometry()
     }
 }
 
+bool MaterialCmp(const Material* a, const Material* b)
+{
+    bool atransp = a->type == Material::material_transparent;
+    bool btransp = b->type == Material::material_transparent;
+    
+    bool agi = a->gitype > 0;
+    bool bgi = b->gitype > 0;
+
+    if (atransp != btransp)
+        return btransp;
+    else if (agi != bgi)
+        return bgi;
+    else
+        return a->name < b->name;
+}
+
 void Map::generateDisplayData()
 {
     uint32_t offset = 0;
@@ -817,9 +833,11 @@ void Map::generateDisplayData()
 
     for (MapLeaf& leaf : m_leafs)
     {
+        bool transparent = false;
+
         leaf.displayData.clear();
 
-        std::map<Material*, std::vector<MapIndex>> polygons;
+        std::map<Material*, std::vector<MapIndex>, bool (*)(const Material* a, const Material* b)> polygons(MaterialCmp);
 
         //Sort polygons by texture
         for (int p = 0; p < leaf.polygons.size(); p++)
@@ -838,10 +856,26 @@ void Map::generateDisplayData()
         }
 
         uint32_t rtxVNum = 0;
+        uint32_t rtxMatId = 0;
 
         for (const auto& polylist : polygons)
         {
             uint32_t vnum = 0;
+
+            if (polylist.first->gitype != rtxMatId || 
+                (polylist.first->type == Material::material_transparent && !transparent))
+            {
+                if (rtxVNum > 0)
+                {
+                    leaf.rtxGeometry.emplace_back(rtxMatId, rtxOffset, rtxVNum);
+                    rtxOffset = offset;
+                    rtxVNum = 0;
+                }
+
+                rtxMatId = polylist.first->gitype;
+            }
+
+            if (polylist.first->type == Material::material_transparent) transparent = true;
 
             for (MapIndex index : polylist.second)
             {
@@ -863,8 +897,8 @@ void Map::generateDisplayData()
             offset += vnum;
         }
 
-        leaf.rtxGeometry = { rtxOffset, rtxVNum };
-        rtxOffset += rtxVNum;
+        if (!transparent) leaf.rtxGeometry.emplace_back(rtxMatId, rtxOffset, rtxVNum);
+        rtxOffset = offset;
     }
 }
 
@@ -918,8 +952,15 @@ void Map::writeLeafs(FILE* file)
         }
 
         // Raytracing data
-        fwrite(&leaf.rtxGeometry.offset, sizeof(uint32_t), 1, file);
-        fwrite(&leaf.rtxGeometry.count, sizeof(uint32_t), 1, file);
+        dnum = leaf.rtxGeometry.size();
+        fwrite(&dnum, sizeof(uint32_t), 1, file);
+
+        for (const Render::GeometryData& elem : leaf.rtxGeometry)
+        {
+            fwrite(&elem.matid, sizeof(uint32_t), 1, file);
+            fwrite(&elem.offset, sizeof(uint32_t), 1, file);
+            fwrite(&elem.count, sizeof(uint32_t), 1, file);
+        }
         
         // collision polygons
         uint32_t polynum = 0;

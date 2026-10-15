@@ -56,7 +56,7 @@ struct MapLeaf
 {
     std::vector<MapPolygon> polygons;
 	std::vector<Render::DisplayData> displayData;
-	Render::GeometryData rtxGeometry;
+	std::vector<Render::GeometryData> rtxGeometry;
 
     BBox bbox;
 

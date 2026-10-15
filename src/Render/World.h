@@ -61,7 +61,7 @@ struct Leaf
     std::vector<DisplayData> skyGeometry;
     //std::vector<ReflectionSurface> waterGeometry;
 
-    GeometryData raytraceGeometry;
+    std::vector<GeometryData> raytraceGeometry;
 };
 
 struct Portal

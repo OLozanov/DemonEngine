@@ -82,7 +82,7 @@ public:
         D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
         dispatchDesc.HitGroupTable.StartAddress = RenderingPipeline::m_hitGroupShaderTable->GetGPUVirtualAddress();
         dispatchDesc.HitGroupTable.SizeInBytes = RenderingPipeline::m_hitGroupShaderTable->GetDesc().Width;
-        dispatchDesc.HitGroupTable.StrideInBytes = dispatchDesc.HitGroupTable.SizeInBytes;
+        dispatchDesc.HitGroupTable.StrideInBytes = RenderingPipeline::RtxRecordSize;
         dispatchDesc.MissShaderTable.StartAddress = RenderingPipeline::m_missShaderTable->GetGPUVirtualAddress();
         dispatchDesc.MissShaderTable.SizeInBytes = RenderingPipeline::m_missShaderTable->GetDesc().Width;
         dispatchDesc.MissShaderTable.StrideInBytes = dispatchDesc.MissShaderTable.SizeInBytes;

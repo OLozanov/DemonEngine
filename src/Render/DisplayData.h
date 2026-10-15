@@ -51,6 +51,7 @@ struct TexturedVertex
 
 struct GeometryData
 {
+    uint32_t matid;
     uint32_t offset;
     uint32_t count;
 };
